@@ -2,16 +2,24 @@
 
 use Illuminate\Support\Facades\Route;
 
-// ==================== 1. IMPORT MODULES AUTH ====================
+// Auth Modules
 use Modules\Auth\F1_Register\Controllers\RegisterController;
 use Modules\Auth\F2_Login\Controllers\LoginController;
 use Modules\Auth\F3_Logout\Controllers\LogoutController;
 
-// ==================== 2. IMPORT MODULES COMMON ====================
+// Common Modules
 use Modules\Common\F4_SearchPost\Controllers\SearchPostController;
 use Modules\Common\F5_FilterByTag\Controllers\FilterTagController;
 use Modules\Common\F6_FilterByCategory\Controllers\FilterCategoryController;
 use Modules\Common\F7_TrendingPopularPost\Controllers\TrendingController;
+
+// Admin Modules
+use Modules\Admin\F8_RoleAndPermission\Controllers\RoleController;
+use Modules\Admin\F8_RoleAndPermission\Controllers\UserManagementController;
+use Modules\Admin\F9_UserManagement\Controllers\UserAdminController;
+use Modules\Admin\F10_CategoryMaster\Controllers\CategoryController;
+use Modules\Admin\F11_BadgeMaster\Controllers\BadgeController;
+use Modules\Admin\F12_TagMaster\Controllers\TagController;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,28 +27,40 @@ use Modules\Common\F7_TrendingPopularPost\Controllers\TrendingController;
 |--------------------------------------------------------------------------
 */
 
-// ==================== ROUTE PUBLIK (BISA DIAKSES SIAPA AJA) ====================
+// Auth
+Route::prefix('auth')->group(function () {
+    Route::post('/register', [RegisterController::class, 'register']);
+    Route::post('/login', [LoginController::class, 'login']);
+    Route::post('/logout', [LogoutController::class, 'logout'])->middleware('auth:sanctum');
+});
 
-// Fitur Auth (Register & Login)
-Route::post('/auth/register', [RegisterController::class, 'register']);
-Route::post('/auth/login', [LoginController::class, 'login']);
+// Explore / Common
+Route::prefix('explore')->group(function () {
+    Route::get('/search', [SearchPostController::class, 'search']);
+    Route::get('/tag/{slug}', [FilterTagController::class, 'filter']);
+    Route::get('/category/{slug}', [FilterCategoryController::class, 'filter']);
+    Route::get('/trending', [TrendingController::class, 'getTrending']);
+});
 
-// Fitur F4 Common: Search Post (Contoh: /api/posts/search?q=laravel)
-Route::get('/posts/search', [SearchPostController::class, 'search']);
+// Admin (Protected)
+Route::middleware(['auth:sanctum'])->prefix('admin')->group(function () {
+    // F8: Role & Permission
+    Route::apiResource('roles', RoleController::class);
+    Route::get('users', [UserManagementController::class, 'index']);
+    Route::get('users/{id}', [UserManagementController::class, 'show']);
+    Route::put('users/{id}/role', [UserManagementController::class, 'update']); // Focus on role/status update
+    Route::put('users/{id}/reset-password-basic', [UserManagementController::class, 'resetPassword']);
 
-// Fitur F5 Common: Filter Post Berdasarkan Tag (Contoh: /api/posts/tag/javascript)
-Route::get('/posts/tag/{slug}', [FilterTagController::class, 'filter']);
+    // F9: User Management (Advanced Admin Action)
+    Route::put('users/{id}/profile', [UserAdminController::class, 'updateProfile']);
+    Route::put('users/{id}/reset-password', [UserAdminController::class, 'resetPassword']);
 
-// Fitur F6 Common: Filter Post Berdasarkan Kategori (Contoh: /api/posts/category/web-dev)
-Route::get('/posts/category/{slug}', [FilterCategoryController::class, 'filter']);
+    // F10: Category Master
+    Route::apiResource('categories', CategoryController::class);
 
-// Fitur F7 Common: Postingan Populer & Trending (Contoh: /api/posts/trending?type=trending)
-Route::get('/posts/trending', [TrendingController::class, 'getTrending']);
+    // F11: Badge Master
+    Route::apiResource('badges', BadgeController::class)->except(['show']);
 
-
-// ==================== ROUTE PRIVATE (WAJIB BAWA BEARER TOKEN) ====================
-
-Route::middleware('auth:sanctum')->group(function () {
-    // Fitur F3 Auth: Logout
-    Route::post('/auth/logout', [LogoutController::class, 'logout']);
+    // F12: Tag Master
+    Route::apiResource('tags', TagController::class)->except(['show']);
 });
