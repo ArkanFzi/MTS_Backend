@@ -87,7 +87,7 @@ backend_roleuser/
 │   │   │       ├── StoreRoleRequest.php
 │   │   │       └── UpdateUserRequest.php
 │   │   │
-│   │   ├── F8_UserManagement/                  # User profile, permissions mgmt (sub-feature dari F7)
+│   │   ├── F9_UserManagement/                  # User profile, permissions mgmt (sub-feature dari F7)
 │   │   │   ├── Controllers/
 │   │   │   │   └── UserAdminController.php
 │   │   │   ├── Services/
@@ -98,7 +98,7 @@ backend_roleuser/
 │   │   │       ├── UpdateProfileRequest.php
 │   │   │       └── ResetPasswordRequest.php
 │   │   │
-│   │   ├── F9_CategoryMaster/                  # Fitur 9: CRUD Kategori Forum
+│   │   ├── F10_CategoryMaster/                  # Fitur 10: CRUD Kategori Forum
 │   │   │   ├── Controllers/
 │   │   │   │   └── CategoryController.php
 │   │   │   ├── Services/
@@ -109,7 +109,7 @@ backend_roleuser/
 │   │   │       ├── StoreCategoryRequest.php
 │   │   │       └── UpdateCategoryRequest.php
 │   │   │
-│   │   ├── F10_TagMaster/                      # Fitur 10: CRUD Master Tag Forum
+│   │   ├── F11_TagMaster/                      # Fitur 10: CRUD Master Tag Forum
 │   │   │   ├── Controllers/
 │   │   │   │   └── TagController.php
 │   │   │   ├── Services/
@@ -120,7 +120,7 @@ backend_roleuser/
 │   │   │       ├── StoreTagRequest.php
 │   │   │       └── UpdateTagRequest.php
 │   │   │
-│   │   └── F11_BadgeMaster/                    # Fitur 11: CRUD Badge/Achievement Master
+│   │   └── F12_BadgeMaster/                    # Fitur 11: CRUD Badge/Achievement Master
 │   │       ├── Controllers/
 │   │       │   └── BadgeController.php
 │   │       ├── Services/
@@ -132,7 +132,7 @@ backend_roleuser/
 │   │           └── UpdateBadgeRequest.php
 │   │
 │   ├── Moderator/                              # Content moderation (Fitur 12-14)
-│   │   ├── F12_ContentReportQueue/             # Fitur 12: Manajemen Report Konten
+│   │   ├── F13_ContentReportQueue/             # Fitur 13: Manajemen Report Konten
 │   │   │   ├── Controllers/
 │   │   │   │   └── ReportController.php
 │   │   │   ├── Services/
@@ -142,7 +142,7 @@ backend_roleuser/
 │   │   │   └── Requests/
 │   │   │       └── UpdateReportRequest.php
 │   │   │
-│   │   ├── F13_UserBanSanction/                # Fitur 13: Ban/Unban User
+│   │   ├── F14_UserBanSanction/                # Fitur 14: Ban/Unban User
 │   │   │   ├── Controllers/
 │   │   │   │   └── UserSanctionController.php
 │   │   │   ├── Services/
@@ -152,7 +152,7 @@ backend_roleuser/
 │   │   │   └── Requests/
 │   │   │       └── BanUserRequest.php
 │   │   │
-│   │   └── F14_ModeratorActionLog/             # Fitur 14: Moderator Action Log (auto-tracked)
+│   │   └── F15_ModeratorActionLog/             # Fitur 15: Moderator Action Log (auto-tracked)
 │   │       ├── Services/
 │   │       │   └── ModerationLogService.php
 │   │       ├── Repositories/
@@ -160,7 +160,7 @@ backend_roleuser/
 │   │       └── Events/
 │   │           └── ModerationActionLogged.php
 │   │
-│   └── User/                                   # Core forum features (Fitur 15-29)
+│   └── User/                                   # Core forum features (Fitur 15-29) 
 │       ├── F15_CreatePost/                     # Fitur 15: Buat Postingan Baru
 │       │   ├── Controllers/
 │       │   │   └── PostController.php
