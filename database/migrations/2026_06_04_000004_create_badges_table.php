@@ -1,0 +1,28 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('badges', function (Blueprint $table) {
+            $table->uuid('id')->primary()->default(DB::raw('uuid_generate_v4()'));
+            $table->string('name', 100)->unique();
+            $table->text('description')->nullable();
+            $table->string('icon_url', 500)->nullable();
+            $table->string('tier', 20)->nullable();
+            $table->string('condition_type', 50)->nullable();
+            $table->integer('condition_value')->nullable();
+            $table->timestamp('created_at')->useCurrent();
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('badges');
+    }
+};
