@@ -23,6 +23,7 @@ use Modules\Moderator\F14_ModeratorActionLog\Controllers\ModerationLogController
 use Modules\Moderator\F15_UserBanSanction\Controllers\UserSanctionController;
 
 use Modules\User\F16_Post\Controllers\PostController;
+use Modules\User\F17_Comment\Controllers\CommentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -59,6 +60,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('posts', [PostController::class, 'store']);
     Route::put('posts/{post}', [PostController::class, 'update']);
     Route::delete('posts/{post}', [PostController::class, 'destroy']);
+
+    Route::prefix('posts/{post}')->group(function () {
+    Route::get('comments', [CommentController::class, 'index']);
+    Route::post('comments', [CommentController::class, 'store']);
+    Route::put('comments/{comment}', [CommentController::class, 'update']);
+});
 
     // --- FITUR MODERATOR (Bisa diakses Moderator ATAU Admin) ---
     Route::middleware('role:moderator,admin')->prefix('moderator')->name('moderator.')->group(function () {
