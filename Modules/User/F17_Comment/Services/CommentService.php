@@ -3,6 +3,8 @@
 namespace Modules\User\F17_Comment\Services;
 
 use Modules\User\F17_Comment\Repositories\CommentRepository;
+use App\Models\Content\Post;    // Tambahkan ini
+use App\Models\Content\Comment; // Tambahkan ini
 
 class CommentService
 {
@@ -13,11 +15,31 @@ class CommentService
         $this->repository = $repository;
     }
 
-    public function addComment(array $data, string $userId)
-    {
-        $data['user_id'] = $userId;
-        return $this->repository->create($data);
+    // Di Modules\User\F17_Comment\Services\CommentService.php
+
+public function addComment(array $data, string $userId, string $postId)
+{
+    // 1. Ambil postingan untuk tahu siapa penulisnya
+    $post = \App\Models\Content\Post::find($postId);
+    
+    // 2. Jika yang komen adalah penulis postingan itu sendiri
+    if ($post->user_id === $userId) {
+        // Hitung berapa komentar yang sudah dibuat user ini di postingan ini
+        $commentCount = \App\Models\Content\Comment::where('post_id', $postId)
+            ->where('user_id', $userId)
+            ->count();
+        
+        // 3. Batasi maksimal 4 kali
+        if ($commentCount >= 4) {
+            throw new \Exception('Anda hanya diperbolehkan mengomentari postingan Anda sendiri maksimal 4 kali.');
+        }
     }
+
+    $data['user_id'] = $userId;
+    $data['post_id'] = $postId;
+    
+    return $this->repository->create($data);
+}
 
     public function getComments(string $postId)
     {
