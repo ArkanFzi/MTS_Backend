@@ -30,6 +30,7 @@ use Modules\User\F26_NotificationSystem\Controllers\NotificationController;
 use Modules\User\F25_FollowUser\Controllers\FollowController;
 use Modules\User\F23_LikeSystem\Controllers\LikeController;
 use Modules\User\F22_VoteSystem\Controllers\VoteController;
+use Modules\User\F20_NestedCommentReply\Controllers\CommentReplyController;
 
 /*
 |--------------------------------------------------------------------------
@@ -80,6 +81,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('comments', [CommentController::class, 'index']);
         Route::post('comments', [CommentController::class, 'store']);
         Route::put('comments/{comment}', [CommentController::class, 'update']);
+        Route::post('comments/{comment}/replies', [CommentReplyController::class, 'store']);
+        Route::put('comments/{comment}/replies/{reply}', [CommentReplyController::class, 'update']);
     });
 
     // --- FITUR TAGS (Bisa ditambah user) ---

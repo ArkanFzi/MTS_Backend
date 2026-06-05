@@ -16,7 +16,7 @@ return Post::with(['user:id,username', 'category:id,name'])
 
     public function findById(string $id)
     {
-        return Post::with(['user', 'category', 'tags', 'comments'])->findOrFail($id);
+        return Post::with(['user', 'category', 'tags', 'comments.user', 'comments.replies.user'])->findOrFail($id);
     }
 
     public function create(array $data)
