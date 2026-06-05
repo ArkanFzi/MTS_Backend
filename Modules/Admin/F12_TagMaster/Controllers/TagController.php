@@ -34,21 +34,31 @@ class TagController extends Controller
         ], 201);
     }
 
-    public function update(UpdateTagRequest $request, string $id): JsonResponse
-    {
-        $this->service->update($id, $request->validated());
-        return response()->json([
-            'success' => true,
-            'message' => 'Tag berhasil diperbarui.'
-        ]);
-    }
+    // Modifikasi di TagController.php
+public function update(UpdateTagRequest $request, string $id): JsonResponse
+{
+    $tag = $this->service->update($id, $request->validated());
+    
+    return response()->json([
+        'success' => true,
+        'message' => 'Tag berhasil diperbarui.',
+        'data' => $tag
+    ]);
+}
 
-    public function destroy(string $id): JsonResponse
-    {
+public function destroy(string $id): JsonResponse
+{
+    try {
         $this->service->delete($id);
         return response()->json([
             'success' => true,
             'message' => 'Tag berhasil dihapus.'
         ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Gagal menghapus tag: ' . $e->getMessage()
+        ], 422);
     }
+}
 }

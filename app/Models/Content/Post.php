@@ -76,7 +76,7 @@ class Post extends Model
     }
 
     public function votes()
-    {
+    {   
         return $this->hasMany(Vote::class, 'target_id')->where('target_type', 'post');
     }
 }
