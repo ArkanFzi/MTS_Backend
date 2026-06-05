@@ -31,6 +31,8 @@ use Modules\User\F25_FollowUser\Controllers\FollowController;
 use Modules\User\F23_LikeSystem\Controllers\LikeController;
 use Modules\User\F22_VoteSystem\Controllers\VoteController;
 use Modules\User\F20_NestedCommentReply\Controllers\CommentReplyController;
+use Modules\User\F19_PostEditHistory\Controllers\PostHistoryController;
+use Modules\User\F21_CommentEditHistory\Controllers\CommentHistoryController;
 use Modules\User\F18_MarkAcceptedAnswer\Controllers\AcceptedAnswerController;
 use Modules\User\F24_BookmarkPost\Controllers\BookmarkController;
 
@@ -123,6 +125,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
         });
 
         Route::get('logs', [ModerationLogController::class, 'index']);
+        Route::get('posts/{post}/history', [PostHistoryController::class, 'index']);
+        Route::get('comments/{comment}/history', [CommentHistoryController::class, 'index']);
 
         Route::prefix('bans')->group(function () {
             Route::get('/', [UserSanctionController::class, 'index']);
@@ -145,6 +149,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::put('{id}/profile', [UserAdminController::class, 'updateProfile']);
             Route::put('{id}/reset-password', [UserAdminController::class, 'resetPassword']);
         });
+
+        Route::get('posts/{post}/history', [PostHistoryController::class, 'index']);
+
 
         Route::prefix('bans')->group(function () {
             Route::get('/', [UserSanctionController::class, 'index']);
