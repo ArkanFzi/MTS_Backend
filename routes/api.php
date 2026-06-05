@@ -27,6 +27,7 @@ use Modules\User\F17_Comment\Controllers\CommentController;
 use Modules\User\F28_ProfileSettings\Controllers\ProfileController;
 use Modules\User\F27_GamificationLeaderboard\Controllers\LeaderboardController;
 use Modules\User\F26_NotificationSystem\Controllers\NotificationController;
+use Modules\User\F25_FollowUser\Controllers\FollowController;
 
 /*
 |--------------------------------------------------------------------------
@@ -83,6 +84,13 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/', [NotificationController::class, 'index']);
         Route::patch('/mark-all-read', [NotificationController::class, 'markAllRead']);
         Route::patch('/{id}/read', [NotificationController::class, 'markAsRead']);
+    });
+
+    // --- FITUR FOLLOW ---
+    Route::prefix('users/{id}')->group(function () {
+        Route::post('/follow', [FollowController::class, 'toggle']);
+        Route::get('/followers', [FollowController::class, 'followers']);
+        Route::get('/following', [FollowController::class, 'following']);
     });
 
     // --- FITUR MODERATOR (Bisa diakses Moderator ATAU Admin) ---
