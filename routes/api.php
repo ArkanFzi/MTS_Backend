@@ -28,6 +28,7 @@ use Modules\User\F28_ProfileSettings\Controllers\ProfileController;
 use Modules\User\F27_GamificationLeaderboard\Controllers\LeaderboardController;
 use Modules\User\F26_NotificationSystem\Controllers\NotificationController;
 use Modules\User\F25_FollowUser\Controllers\FollowController;
+use Modules\User\F23_LikeSystem\Controllers\LikeController;
 
 /*
 |--------------------------------------------------------------------------
@@ -92,6 +93,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/followers', [FollowController::class, 'followers']);
         Route::get('/following', [FollowController::class, 'following']);
     });
+
+    Route::post('/likes/toggle', [LikeController::class, 'toggle']);
 
     // --- FITUR MODERATOR (Bisa diakses Moderator ATAU Admin) ---
     Route::middleware('role:moderator,admin')->prefix('moderator')->name('moderator.')->group(function () {
