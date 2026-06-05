@@ -6,13 +6,17 @@ use Modules\User\F17_Comment\Repositories\CommentRepository;
 use App\Models\Content\Post;    // Tambahkan ini
 use App\Models\Content\Comment; // Tambahkan ini
 
+use Modules\User\F29_GamificationLeaderboard\Services\GamificationService;
+
 class CommentService
 {
     protected $repository;
+    protected $gamification;
 
-    public function __construct(CommentRepository $repository)
+    public function __construct(CommentRepository $repository, GamificationService $gamification)
     {
         $this->repository = $repository;
+        $this->gamification = $gamification;
     }
 
     // Di Modules\User\F17_Comment\Services\CommentService.php
@@ -38,7 +42,13 @@ public function addComment(array $data, string $userId, string $postId)
     $data['user_id'] = $userId;
     $data['post_id'] = $postId;
     
-    return $this->repository->create($data);
+    $comment = $this->repository->create($data);
+
+    // Tambah poin: +5 untuk setiap komentar
+    $user = \App\Models\Auth\User::find($userId);
+    $this->gamification->addPoints($user, 5, 'create_comment', $comment->id, 'Menulis komentar');
+
+    return $comment;
 }
 
     public function getComments(string $postId)
