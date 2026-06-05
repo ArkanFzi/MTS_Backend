@@ -24,6 +24,8 @@ use Modules\Moderator\F15_UserBanSanction\Controllers\UserSanctionController;
 
 use Modules\User\F16_Post\Controllers\PostController;
 use Modules\User\F17_Comment\Controllers\CommentController;
+use Modules\User\F30_ProfileSettings\Controllers\ProfileController;
+use Modules\User\F29_GamificationLeaderboard\Controllers\LeaderboardController;
 
 /*
 |--------------------------------------------------------------------------
@@ -42,6 +44,7 @@ Route::prefix('explore')->group(function () {
     Route::get('/tag/{slug}', [FilterTagController::class, 'filter']);
     Route::get('/category/{slug}', [FilterCategoryController::class, 'filter']);
     Route::get('/trending', [TrendingController::class, 'getTrending']);
+    Route::get('/leaderboard', [LeaderboardController::class, 'index']);
 });
 
 Route::apiResource('posts', PostController::class)->only(['index', 'show']);
@@ -51,6 +54,13 @@ Route::apiResource('posts', PostController::class)->only(['index', 'show']);
 Route::middleware(['auth:sanctum'])->group(function () {
     
     Route::post('/auth/logout', [LogoutController::class, 'logout']);
+
+    // --- FITUR PROFILE SETTINGS ---
+    Route::prefix('settings')->group(function () {
+        Route::get('profile', [ProfileController::class, 'show']);
+        Route::put('profile', [ProfileController::class, 'update']);
+        Route::put('password', [ProfileController::class, 'updatePassword']);
+    });
 
     // --- FITUR UMUM USER (Sudah Login) ---
     Route::prefix('me')->name('me.')->group(function () {
