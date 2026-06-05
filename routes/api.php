@@ -31,6 +31,7 @@ use Modules\User\F25_FollowUser\Controllers\FollowController;
 use Modules\User\F23_LikeSystem\Controllers\LikeController;
 use Modules\User\F22_VoteSystem\Controllers\VoteController;
 use Modules\User\F20_NestedCommentReply\Controllers\CommentReplyController;
+use Modules\User\F18_MarkAcceptedAnswer\Controllers\AcceptedAnswerController;
 
 /*
 |--------------------------------------------------------------------------
@@ -83,6 +84,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::put('comments/{comment}', [CommentController::class, 'update']);
         Route::post('comments/{comment}/replies', [CommentReplyController::class, 'store']);
         Route::put('comments/{comment}/replies/{reply}', [CommentReplyController::class, 'update']);
+        Route::post('comments/{comment}/accept', [AcceptedAnswerController::class, 'store']);
     });
 
     // --- FITUR TAGS (Bisa ditambah user) ---
