@@ -2,7 +2,7 @@
 
 namespace Modules\Admin\F10_CategoryMaster\Controllers;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Controller; // Gunakan base controller yang benar
 use Modules\Admin\F10_CategoryMaster\Services\CategoryService;
 use Modules\Admin\F10_CategoryMaster\Requests\StoreCategoryRequest;
 use Modules\Admin\F10_CategoryMaster\Requests\UpdateCategoryRequest;

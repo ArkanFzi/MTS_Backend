@@ -1,10 +1,10 @@
 <?php
 
-namespace Modules\Admin\F14_ModeratorActionLog\Controllers;
+namespace Modules\Moderator\F14_ModeratorActionLog\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
-use Modules\Admin\F14_ModeratorActionLog\Services\ModerationLogService;
+use Modules\Moderator\F14_ModeratorActionLog\Services\ModerationLogService;
 
 class ModerationLogController extends Controller
 {

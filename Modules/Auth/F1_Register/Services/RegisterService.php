@@ -3,6 +3,7 @@
 namespace Modules\Auth\F1_Register\Services;
 
 use Modules\Auth\F1_Register\Repositories\RegisterRepository;
+use Illuminate\Validation\ValidationException;
 
 class RegisterService
 {
@@ -15,10 +16,15 @@ class RegisterService
 
     public function execute(array $data): array
     {
-        // 1. Simpan data user baru lewat repository
-        $user = $this->registerRepository->createUser($data);
+        // Cek apakah role "user" sudah ada
+        if (!\App\Models\Auth\Role::where('name', 'user')->exists()) {
+            throw ValidationException::withMessages([
+                'error' => ['Role "user" belum dibuat. Jalankan Role Seeder terlebih dahulu.']
+            ]);
+        }
 
-        // 2. Buat token akses menggunakan Laravel Sanctum
+        $user = $this->registerRepository->create($data);
+
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return [

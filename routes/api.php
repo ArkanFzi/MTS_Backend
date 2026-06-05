@@ -20,9 +20,9 @@ use Modules\Admin\F9_UserManagement\Controllers\UserAdminController;
 use Modules\Admin\F10_CategoryMaster\Controllers\CategoryController;
 use Modules\Admin\F11_BadgeMaster\Controllers\BadgeController;
 use Modules\Admin\F12_TagMaster\Controllers\TagController;
-use Modules\Admin\F13_ContentReportQueue\Controllers\ReportController;
-use Modules\Admin\F14_ModeratorActionLog\Controllers\ModerationLogController;
-use Modules\Admin\F15_UserBanSanction\Controllers\UserSanctionController;
+use Modules\Moderator\F13_ContentReportQueue\Controllers\ReportController;
+use Modules\Moderator\F14_ModeratorActionLog\Controllers\ModerationLogController;
+use Modules\Moderator\F15_UserBanSanction\Controllers\UserSanctionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -54,10 +54,14 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     // === 2. MODERATOR ROUTES (F13, F14, F15) ===
-    Route::middleware('role:moderator|admin')  // Bisa moderator ATAU admin
+    Route::middleware('role:moderator')  // Bisa moderator ATAU admin
          ->prefix('moderator')
          ->name('moderator.')
          ->group(function () {
+
+        Route::apiResource('categories', CategoryController::class);
+        Route::apiResource('badges', BadgeController::class)->except(['show']);
+        Route::apiResource('tags', TagController::class)->except(['show']);
 
         // F13: Content Report Queue
         Route::prefix('reports')->name('reports.')->group(function () {
@@ -96,5 +100,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('users/{id}/role', [UserManagementController::class, 'update']);
         Route::put('users/{id}/profile', [UserAdminController::class, 'updateProfile']);
         Route::put('users/{id}/reset-password', [UserAdminController::class, 'resetPassword']);
+
+        Route::prefix('bans')->name('bans.')->group(function () {
+            Route::get('/', [UserSanctionController::class, 'index'])->name('index');
+            Route::post('{id}/ban', [UserSanctionController::class, 'ban'])->name('ban');
+            Route::post('{id}/unban', [UserSanctionController::class, 'unban'])->name('unban');
+        });
     });
 });

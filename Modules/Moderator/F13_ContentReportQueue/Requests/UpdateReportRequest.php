@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\Admin\F13_ContentReportQueue\Requests;
+namespace Modules\Moderator\F13_ContentReportQueue\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 

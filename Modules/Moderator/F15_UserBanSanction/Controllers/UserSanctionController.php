@@ -1,11 +1,11 @@
 <?php
 
-namespace Modules\Admin\F15_UserBanSanction\Controllers;
+namespace Modules\Moderator\F15_UserBanSanction\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
-use Modules\Admin\F15_UserBanSanction\Services\UserSanctionService;
-use Modules\Admin\F15_UserBanSanction\Requests\BanUserRequest;
+use Modules\Moderator\F15_UserBanSanction\Services\UserSanctionService;
+use Modules\Moderator\F15_UserBanSanction\Requests\BanUserRequest;
 
 class UserSanctionController extends Controller
 {

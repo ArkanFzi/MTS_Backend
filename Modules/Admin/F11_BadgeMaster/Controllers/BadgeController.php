@@ -2,56 +2,50 @@
 
 namespace Modules\Admin\F11_BadgeMaster\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Routing\Controller;
+use App\Http\Controllers\Controller; // Gunakan base controller yang benar
+use Illuminate\Http\JsonResponse;
 use Modules\Admin\F11_BadgeMaster\Services\BadgeService;
 use Modules\Admin\F11_BadgeMaster\Requests\StoreBadgeRequest;
 use Modules\Admin\F11_BadgeMaster\Requests\UpdateBadgeRequest;
 
 class BadgeController extends Controller
 {
-    protected BadgeService $service;
+    public function __construct(protected BadgeService $service) {}
 
-    public function __construct(BadgeService $service)
+    public function index(): JsonResponse
     {
-        $this->service = $service;
+        // Return JSON, jangan view()
+        return response()->json([
+            'success' => true,
+            'data' => $this->service->getAllPaginated(15)
+        ]);
     }
 
-    public function index(Request $request)
+    public function store(StoreBadgeRequest $request): JsonResponse
     {
-        $badges = $this->service->getAllPaginated(15, $request->search);
-        return view('admin::F11_BadgeMaster.index', compact('badges'));
+        $badge = $this->service->create($request->validated());
+        return response()->json([
+            'success' => true,
+            'message' => 'Badge berhasil dibuat.',
+            'data' => $badge
+        ], 201);
     }
 
-    public function create()
-    {
-        return view('admin::F11_BadgeMaster.create');
-    }
-
-    public function store(StoreBadgeRequest $request)
-    {
-        $this->service->create($request->validated());
-        return redirect()->route('admin.badges.index')
-                         ->with('success', 'Badge berhasil dibuat.');
-    }
-
-    public function edit(string $id)
-    {
-        $badge = $this->service->findById($id);
-        return view('admin::F11_BadgeMaster.edit', compact('badge'));
-    }
-
-    public function update(UpdateBadgeRequest $request, string $id)
+    public function update(UpdateBadgeRequest $request, string $id): JsonResponse
     {
         $this->service->update($id, $request->validated());
-        return redirect()->route('admin.badges.index')
-                         ->with('success', 'Badge berhasil diperbarui.');
+        return response()->json([
+            'success' => true,
+            'message' => 'Badge berhasil diperbarui.'
+        ]);
     }
 
-    public function destroy(string $id)
+    public function destroy(string $id): JsonResponse
     {
         $this->service->delete($id);
-        return redirect()->route('admin.badges.index')
-                         ->with('success', 'Badge berhasil dihapus.');
+        return response()->json([
+            'success' => true,
+            'message' => 'Badge berhasil dihapus.'
+        ]);
     }
 }

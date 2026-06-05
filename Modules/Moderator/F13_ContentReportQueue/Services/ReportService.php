@@ -1,8 +1,8 @@
 <?php
 
-namespace Modules\Admin\F13_ContentReportQueue\Services;
+namespace Modules\Moderator\F13_ContentReportQueue\Services;
 
-use Modules\Admin\F13_ContentReportQueue\Repositories\ReportRepository;
+use Modules\Moderator\F13_ContentReportQueue\Repositories\ReportRepository;
 use App\Models\Moderation\ModerationLog;
 use Illuminate\Support\Facades\Auth;
 

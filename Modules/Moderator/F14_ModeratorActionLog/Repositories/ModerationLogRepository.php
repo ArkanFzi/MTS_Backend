@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\Admin\F14_ModeratorActionLog\Repositories;
+namespace Modules\Moderator\F14_ModeratorActionLog\Repositories;
 
 use App\Models\Moderation\ModerationLog;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;

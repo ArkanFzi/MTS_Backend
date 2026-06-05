@@ -2,56 +2,53 @@
 
 namespace Modules\Admin\F12_TagMaster\Controllers;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Routing\Controller;
+use Illuminate\Http\JsonResponse;
 use Modules\Admin\F12_TagMaster\Services\TagService;
 use Modules\Admin\F12_TagMaster\Requests\StoreTagRequest;
 use Modules\Admin\F12_TagMaster\Requests\UpdateTagRequest;
 
 class TagController extends Controller
 {
-    protected TagService $service;
+    public function __construct(
+        protected TagService $service
+    ) {}
 
-    public function __construct(TagService $service)
-    {
-        $this->service = $service;
-    }
-
-    public function index(Request $request)
+    public function index(Request $request): JsonResponse
     {
         $tags = $this->service->getAllPaginated(15, $request->search);
-        return view('admin::F12_TagMaster.index', compact('tags'));
+        return response()->json([
+            'success' => true,
+            'data' => $tags
+        ]);
     }
 
-    public function create()
+    public function store(StoreTagRequest $request): JsonResponse
     {
-        return view('admin::F12_TagMaster.create');
+        $tag = $this->service->create($request->validated());
+        return response()->json([
+            'success' => true,
+            'message' => 'Tag berhasil dibuat.',
+            'data' => $tag
+        ], 201);
     }
 
-    public function store(StoreTagRequest $request)
-    {
-        $this->service->create($request->validated());
-        return redirect()->route('admin.tags.index')
-                         ->with('success', 'Tag berhasil dibuat.');
-    }
-
-    public function edit(string $id)
-    {
-        $tag = $this->service->findById($id);
-        return view('admin::F12_TagMaster.edit', compact('tag'));
-    }
-
-    public function update(UpdateTagRequest $request, string $id)
+    public function update(UpdateTagRequest $request, string $id): JsonResponse
     {
         $this->service->update($id, $request->validated());
-        return redirect()->route('admin.tags.index')
-                         ->with('success', 'Tag berhasil diperbarui.');
+        return response()->json([
+            'success' => true,
+            'message' => 'Tag berhasil diperbarui.'
+        ]);
     }
 
-    public function destroy(string $id)
+    public function destroy(string $id): JsonResponse
     {
         $this->service->delete($id);
-        return redirect()->route('admin.tags.index')
-                         ->with('success', 'Tag berhasil dihapus.');
+        return response()->json([
+            'success' => true,
+            'message' => 'Tag berhasil dihapus.'
+        ]);
     }
 }

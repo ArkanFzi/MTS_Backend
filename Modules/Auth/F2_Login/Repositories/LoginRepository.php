@@ -7,12 +7,12 @@ use App\Models\Auth\User;
 class LoginRepository
 {
     /**
-     * Cari user berdasarkan email atau username
+     * Cari user berdasarkan email + load roles
      */
-    public function findByEmailOrUsername(string $login): ?User
+    public function findByEmail(string $email): ?User
     {
-        return User::where('email', $login)
-                   ->orWhere('username', $login)
-                   ->first();
+        return User::with('roles')
+                    ->where('email', $email)
+                    ->first();
     }
 }

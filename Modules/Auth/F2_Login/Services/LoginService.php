@@ -2,24 +2,35 @@
 
 namespace Modules\Auth\F2_Login\Services;
 
-use App\Models\Auth\User;
+use Modules\Auth\F2_Login\Repositories\LoginRepository;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
 class LoginService
 {
+    protected LoginRepository $repository;
+
+    public function __construct(LoginRepository $repository)
+    {
+        $this->repository = $repository;
+    }
+
     public function execute(array $data)
     {
-        $user = User::where('email', $data['email'])->first();
+        $user = $this->repository->findByEmail($data['email']);
 
-        // FIX DI SINI: ganti $user->password menjadi $user->password_hash
         if (! $user || ! Hash::check($data['password'], $user->password_hash)) {
             throw ValidationException::withMessages([
                 'email' => ['Email atau password salah.'],
             ]);
         }
 
-        // Generate token Sanctum
+        if ($user->is_banned) {
+            throw ValidationException::withMessages([
+                'email' => ['Akun Anda telah diban. Silakan hubungi administrator.'],
+            ]);
+        }
+
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return [

@@ -1,8 +1,8 @@
 <?php
 
-namespace Modules\Admin\F14_ModeratorActionLog\Services;
+namespace Modules\Moderator\F14_ModeratorActionLog\Services;
 
-use Modules\Admin\F14_ModeratorActionLog\Repositories\ModerationLogRepository;
+use Modules\Moderator\F14_ModeratorActionLog\Repositories\ModerationLogRepository;
 
 class ModerationLogService
 {

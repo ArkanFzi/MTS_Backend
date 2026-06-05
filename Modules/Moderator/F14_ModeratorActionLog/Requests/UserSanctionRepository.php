@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\Admin\F15_UserBanSanction\Repositories;
+namespace Modules\Moderator\F15_UserBanSanction\Repositories;
 
 use App\Models\Auth\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;

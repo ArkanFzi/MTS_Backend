@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\Admin\F13_ContentReportQueue\Repositories;
+namespace Modules\Moderator\F13_ContentReportQueue\Repositories;
 
 use App\Models\Moderation\Report;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;

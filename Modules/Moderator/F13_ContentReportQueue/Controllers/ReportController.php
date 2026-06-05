@@ -1,11 +1,10 @@
 <?php
 
-namespace Modules\Admin\F13_ContentReportQueue\Controllers;
+namespace Modules\Moderator\F13_ContentReportQueue\Controllers;
 
+use App\Http\Controllers\Controller; // Gunakan base controller Laravel
 use Illuminate\Http\Request;
-use Illuminate\Routing\Controller;
-use Modules\Admin\F13_ContentReportQueue\Services\ReportService;
-use Modules\Admin\F13_ContentReportQueue\Requests\UpdateReportRequest;
+use Modules\Moderator\F13_ContentReportQueue\Services\ReportService;
 
 class ReportController extends Controller
 {
@@ -19,19 +18,18 @@ class ReportController extends Controller
     public function index(Request $request)
     {
         $reports = $this->service->getAllPaginated(20, $request->status, $request->search);
-        return view('admin::F13_ContentReportQueue.index', compact('reports'));
+        return response()->json($reports); // Return JSON untuk API
     }
 
     public function show(string $id)
     {
         $report = $this->service->findById($id);
-        return view('admin::F13_ContentReportQueue.show', compact('report'));
+        return response()->json($report); // Return JSON
     }
 
-    public function update(UpdateReportRequest $request, string $id)
+    public function update(Request $request, string $id)
     {
         $this->service->resolve($id, $request->validated());
-        return redirect()->route('admin.reports.index')
-                         ->with('success', 'Laporan berhasil diproses.');
+        return response()->json(['message' => 'Laporan berhasil diproses.']); // Return JSON
     }
 }

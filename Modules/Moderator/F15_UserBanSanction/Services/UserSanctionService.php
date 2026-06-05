@@ -1,9 +1,9 @@
 <?php
 
-namespace Modules\Admin\F15_UserBanSanction\Services;
+namespace Modules\Moderator\F15_UserBanSanction\Services;
 
-use Modules\Admin\F15_UserBanSanction\Repositories\UserSanctionRepository;
-use Modules\Admin\F14_ModeratorActionLog\Services\ModerationLogService;
+use Modules\Moderator\F15_UserBanSanction\Repositories\UserSanctionRepository;
+use Modules\Moderator\F14_ModeratorActionLog\Services\ModerationLogService;
 use Illuminate\Support\Facades\Auth;
 
 class UserSanctionService

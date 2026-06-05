@@ -16,20 +16,22 @@ class RegisterController extends Controller
         $this->registerService = $registerService;
     }
 
-    // GANTI DI SINI: dari __invoke jadi register
     public function register(RegisterRequest $request): JsonResponse
     {
         $result = $this->registerService->execute($request->validated());
 
         return response()->json([
             'status'  => 'success',
-            'message' => 'Registrasi berhasil. Akun Anda telah siap!',
+            'message' => 'Registrasi berhasil. Selamat datang!',
             'data'    => [
                 'user' => [
-                    'id'       => $result['user']->id,
-                    'username' => $result['user']->username,
-                    'email'    => $result['user']->email,
-                    'level'    => $result['user']->level,
+                    'id'                => $result['user']->id,
+                    'username'          => $result['user']->username,
+                    'email'             => $result['user']->email,
+                    'avatar_url'        => $result['user']->avatar_url,
+                    'level'             => $result['user']->level,
+                    'reputation_points' => $result['user']->reputation_points,
+                    'roles'             => $result['user']->roles->pluck('name'), // contoh: ["user"]
                 ],
                 'access_token' => $result['access_token'],
                 'token_type'   => $result['token_type']

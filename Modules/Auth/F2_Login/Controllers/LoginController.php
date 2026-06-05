@@ -17,21 +17,26 @@ class LoginController extends Controller
         $this->loginService = $loginService;
     }
 
-    // GANTI DI SINI: dari __invoke jadi login
     public function login(LoginRequest $request): JsonResponse
     {
         try {
             $result = $this->loginService->execute($request->validated());
+
+            $user = $result['user'];
 
             return response()->json([
                 'status'  => 'success',
                 'message' => 'Login berhasil!',
                 'data'    => [
                     'user' => [
-                        'id'       => $result['user']->id,
-                        'username' => $result['user']->username,
-                        'email'    => $result['user']->email,
-                        'level'    => $result['user']->level,
+                        'id'                => $user->id,
+                        'username'          => $user->username,
+                        'email'             => $user->email,
+                        'avatar_url'        => $user->avatar_url,
+                        'level'             => $user->level,
+                        'reputation_points' => $user->reputation_points,
+                        'is_banned'         => $user->is_banned,
+                        'roles'             => $user->roles->pluck('name'), // contoh: ["user"] atau ["moderator"]
                     ],
                     'access_token' => $result['access_token'],
                     'token_type'   => $result['token_type']
@@ -41,7 +46,7 @@ class LoginController extends Controller
         } catch (ValidationException $e) {
             return response()->json([
                 'status'  => 'error',
-                'message' => 'Autentikasi gagal',
+                'message' => 'Login gagal',
                 'errors'  => $e->errors()
             ], 422);
         }

@@ -97,4 +97,51 @@ class User extends Authenticatable
         return $this->belongsToMany(Badge::class, 'user_badges', 'user_id', 'badge_id')
                     ->withPivot('earned_at');
     }
+
+    // =============================================
+    //     ROLE HELPER METHODS (TAMBAHKAN INI)
+    // =============================================
+
+    /**
+     * Cek apakah user memiliki role tertentu
+     */
+    public function hasRole(string $role): bool
+    {
+        return $this->roles()->where('name', $role)->exists();
+    }
+
+    /**
+     * Cek apakah user memiliki salah satu dari role yang diberikan
+     */
+    public function hasAnyRole(...$roles): bool
+{
+        // Kita ubah semua ke lowercase dan trim untuk memastikan tidak ada spasi tersembunyi
+        $userRoles = $this->roles->pluck('name')->map(fn($name) => trim(strtolower($name)));
+        $requiredRoles = array_map(fn($role) => trim(strtolower($role)), $roles);
+
+        return $userRoles->intersect($requiredRoles)->isNotEmpty();
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->hasRole('admin');
+    }
+
+    public function isModerator(): bool
+    {
+        return $this->hasRole('moderator');
+    }
+
+    public function isUser(): bool
+    {
+        return $this->hasRole('user');
+    }
+
+    /**
+     * Cek apakah boleh akses panel moderator
+     */
+    public function canAccessModeratorPanel(): bool
+    {
+        return $this->hasAnyRole('moderator', 'admin');
+    }
 }

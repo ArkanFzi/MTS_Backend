@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\Admin\F15_UserBanSanction\Requests;
+namespace Modules\Moderator\F15_UserBanSanction\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
