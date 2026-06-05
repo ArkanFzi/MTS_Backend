@@ -45,6 +45,7 @@ Route::prefix('auth')->group(function () {
 
 Route::prefix('explore')->group(function () {
     Route::get('/search', [SearchPostController::class, 'search']);
+    Route::get('/tags', [TagController::class, 'index']);
     Route::get('/tag/{slug}', [FilterTagController::class, 'filter']);
     Route::get('/category/{slug}', [FilterCategoryController::class, 'filter']);
     Route::get('/trending', [TrendingController::class, 'getTrending']);
@@ -80,6 +81,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('comments', [CommentController::class, 'store']);
         Route::put('comments/{comment}', [CommentController::class, 'update']);
     });
+
+    // --- FITUR TAGS (Bisa ditambah user) ---
+    Route::post('tags', [TagController::class, 'store']);
 
     // --- FITUR NOTIFIKASI ---
     Route::prefix('notifications')->group(function () {
