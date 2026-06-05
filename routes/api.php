@@ -26,6 +26,7 @@ use Modules\User\F16_Post\Controllers\PostController;
 use Modules\User\F17_Comment\Controllers\CommentController;
 use Modules\User\F28_ProfileSettings\Controllers\ProfileController;
 use Modules\User\F27_GamificationLeaderboard\Controllers\LeaderboardController;
+use Modules\User\F26_NotificationSystem\Controllers\NotificationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -72,10 +73,17 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::delete('posts/{post}', [PostController::class, 'destroy']);
 
     Route::prefix('posts/{post}')->group(function () {
-    Route::get('comments', [CommentController::class, 'index']);
-    Route::post('comments', [CommentController::class, 'store']);
-    Route::put('comments/{comment}', [CommentController::class, 'update']);
-});
+        Route::get('comments', [CommentController::class, 'index']);
+        Route::post('comments', [CommentController::class, 'store']);
+        Route::put('comments/{comment}', [CommentController::class, 'update']);
+    });
+
+    // --- FITUR NOTIFIKASI ---
+    Route::prefix('notifications')->group(function () {
+        Route::get('/', [NotificationController::class, 'index']);
+        Route::patch('/mark-all-read', [NotificationController::class, 'markAllRead']);
+        Route::patch('/{id}/read', [NotificationController::class, 'markAsRead']);
+    });
 
     // --- FITUR MODERATOR (Bisa diakses Moderator ATAU Admin) ---
     Route::middleware('role:moderator,admin')->prefix('moderator')->name('moderator.')->group(function () {
