@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\User\F30_ProfileSettings\Services;
+namespace Modules\User\F28_ProfileSettings\Services;
 
 use App\Models\Auth\User;
 use Illuminate\Support\Facades\Hash;

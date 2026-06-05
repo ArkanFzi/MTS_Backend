@@ -24,8 +24,8 @@ use Modules\Moderator\F15_UserBanSanction\Controllers\UserSanctionController;
 
 use Modules\User\F16_Post\Controllers\PostController;
 use Modules\User\F17_Comment\Controllers\CommentController;
-use Modules\User\F30_ProfileSettings\Controllers\ProfileController;
-use Modules\User\F29_GamificationLeaderboard\Controllers\LeaderboardController;
+use Modules\User\F28_ProfileSettings\Controllers\ProfileController;
+use Modules\User\F27_GamificationLeaderboard\Controllers\LeaderboardController;
 
 /*
 |--------------------------------------------------------------------------

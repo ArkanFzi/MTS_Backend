@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\User\F29_GamificationLeaderboard\Services;
+namespace Modules\User\F27_GamificationLeaderboard\Services;
 
 use App\Models\Auth\User;
 use App\Models\Gamification\PointsLog;

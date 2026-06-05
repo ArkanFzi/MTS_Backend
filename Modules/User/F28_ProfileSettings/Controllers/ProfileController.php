@@ -1,12 +1,12 @@
 <?php
 
-namespace Modules\User\F30_ProfileSettings\Controllers;
+namespace Modules\User\F28_ProfileSettings\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Modules\User\F30_ProfileSettings\Requests\UpdateProfileRequest;
-use Modules\User\F30_ProfileSettings\Services\ProfileService;
+use Modules\User\F28_ProfileSettings\Requests\UpdateProfileRequest;
+use Modules\User\F28_ProfileSettings\Services\ProfileService;
 
 class ProfileController extends Controller
 {

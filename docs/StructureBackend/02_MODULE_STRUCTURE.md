@@ -290,7 +290,7 @@ backend_roleuser/
 │       │   └── Listeners/
 │       │       └── SendNotification.php
 │       │
-│       └── F29_GamificationLeaderboard/        # Fitur 29: Reputation Level & Leaderboard
+│       └── F27_GamificationLeaderboard/        # Fitur 29: Reputation Level & Leaderboard
 │           ├── Controllers/
 │           │   └── GamificationController.php
 │           ├── Services/
@@ -524,7 +524,7 @@ Moderator/
 - **F26_BookmarkPost** - Bookmark posts
 - **F27_FollowUser** - Follow users
 - **F28_NotificationSystem** - Real-time notifications
-- **F29_GamificationLeaderboard** - Reputation & leaderboard
+- **F27_GamificationLeaderboard** - Reputation & leaderboard
 
 **Naming Pattern**:
 ```
@@ -548,7 +548,7 @@ User/
 ├── F26_BookmarkPost/
 ├── F27_FollowUser/
 ├── F28_NotificationSystem/
-└── F29_GamificationLeaderboard/
+└── F27_GamificationLeaderboard/
 ```
 
 **Authorization**: User authentication required for most endpoints
@@ -587,7 +587,7 @@ User/
 | 26 | Bookmark | `User/F26_BookmarkPost/` | User |
 | 27 | Follow User | `User/F27_FollowUser/` | User |
 | 28 | Notification | `User/F28_NotificationSystem/` | User |
-| 29 | Gamification | `User/F29_GamificationLeaderboard/` | User |
+| 29 | Gamification | `User/F27_GamificationLeaderboard/` | User |
 
 ---
 

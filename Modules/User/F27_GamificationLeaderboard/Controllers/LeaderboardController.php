@@ -1,11 +1,11 @@
 <?php
 
-namespace Modules\User\F29_GamificationLeaderboard\Controllers;
+namespace Modules\User\F27_GamificationLeaderboard\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Modules\User\F29_GamificationLeaderboard\Services\GamificationService;
+use Modules\User\F27_GamificationLeaderboard\Services\GamificationService;
 
 class LeaderboardController extends Controller
 {
@@ -16,9 +16,6 @@ class LeaderboardController extends Controller
         $this->service = $service;
     }
 
-    /**
-     * Tampilkan daftar user dengan reputasi tertinggi.
-     */
     public function index(Request $request): JsonResponse
     {
         $limit = $request->query('limit', 10);

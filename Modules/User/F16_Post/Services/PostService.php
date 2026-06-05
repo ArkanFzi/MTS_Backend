@@ -4,7 +4,7 @@ namespace Modules\User\F16_Post\Services;
 
 use Modules\User\F16_Post\Repositories\PostRepository;
 use Illuminate\Support\Facades\Auth;
-use Modules\User\F29_GamificationLeaderboard\Services\GamificationService;
+use Modules\User\F27_GamificationLeaderboard\Services\GamificationService;
 
 class PostService
 {

@@ -6,7 +6,7 @@ use Modules\User\F17_Comment\Repositories\CommentRepository;
 use App\Models\Content\Post;    // Tambahkan ini
 use App\Models\Content\Comment; // Tambahkan ini
 
-use Modules\User\F29_GamificationLeaderboard\Services\GamificationService;
+use Modules\User\F27_GamificationLeaderboard\Services\GamificationService;
 
 class CommentService
 {
