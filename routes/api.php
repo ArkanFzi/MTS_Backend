@@ -32,6 +32,7 @@ use Modules\User\F23_LikeSystem\Controllers\LikeController;
 use Modules\User\F22_VoteSystem\Controllers\VoteController;
 use Modules\User\F20_NestedCommentReply\Controllers\CommentReplyController;
 use Modules\User\F18_MarkAcceptedAnswer\Controllers\AcceptedAnswerController;
+use Modules\User\F24_BookmarkPost\Controllers\BookmarkController;
 
 /*
 |--------------------------------------------------------------------------
@@ -105,6 +106,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     });
 
     Route::post('/likes/toggle', [LikeController::class, 'toggle']);
+    Route::post('/bookmarks/toggle', [BookmarkController::class, 'toggle']);
+    Route::get('/bookmarks', [BookmarkController::class, 'index']);
     Route::post('/votes', [VoteController::class, 'vote']);
 
     // --- FITUR MODERATOR (Bisa diakses Moderator ATAU Admin) ---
