@@ -22,7 +22,7 @@ class CommentController extends Controller
         $data = $request->validated();
         $data['post_id'] = $postId;
 
-        $comment = $this->service->addComment($data, auth()->id());
+        $comment = $this->service->addComment($data, auth()->id(), $postId);
 
         return response()->json([
             'message' => 'Komentar berhasil ditambahkan', 
