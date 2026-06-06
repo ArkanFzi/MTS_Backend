@@ -4,13 +4,13 @@ namespace Modules\User\F16_Post\Services;
 
 use Modules\User\F16_Post\Repositories\PostRepository;
 use Illuminate\Support\Facades\Auth;
-use Modules\User\F27_GamificationLeaderboard\Services\GamificationService;
+use Modules\User\F29_BadgeAchievement\Services\BadgeAchievementService;
 
 class PostService
 {
     public function __construct(
         protected PostRepository $repo,
-        protected GamificationService $gamification
+        protected BadgeAchievementService $gamification
     ) {}
 
     public function getPosts() { return $this->repo->getAllPaginated(); }

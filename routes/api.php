@@ -34,6 +34,7 @@ use Modules\User\F20_NestedCommentReply\Controllers\CommentReplyController;
 use Modules\User\F19_PostEditHistory\Controllers\PostHistoryController;
 use Modules\User\F21_CommentEditHistory\Controllers\CommentHistoryController;
 use Modules\User\F18_MarkAcceptedAnswer\Controllers\AcceptedAnswerController;
+use Modules\User\F29_BadgeAchievement\Controllers\BadgeAchievementController;
 use Modules\User\F24_BookmarkPost\Controllers\BookmarkController;
 
 /*
@@ -75,6 +76,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // --- FITUR UMUM USER (Sudah Login) ---
     Route::prefix('me')->name('me.')->group(function () {
         Route::get('posts', [PostController::class, 'myPosts']);
+        Route::get('badges', [BadgeAchievementController::class, 'index']);
     });
     
     Route::post('posts', [PostController::class, 'store']);

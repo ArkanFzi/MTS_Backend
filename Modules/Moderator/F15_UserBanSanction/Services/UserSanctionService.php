@@ -4,17 +4,23 @@ namespace Modules\Moderator\F15_UserBanSanction\Services;
 
 use Modules\Moderator\F15_UserBanSanction\Repositories\UserSanctionRepository;
 use Modules\Moderator\F14_ModeratorActionLog\Services\ModerationLogService;
+use Modules\User\F26_NotificationSystem\Services\NotificationService;
 use Illuminate\Support\Facades\Auth;
 
 class UserSanctionService
 {
     protected UserSanctionRepository $repository;
     protected ModerationLogService $logService;
+    protected NotificationService $notificationService;
 
-    public function __construct(UserSanctionRepository $repository, ModerationLogService $logService)
-    {
+    public function __construct(
+        UserSanctionRepository $repository, 
+        ModerationLogService $logService,
+        NotificationService $notificationService
+    ) {
         $this->repository = $repository;
         $this->logService = $logService;
+        $this->notificationService = $notificationService;
     }
 
     public function getAllPaginated(int $perPage = 15, $search = null)
@@ -38,6 +44,15 @@ class UserSanctionService
             'reason'         => $data['reason'],
             'notes'          => $data['notes'] ?? null,
         ]);
+
+        // Kirim Notifikasi Ban
+        $this->notificationService->createNotification(
+            $id,
+            Auth::id(),
+            'user_banned',
+            $id,
+            \App\Models\Auth\User::class
+        );
 
         return true;
     }

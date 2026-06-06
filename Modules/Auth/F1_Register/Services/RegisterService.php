@@ -3,15 +3,18 @@
 namespace Modules\Auth\F1_Register\Services;
 
 use Modules\Auth\F1_Register\Repositories\RegisterRepository;
+use Modules\User\F26_NotificationSystem\Services\NotificationService;
 use Illuminate\Validation\ValidationException;
 
 class RegisterService
 {
     protected RegisterRepository $registerRepository;
+    protected NotificationService $notificationService;
 
-    public function __construct(RegisterRepository $registerRepository)
+    public function __construct(RegisterRepository $registerRepository, NotificationService $notificationService)
     {
         $this->registerRepository = $registerRepository;
+        $this->notificationService = $notificationService;
     }
 
     public function execute(array $data): array
@@ -24,6 +27,15 @@ class RegisterService
         }
 
         $user = $this->registerRepository->create($data);
+        
+        // Kirim Notifikasi Pengingat Lengkapi Profile
+        $this->notificationService->createNotification(
+            $user->id,
+            $user->id,
+            'complete_profile_reminder',
+            $user->id,
+            \App\Models\Auth\User::class
+        );
 
         $token = $user->createToken('auth_token')->plainTextToken;
 

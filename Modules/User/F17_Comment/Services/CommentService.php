@@ -5,7 +5,7 @@ namespace Modules\User\F17_Comment\Services;
 use Modules\User\F17_Comment\Repositories\CommentRepository;
 use App\Models\Content\Post;
 use App\Models\Content\Comment;
-use Modules\User\F27_GamificationLeaderboard\Services\GamificationService;
+use Modules\User\F29_BadgeAchievement\Services\BadgeAchievementService;
 use Modules\User\F26_NotificationSystem\Services\NotificationService;
 
 class CommentService
@@ -16,7 +16,7 @@ class CommentService
 
     public function __construct(
         CommentRepository $repository, 
-        GamificationService $gamification,
+        BadgeAchievementService $gamification,
         NotificationService $notification
     ) {
         $this->repository = $repository;
