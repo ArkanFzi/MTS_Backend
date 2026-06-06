@@ -8,10 +8,15 @@ use Illuminate\Support\Facades\Log;
 
 class PostRepository
 {
-    public function getAllPaginated(int $perPage = 15)
+    public function getAllPaginated(int $perPage = 15, ?string $sort = null)
     {
-        $query = Post::with(['user:id,username', 'category:id,name'])
-            ->latest();
+        $query = Post::with(['user:id,username', 'category:id,name']);
+
+        if ($sort === 'view_count') {
+            $query->orderBy('view_count', 'desc');
+        } else {
+            $query->latest();
+        }
 
         // Coba resolve user via sanctum
         $user = auth('sanctum')->user();

@@ -13,7 +13,9 @@ class PostService
         protected BadgeAchievementService $gamification
     ) {}
 
-    public function getPosts() { return $this->repo->getAllPaginated(); }
+    public function getPosts(int $perPage = 15, ?string $sort = null) { 
+        return $this->repo->getAllPaginated($perPage, $sort); 
+    }
 
     public function getPostDetail(string $id)
     {

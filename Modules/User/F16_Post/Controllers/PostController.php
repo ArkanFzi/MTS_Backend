@@ -13,9 +13,15 @@ class PostController extends Controller
 {
     public function __construct(protected PostService $service) {}
 
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        return response()->json(['success' => true, 'data' => $this->service->getPosts()]);
+        $perPage = $request->query('per_page', 15);
+        $sort = $request->query('sort');
+        
+        return response()->json([
+            'success' => true, 
+            'data' => $this->service->getPosts((int)$perPage, $sort)
+        ]);
     }
 
     public function show(Request $request, string $id): JsonResponse
