@@ -18,7 +18,7 @@ class PostController extends Controller
         return response()->json(['success' => true, 'data' => $this->service->getPosts()]);
     }
 
-    public function show(string $id): JsonResponse
+    public function show(Request $request, string $id): JsonResponse
     {
         return response()->json(['success' => true, 'data' => $this->service->getPostDetail($id)]);
     }

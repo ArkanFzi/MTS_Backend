@@ -13,9 +13,10 @@ class PostRepository
         $query = Post::with(['user:id,username', 'category:id,name'])
             ->latest();
 
-        if (Auth::check()) {
-            $user = Auth::user();
-            
+        // Coba resolve user via sanctum
+        $user = auth('sanctum')->user();
+
+        if ($user) {
             // Debugging role
             $isAdmin = $user->hasRole('admin');
             $isModerator = $user->hasRole('moderator');
@@ -44,10 +45,11 @@ class PostRepository
 
     public function findById(string $id)
     {
-        // Gunakan withTrashed agar staf bisa melihat post yang dihapus
         $query = Post::with(['user', 'category', 'tags', 'comments.user', 'comments.replies.user']);
 
-        $isStaff = Auth::check() && (Auth::user()->hasRole('moderator') || Auth::user()->hasRole('admin'));
+        // Coba resolve user via sanctum
+        $user = auth('sanctum')->user();
+        $isStaff = $user && ($user->hasRole('moderator') || $user->hasRole('admin'));
 
         if ($isStaff) {
             $post = $query->withTrashed()->findOrFail($id);
@@ -57,12 +59,15 @@ class PostRepository
 
         // Aturan akses untuk status 'closed'
         if ($post->status === 'closed') {
-            $isOwner = Auth::check() && $post->user_id === Auth::id();
+            $currentUserId = $user ? (string) $user->id : '';
+            $postUserId = (string) $post->user_id;
+            
+            $isOwner = $user && ($currentUserId === $postUserId);
             
             Log::info('Checking access for closed post:', [
                 'post_id' => $id,
-                'current_user_id' => Auth::id(),
-                'post_user_id' => $post->user_id,
+                'current_user_id' => $currentUserId,
+                'post_user_id' => $postUserId,
                 'is_owner' => $isOwner,
                 'is_staff' => $isStaff
             ]);
