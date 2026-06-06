@@ -723,51 +723,292 @@ NOTE: Admin-specific route for comment history does NOT currently exist — only
 
 ```
 src/
+├── components/
+│   ├── ui/
+│   │   ├── button.tsx                  // Komponen primitif tombol (Tema Aksen Emas #D4AF37)
+│   │   ├── card.tsx                    // Komponen primitif pembungkus kartu (Obsidian Black #161618)
+│   │   ├── input.tsx                   // Komponen primitif kolom input tekstual form
+│   │   ├── table.tsx                   // Komponen primitif rendering grid tabel data tabular
+│   │   ├── avatar.tsx                  // Komponen primitif bingkai foto profil pengguna
+│   │   ├── badge.tsx                   // Komponen primitif label kecil penanda status / tag
+│   │   ├── tabs.tsx                    // Komponen primitif pengontrol navigasi tab internal halaman
+│   │   └── dialog.tsx                  // Komponen primitif modal alert popup / overlay box
+│   └── shared/
+│       ├── StatusBadge.tsx             // Render teks status terstandardisasi seperti 'SYSTEM.ONLINE', 'MUTED'
+│       ├── TechnicalTimestamp.tsx      // Mengonversi waktu audit/UUID menggunakan font monospace Fira Code
+│       └── LoadingSpinner.tsx          // Komponen indikator animasi loading berputar untuk fetch data global
+│
+├── features/
+│   ├── Auth/
+│   │   ├── F1_Register/
+│   │   │   ├── api/
+│   │   │   │   └── index.ts            // Request Axios / fetch pendaftaran akun baru ke Laravel Sanctum
+│   │   │   ├── components/
+│   │   │   │   ├── RegisterForm.tsx    // Formulir antarmuka isian pendaftaran (Dumb UI View)
+│   │   │   │   └── TermsCheckbox.tsx   // Elemen checkbox persetujuan syarat dan ketentuan sistem
+│   │   │   └── types/
+│   │   │       └── index.ts            // Definisi objek TypeScript RegisterPayload dan RegisterResponse
+│   │   ├── F2_Login/
+│   │   │   ├── api/
+│   │   │   │   └── index.ts            // Handler autentikasi kredensial untuk mendapatkan access Bearer Token
+│   │   │   ├── components/
+│   │   │   │   └── LoginForm.tsx       // Formulir input email dan password login (Dumb UI View)
+│   │   │   └── types/
+│   │   │       └── index.ts            // Kontrak tipe data payload pengiriman login user
+│   │   └── F3_Logout/
+│   │       ├── api/
+│   │       │   └── index.ts            // Request penghancuran token sesi aktif di server backend Laravel
+│   │       ├── components/
+│   │       │   └── LogoutButton.tsx    // Aksi trigger tombol keluar aman dari sistem aplikasi
+│   │       └── types/
+│   │           └── index.ts            // Model skema respons penutupan sesi login
+│   │
+│   ├── Common/
+│   │   ├── F4_SearchPost/
+│   │   │   ├── api/
+│   │   │   │   └── index.ts            // Integrasi query pencarian teks penuh (full-text search) ke database
+│   │   │   ├── components/
+│   │   │   │   └── SearchBar.tsx       // Komponen kotak bar pencarian utama dengan ikon kaca pembesar
+│   │   │   └── types/
+│   │   │       └── index.ts            // Interface parameter pencarian kata kunci postingan
+│   │   ├── F5_FilterTag/
+│   │   │   ├── api/
+│   │   │   │   └── index.ts            // Endpoint penarik koleksi post terfilter berdasarkan parameter tag
+│   │   │   ├── components/
+│   │   │   │   └── TagBadgeGroup.tsx   // Komponen baris horizontal penampung koleksi tag terikat
+│   │   │   └── types/
+│   │   │       └── index.ts            // Definisi tipe data id tag filter
+│   │   ├── F6_FilterCategory/
+│   │   │   ├── api/
+│   │   │   │   └── index.ts            // Endpoint penarik daftar pertanyaan berdasarkan rumpun kategori
+│   │   │   ├── components/
+│   │   │   │   └── CategoryList.tsx    // Komponen daftar navigasi list kategori untuk area sidebar
+│   │   │   └── types/
+│   │   │       └── index.ts            // Aturan tipe struktur data objek kategori master
+│   │   └── F7_TrendingPopularPost/
+│   │       ├── api/
+│   │       │   └── index.ts            // Mengambil peringkat metrik post paling banyak di-vote dan dilihat
+│   │       ├── components/
+│   │       │   └── TrendingSidebar.tsx // Panel informasi samping visual pembungkus daftar postingan viral
+│   │       └── types/
+│   │           └── index.ts            // Interface skema urutan statistik data trending
+│   │
+│   ├── Admin/
+│   │   ├── F8_AdminDashboard/
+│   │   │   ├── api/
+│   │   │   │   └── index.ts            // Fetch total data aggregat user, post, dan laporan masuk untuk dashboard
+│   │   │   ├── components/
+│   │   │   │   ├── AnalyticsChart.tsx  // Komponen grafik performa keaktifan data statistik komunitas
+│   │   │   │   └── SystemToggleCard.tsx// Kartu panel sakelar kendali pembatasan pendaftaran sistem (Lockdown)
+│   │   │   └── types/
+│   │   │       └── index.ts            // Interface struktur ringkasan statistik admin
+│   │   ├── F9_UserDirectoryControl/
+│   │   │   ├── api/
+│   │   │   │   └── index.ts            // Mengambil keseluruhan data daftar pengguna terdaftar dari sistem
+│   │   │   ├── components/
+│   │   │   │   └── UserTable.tsx       // Komponen tabel direktori akun dilengkapi filter role dan status
+│   │   │   └── types/
+│   │   │       └── index.ts            // Definisi interface baris data user manajemen
+│   │   ├── F10_CategoryMaster/
+│   │   │   ├── api/
+│   │   │   │   └── index.ts            // Eksekusi fungsi CRUD modifikasi entitas master kategori aplikasi
+│   │   │   ├── components/
+│   │   │   │   └── CategoryFormModal.tsx// Jendela pop-up pengisian tambah dan sunting nama kategori master
+│   │   │   └── types/
+│   │   │       └── index.ts            // Tipe data payload pembentukan kategori baru
+│   │   ├── F11_BadgeMaster/
+│   │   │   ├── api/
+│   │   │   │   └── index.ts            // Operasi manajemen pembuatan dan penghapusan lencana penghargaan baru
+│   │   │   ├── components/
+│   │   │   │   └── BadgeFormModal.tsx  // Form pengunggahan ikon lencana serta penentuan syarat poin minimum
+│   │   │   └── types/
+│   │   │       └── index.ts            // Interface syarat kualifikasi data master badge
+│   │   └── F12_TagMaster/
+│   │       ├── api/
+│   │       │   └── index.ts            // Operasi pengelolaan penambahan tag baru beserta konfigurasi warna hex
+│   │       ├── components/
+│   │       │   └── TagFormModal.tsx    // Input form master penciptaan tag lengkap dengan pemilih warna hex asli
+│   │       └── types/
+│   │           └── index.ts            // Aturan tipe data hexadecimal dan nama entitas tag
+│   │
+│   ├── Moderator/
+│   │   ├── F13_ReportQueue/
+│   │   │   ├── api/
+│   │   │   │   └── index.ts            // Fetch antrean komplain laporan pelanggaran postingan/komentar dari user
+│   │   │   ├── components/
+│   │   │   │   ├── ReportListRow.tsx   // Komponen baris laporan aktif bermuatan detail pelanggar konten
+│   │   │   │   └── ActionReasonModal.tsx// Jendela konfirmasi penindakan laporan disertai pengisian opsi alasan
+│   │   │   └── types/
+│   │   │       └── index.ts            // Model data pelaporan tiket komplain komunitas
+│   │   ├── F14_ModeratorActionLog/
+│   │   │   ├── api/
+│   │   │   │   └── index.ts            // Penarik data rekam jejak riwayat putusan tindakan seluruh moderator
+│   │   │   ├── components/
+│   │   │   │   └── ActionLogTable.tsx  // Tabel data rekam jejak penalti postingan dan pembersihan spam
+│   │   │   └── types/
+│   │   │       └── index.ts            // Interface log baris history keputusan moderator
+│   │   └── F15_UserBanSanction/
+│   │       ├── api/
+│   │       │   └── index.ts            // Hit API penjatuhan sanksi pembekuan/banned akun pengguna bermasalah
+│   │       ├── components/
+│   │       │   └── BanControlForm.tsx  // Formulir pemilihan jenis suspensi beserta penentu tenggat durasi waktu
+│   │       └── types/
+│   │           └── index.ts            // Payload skema pembekuan akses user terhukum
+│   │
+│   └── User/
+│       ├── F16_Post/
+│       │   ├── api/
+│       │   │   └── index.ts            // Pendekatan Makro: Sentralisasi CRUD data postingan pertanyaan utama
+│       │   ├── components/
+│       │   │   ├── CreatePostForm.tsx  // Komponen area form editor input pembuatan topik diskusi baru
+│       │   │   ├── EditPostForm.tsx    // Komponen form koreksi konten pertanyaan wajib melampirkan alasan edit
+│       │   │   └── PostCardItem.tsx    // Tampilan card utama penampil konten ringkasan postingan pada feed publik
+│       │   └── types/
+│       │       └── index.ts            // Interface payload struktur konten teks postingan dan id pembuat
+│       ├── F17_Comment/
+│       │   ├── api/
+│       │   │   └── index.ts            // Pendekatan Makro: Sentralisasi CRUD data komentar dan sub-balasan opini
+│       │   ├── components/
+│       │   │   ├── CommentList.tsx     // Area render baris pohon kumpulan komentar di bawah suatu pertanyaan
+│       │   │   └── ReplyForm.tsx       // Kotak input teks melayang mini khusus untuk membalas baris komentar orang lain
+│       │   └── types/
+│       │       └── index.ts            // Interface data node komentar berwujud relasi bertingkat
+│       ├── F18_Bookmark/
+│       │   ├── api/
+│       │   │   └── index.ts            // Mengelola penyimpanan interaksi penandaan post favorit ke akun pribadi
+│       │   ├── components/
+│       │   │   └── BookmarkToggle.tsx  // Komponen tombol berbentuk pin penanda simpan postingan terarsivasi
+│       │   └── types/
+│       │       └── index.ts            // Aturan tipe data relasi id user dan id post bookmark
+│       ├── F19_Notification/
+│       │   ├── api/
+│       │   │   └── index.ts            // Polling fetch daftar pemberitahuan interaksi balasan/upvote terbaru
+│       │   ├── components/
+│       │   │   └── NotificationRow.tsx // Baris notifikasi pembawa ringkasan aktivitas masuk ke akun pengguna
+│       │   └── types/
+│       │       └── index.ts            // Interface objek metadata notifikasi sistem
+│       ├── F20_Leaderboard/
+│       │   ├── api/
+│       │   │   └── index.ts            // Mengambil daftar peringkat profil user berlandaskan raihan poin tertinggi
+│       │   ├── components/
+│       │   │   ├── LeaderboardTable.tsx// Komponen tabel baris panjang pemegang posisi ranking reputasi komunitas
+│       │   │   └── RankCard.tsx        // Desain komponen bento podium mini istimewa bagi top 3 master suhu
+│       │   └── types/
+│       │       └── index.ts            // Skema urutan ranking poin user global
+│       ├── F21_TagList/
+│       │   ├── api/
+│       │   │   └── index.ts            // Ambil seluruh daftar tag terdaftar berserta jumlah statistik akumulasi pemakaian
+│       │   ├── components/
+│       │   │   └── TagGridItem.tsx     // Kotak bento mini visual penjelas deskripsi satu tag spesifik
+│       │   └── types/
+│       │       └── index.ts            // Aturan interface perhitungan total usage tag
+│       ├── F22_MyPosts/
+│       │   ├── api/
+│       │   │   └── index.ts            // Fetch muatan kompilasi data arsip seluruh post milik user terotentikasi
+│       │   ├── components/
+│       │   │   └── PersonalPostRow.tsx // Baris ringkas penampilan rekam jejak status pertanyaan pribadi
+│       │   └── types/
+│       │       └── index.ts            // Skema data postingan internal kepemilikan user
+│       ├── F23_PublicProfile/
+│       │   ├── api/
+│       │   │   └── index.ts            // Penarik informasi biodata publik user lain menggunakan kunci username
+│       │   ├── components/
+│       │   │   └── ProfileHeader.tsx   // Komponen banner atas visual profil pembawa nama, bio, dan total poin
+│       │   └── types/
+│       │       └── index.ts            // Model pemetaan profil user eksternal
+│       ├── F24_ModTagCategory/
+│       │   ├── api/
+│       │   │   └── index.ts            // Aksi intervensi pemindahan rumpun kategori/tag post salah sasaran oleh mod
+│       │   ├── components/
+│       │   │   └── ModQuickAction.tsx  // Dropdown drop-panel aksi cepat pembenahan klasifikasi konten tulisan
+│       │   └── types/
+│       │       └── index.ts            // Struktur data payload mutasi taksonomi konten post
+│       ├── F25_EditHistory/
+│       │   ├── api/
+│       │   │   └── index.ts            // Mengambil data log riwayat versi perbaikan teks tulisan dari masa ke masa
+│       │   ├── components/
+│       │   │   └── HistoryDiffLog.tsx  // Komponen komparasi visual pelacak perbedaan teks sebelum dan sesudah diedit
+│       │   └── types/
+│       │       └── index.ts            // Interface data histori perbaikan teks revisi
+│       ├── F26_RoleManagement/
+│       │   ├── api/
+│       │   │   └── index.ts            // Hit API mutasi perubahan kasta jabatan akun (Reguler, Mod, Administrator)
+│       │   ├── components/
+│       │   │   └── RoleSelectDropdown.tsx// Komponen selektor aman pengubah tingkat otorisasi kedudukan user
+│       │   └── types/
+│       │       └── index.ts            // Model payload pengangkatan role jabatan akun baru
+│       ├── F27_AuditTimeline/
+│       │   ├── api/
+│       │   │   └── index.ts            // Tarik seluruh runtutan log audit krusial sistem demi transparansi internal
+│       │   ├── components/
+│       │   │   └── TimelineFeed.tsx    // Garis linimasa vertikal penunjuk urutan eksekusi command penting admin
+│       │   └── types/
+│       │       └── index.ts            // Interface baris riwayat data audit trail sistem
+│       ├── F28_ProfileSettings/
+│       │   ├── api/
+│       │   │   └── index.ts            // Pembaruan data pribadi sensitif seperti bio, kata sandi, dan foto avatar baru
+│       │   ├── components/
+│       │   │   └── SettingsForm.tsx    // Formulir isian pengubahan rahasia data identitas diri user sendiri
+│       │   └── types/
+│       │       └── index.ts            // Model payload pembaharuan profile user terotentikasi
+│       └── F29_BadgeAchievement/
+│           ├── api/
+│           │   └── index.ts            // Tarik katalog seluruh medali lencana penghargaan yang berhasil diklaim user
+│           ├── components/
+│           │   └── BadgeGridDisplay.tsx// Lemari pameran grid visual koleksi pin lencana emas pencapaian pribadi
+│           └── types/
+│               └── index.ts            // Interface jalinan data lencana pencapaian koleksi user
+│
 ├── pages/
 │   ├── Auth/
-│   │   ├── RegisterPage.tsx          (PAGE 1)
-│   │   └── LoginPage.tsx             (PAGE 2)
+│   │   ├── RegisterPage.tsx            // PAGE 1 - Smart Container mengomandoi validasi form alur F1_Register
+│   │   └── LoginPage.tsx               // PAGE 2 - Smart Container mengomandoi otentikasi data alur F2_Login
 │   ├── Public/
-│   │   ├── HomePage.tsx              (PAGE 3)
-│   │   ├── PostDetailPage.tsx        (PAGE 4)
-│   │   ├── SearchPage.tsx            (PAGE 5)
-│   │   ├── TagFilterPage.tsx         (PAGE 6)
-│   │   ├── CategoryFilterPage.tsx    (PAGE 7)
-│   │   ├── TrendingPage.tsx          (PAGE 8)
-│   │   ├── LeaderboardPage.tsx       (PAGE 9)
-│   │   └── TagsListPage.tsx          (PAGE 10)
+│   │   ├── HomePage.tsx                // PAGE 3 - Smart Container pusat muatan kompilasi feed utama beranda publik
+│   │   ├── PostDetailPage.tsx          // PAGE 4 - Smart Container pusat rendering detail thread pertanyaan F16 & F17
+│   │   ├── SearchPage.tsx              // PAGE 5 - Smart Container orkestrasi hasil filter pencarian teks F4_SearchPost
+│   │   ├── TagFilterPage.tsx           // PAGE 6 - Smart Container penampil list data post terikat dengan F5_FilterTag
+│   │   ├── CategoryFilterPage.tsx      // PAGE 7 - Smart Container penampil list data post terikat dengan F6_FilterCategory
+│   │   ├── TrendingPage.tsx            // PAGE 8 - Smart Container penampil kompilasi thread post terhangat F7_Trending
+│   │   ├── LeaderboardPage.tsx         // PAGE 9 - Smart Container orkestrasi data ranking teratas suhu F20_Leaderboard
+│   │   └── TagsListPage.tsx            // PAGE 10 - Smart Container halaman katalog ensiklopedia tag komunitas F21_TagList
 │   ├── User/
-│   │   ├── CreatePostPage.tsx        (PAGE 11)
-│   │   ├── EditPostPage.tsx          (PAGE 12)
-│   │   ├── MyPostsPage.tsx           (PAGE 13)
-│   │   ├── BookmarksPage.tsx         (PAGE 14)
-│   │   ├── NotificationsPage.tsx     (PAGE 15)
-│   │   ├── ProfileSettingsPage.tsx   (PAGE 16)
-│   │   ├── PublicProfilePage.tsx     (PAGE 17)
-│   │   └── MyBadgesPage.tsx          (PAGE 18)
+│   │   ├── CreatePostPage.tsx          // PAGE 11 - Smart Container pengarah submit posting teks pertanyaan baru F16_Post
+│   │   ├── EditPostPage.tsx            // PAGE 12 - Smart Container pengarah revisi teks thread pertanyaan lama F16_Post
+│   │   ├── MyPostsPage.tsx             // PAGE 13 - Smart Container penampil arsip history pertanyaan sendiri F22_MyPosts
+│   │   ├── BookmarksPage.tsx           // PAGE 14 - Smart Container penampil koleksi thread tersimpan user F18_Bookmark
+│   │   ├── NotificationsPage.tsx       // PAGE 15 - Smart Container pusat kendali masuknya pemberitahuan F19_Notification
+│   │   ├── ProfileSettingsPage.tsx     // PAGE 16 - Smart Container pengelola form ubah biodata akun F28_ProfileSettings
+│   │   ├── PublicProfilePage.tsx       // PAGE 17 - Smart Container portofolio pameran profil eksternal user F23_PublicProfile
+│   │   └── MyBadgesPage.tsx            // PAGE 18 - Smart Container galeri raihan lencana prestasi personal F29_Badge
 │   ├── Moderator/
-│   │   ├── ReportQueuePage.tsx       (PAGE 19)
-│   │   ├── ActionLogPage.tsx         (PAGE 20)
-│   │   ├── BanManagementPage.tsx     (PAGE 21)
-│   │   ├── ModTagCategoryPage.tsx    (PAGE 22)
-│   │   └── EditHistoryPage.tsx       (PAGE 23)
+│   │   ├── ReportQueuePage.tsx         // PAGE 19 - Smart Container panel antrean tiket aduan pelanggaran F13_ReportQueue
+│   │   ├── ActionLogPage.tsx           // PAGE 20 - Smart Container monitoring rekam jejak keputusan moderasi F14_Log
+│   │   ├── BanManagementPage.tsx       // PAGE 21 - Smart Container eksekusi isolasi pembekuan akses user F15_UserBan
+│   │   ├── ModTagCategoryPage.tsx      // PAGE 22 - Smart Container panel cepat pembenahan klasifikasi tulisan F24_ModTag
+│   │   └── EditHistoryPage.tsx         // PAGE 23 - Smart Container audit pelacak perubahan teks postingan user F25_History
 │   └── Admin/
-│       ├── AdminDashboardPage.tsx    (PAGE 24 = Prompt P7)
-│       ├── TagCategoryPage.tsx       (PAGE 25 = Prompt P8)
-│       ├── UserDirectoryPage.tsx     (PAGE 26 = Prompt P9)
-│       ├── RoleManagementPage.tsx    (PAGE 27)
-│       ├── BadgeMasterPage.tsx       (PAGE 28)
-│       └── AuditTimelinePage.tsx     (PAGE 29 = Prompt P10)
-├── features/                         (Logic & komponen per fitur)
+│       ├── AdminDashboardPage.tsx      // PAGE 24 - Smart Container pengawas statistik aggregat utama bento grid F8_Admin
+│       ├── TagCategoryPage.tsx         // PAGE 25 - Smart Container manajemen master data taksonomi F10_Category & F12_Tag
+│       ├── UserDirectoryPage.tsx       // PAGE 26 - Smart Container otoritas kontrol seluruh akun user terdaftar F9_User
+│       ├── RoleManagementPage.tsx      // PAGE 27 - Smart Container otoritas penentu kenaikan kasta/jabatan user F26_Role
+│       ├── BadgeMasterPage.tsx         // PAGE 28 - Smart Container pabrik cetak pembuatan master reward medali F11_Badge
+│       └── AuditTimelinePage.tsx       // PAGE 29 - Smart Container pusat rekam jejak audit komando krusial sistem F27_Audit
+│
 ├── layouts/
-│   ├── PublicLayout.tsx              (Navbar publik)
-│   ├── UserLayout.tsx                (Navbar + sidebar user)
-│   ├── ModeratorLayout.tsx           (Moderator sidebar)
-│   └── AdminLayout.tsx               (Admin fixed sidebar 250px)
-└── routes/
-    └── AppRouter.tsx                 (React Router v6 config)
-```
-
+│   ├── PublicLayout.tsx                // Kerangka arsitektur navigasi header atas bagi pengunjung tamu publik
+│   ├── UserLayout.tsx                  // Kerangka arsitektur tata letak sidebar bagi pengguna terautentikasi sistem
+│   ├── ModeratorLayout.tsx             // Kerangka arsitektur sidebar dashboard pemrosesan penyelesaian tiket aduan
+│   └── AdminLayout.tsx                 // Kerangka arsitektur kaku bertema industrial luxury dengan fixed sidebar 250px
+│
+├── routes/
+│   └── AppRouter.tsx                   // Sentralisasi konfigurasi pemetaan rute React Router v6 untuk 29 halaman utama
+│
+├── types/
+│   └── index.ts                        // Penampung tunggal definisi tipe data core global shared typescript interfaces
+│
+├── index.css                           // File konfigurasi penimpaan variabel warna inti Tailwind v4 (Obsidian Black & Gold Hex)
+└── main.tsx                            // Titik masuk (entry point) eksekusi utama aplikasi frontend bundler Vite
 ---
 
 > [!IMPORTANT]
