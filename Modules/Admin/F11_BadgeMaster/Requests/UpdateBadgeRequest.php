@@ -18,8 +18,15 @@ class UpdateBadgeRequest extends FormRequest
             'description'     => 'required|string|max:255',
             'icon_url'        => 'required|string|max:255|url',
             'tier'            => 'required|in:bronze,silver,gold,platinum,diamond',
-            'condition_type'  => 'required|string|max:50',
+            'condition_type'  => 'required|in:reputation_points,post_count,comment_count',
             'condition_value' => 'required|integer|min:1',
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'condition_type.in' => 'Tipe kondisi tidak valid. Gunakan: reputation_points, post_count, atau comment_count.',
         ];
     }
 }

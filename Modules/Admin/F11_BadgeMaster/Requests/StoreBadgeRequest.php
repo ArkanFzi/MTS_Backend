@@ -18,7 +18,7 @@ class StoreBadgeRequest extends FormRequest
             'description'     => 'required|string|max:255',
             'icon_url'        => 'required|string|max:255|url',
             'tier'            => 'required|in:bronze,silver,gold,platinum,diamond',
-            'condition_type'  => 'required|string|max:50',
+            'condition_type'  => 'required|in:reputation_points,post_count,comment_count',
             'condition_value' => 'required|integer|min:1',
         ];
     }
@@ -26,7 +26,8 @@ class StoreBadgeRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'tier.in' => 'Tier badge harus salah satu dari: bronze, silver, gold, platinum, diamond.',
+            'tier.in'           => 'Tier badge harus salah satu dari: bronze, silver, gold, platinum, diamond.',
+            'condition_type.in' => 'Tipe kondisi tidak valid. Gunakan: reputation_points, post_count, atau comment_count.',
         ];
     }
 }
