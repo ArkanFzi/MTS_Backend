@@ -143,6 +143,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // --- FITUR KHUSUS ADMIN ---
     Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
+        Route::get('stats/overview', [AdminDashboardController::class, 'overview']);
+        Route::get('stats/points-summary', [AdminDashboardController::class, 'pointsSummary']);
         Route::apiResource('roles', RoleController::class);
         Route::apiResource('categories', CategoryController::class);
         Route::apiResource('badges', BadgeController::class)->except(['show']);
@@ -156,8 +158,15 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::put('{id}/reset-password', [UserAdminController::class, 'resetPassword']);
         });
 
-        Route::get('posts/{post}/history', [PostHistoryController::class, 'index']);
+        Route::prefix('reports')->group(function () {
+            Route::get('/', [ReportController::class, 'index']);
+            Route::get('{id}', [ReportController::class, 'show']);
+            Route::put('{id}', [ReportController::class, 'update']);
+        });
 
+        Route::get('logs', [ModerationLogController::class, 'index']);
+        Route::get('posts/{post}/history', [PostHistoryController::class, 'index']);
+        Route::get('comments/{comment}/history', [CommentHistoryController::class, 'index']);
 
         Route::prefix('bans')->group(function () {
             Route::get('/', [UserSanctionController::class, 'index']);
