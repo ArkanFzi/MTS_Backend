@@ -8,7 +8,7 @@ class UpdateReportRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        return auth()->check() && (auth()->user()->hasRole('moderator') || auth()->user()->hasRole('admin'));
     }
 
     public function rules(): array

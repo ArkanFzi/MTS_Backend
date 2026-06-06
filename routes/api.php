@@ -36,6 +36,7 @@ use Modules\User\F21_CommentEditHistory\Controllers\CommentHistoryController;
 use Modules\User\F18_MarkAcceptedAnswer\Controllers\AcceptedAnswerController;
 use Modules\User\F29_BadgeAchievement\Controllers\BadgeAchievementController;
 use Modules\User\F24_BookmarkPost\Controllers\BookmarkController;
+use Modules\User\F30_UserReport\Controllers\UserReportController;
 
 /*
 |--------------------------------------------------------------------------
@@ -59,6 +60,7 @@ Route::prefix('explore')->group(function () {
 });
 
 Route::apiResource('posts', PostController::class)->only(['index', 'show']);
+Route::get('comments', [CommentController::class, 'index']);
 
 // ====================== PROTECTED ROUTES ======================
 // 1. Semua route di bawah ini wajib sudah login (Sanctum)
@@ -81,6 +83,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     
     Route::post('posts', [PostController::class, 'store']);
     Route::put('posts/{post}', [PostController::class, 'update']);
+    Route::patch('posts/{post}/status', [PostController::class, 'updateStatus']); // Endpoint baru
     Route::delete('posts/{post}', [PostController::class, 'destroy']);
 
     Route::prefix('posts/{post}')->group(function () {
@@ -113,6 +116,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/bookmarks/toggle', [BookmarkController::class, 'toggle']);
     Route::get('/bookmarks', [BookmarkController::class, 'index']);
     Route::post('/votes', [VoteController::class, 'vote']);
+    Route::post('reports', [UserReportController::class, 'store']);
 
     // --- FITUR MODERATOR (Bisa diakses Moderator ATAU Admin) ---
     Route::middleware('role:moderator,admin')->prefix('moderator')->name('moderator.')->group(function () {
