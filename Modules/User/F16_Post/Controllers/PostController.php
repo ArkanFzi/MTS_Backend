@@ -7,6 +7,7 @@ use Modules\User\F16_Post\Services\PostService;
 use Modules\User\F16_Post\Requests\StorePostRequest;
 use Modules\User\F16_Post\Requests\UpdatePostRequest;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class PostController extends Controller
 {
@@ -32,6 +33,16 @@ class PostController extends Controller
     {
         $post = $this->service->updatePost($id, $request->validated());
         return response()->json(['success' => true, 'message' => 'Post berhasil diperbarui', 'data' => $post]);
+    }
+
+    public function updateStatus(Request $request, string $id): JsonResponse
+    {
+        $request->validate([
+            'status' => 'required|in:open,closed'
+        ]);
+
+        $this->service->updateStatus($id, $request->status);
+        return response()->json(['success' => true, 'message' => 'Status berhasil diperbarui']);
     }
 
     public function destroy(string $id): JsonResponse

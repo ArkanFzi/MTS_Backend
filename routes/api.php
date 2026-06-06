@@ -83,6 +83,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     
     Route::post('posts', [PostController::class, 'store']);
     Route::put('posts/{post}', [PostController::class, 'update']);
+    Route::patch('posts/{post}/status', [PostController::class, 'updateStatus']); // Endpoint baru
     Route::delete('posts/{post}', [PostController::class, 'destroy']);
 
     Route::prefix('posts/{post}')->group(function () {

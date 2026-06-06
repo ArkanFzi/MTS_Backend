@@ -26,6 +26,8 @@ class PostService
     {
         $user = Auth::user();
         $data['user_id'] = $user->id;
+        $data['status']  = 'open'; // Paksa status jadi 'open'
+        
         $post = $this->repo->create($data);
         
         if (isset($data['tags'])) {
@@ -40,6 +42,12 @@ class PostService
     public function updatePost(string $id, array $data)
     {
         $post = $this->repo->findById($id);
+        
+        // Cek izin: Hanya pemilik atau staf yang boleh update konten
+        if ($post->user_id !== Auth::id() && !Auth::user()->hasRole('moderator') && !Auth::user()->hasRole('admin')) {
+            abort(403, 'Anda tidak memiliki izin untuk mengedit post ini.');
+        }
+
         $oldBody = $post->body;
 
         // Update data utama
@@ -62,6 +70,18 @@ class PostService
         }
 
         return $post->load('tags');
+    }
+
+    public function updateStatus(string $id, string $status)
+    {
+        $post = $this->repo->findById($id);
+
+        // Cek izin: Hanya pemilik atau staf yang boleh update status
+        if ($post->user_id !== Auth::id() && !Auth::user()->hasRole('moderator') && !Auth::user()->hasRole('admin')) {
+            abort(403, 'Anda tidak memiliki izin untuk mengubah status post ini.');
+        }
+
+        return $this->repo->update($id, ['status' => $status]);
     }
 
     public function deletePost(string $id)

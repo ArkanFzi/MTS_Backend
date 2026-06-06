@@ -4,6 +4,7 @@ namespace App\Models\Content;
 
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Models\Auth\User;
@@ -12,7 +13,7 @@ use App\Models\Interaction\Vote;
 
 class Comment extends Model
 {
-    use HasUuids;
+    use HasUuids, SoftDeletes;
 
     protected $table = 'comments';
     public $incrementing = false;
@@ -31,7 +32,8 @@ class Comment extends Model
         'vote_score' => 'integer',
         'is_accepted' => 'boolean',
         'created_at' => 'datetime',
-        'updated_at' => 'datetime'
+        'updated_at' => 'datetime',
+        'deleted_at' => 'datetime'
     ];
 
     public function post(): BelongsTo
