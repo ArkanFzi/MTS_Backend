@@ -38,10 +38,14 @@ class ReportService
 
         $this->repository->update($id, $updateData);
 
+        // Ambil target user ID dari model target (post/comment)
+        $target = $report->target;
+        $targetUserId = $target ? ($target->user_id ?? null) : null;
+
         // Catat ke Moderation Log
         ModerationLog::create([
             'moderator_id'   => Auth::id(),
-            'target_user_id' => $report->reporter_id, // atau target user tergantung kebutuhan
+            'target_user_id' => $targetUserId, 
             'action_type'    => 'resolve_report',
             'reason'         => $data['reason'] ?? 'Laporan ditangani',
             'notes'          => $data['notes'] ?? null,
