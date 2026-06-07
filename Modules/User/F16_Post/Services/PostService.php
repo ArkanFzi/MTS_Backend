@@ -17,6 +17,11 @@ class PostService
         return $this->repo->getAllPaginated($perPage, $sort); 
     }
 
+    public function getMyPosts(string $userId, int $perPage = 15)
+    {
+        return $this->repo->getMyPostsPaginated($userId, $perPage);
+    }
+
     public function getPostDetail(string $id)
     {
         $post = $this->repo->findById($id);

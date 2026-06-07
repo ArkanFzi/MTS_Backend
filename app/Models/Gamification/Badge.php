@@ -3,13 +3,14 @@
 namespace App\Models\Gamification;
 
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use App\Models\Auth\User;
 
 class Badge extends Model
 {
-    use HasUuids;
+    use HasUuids, HasFactory;
 
     protected $table = 'badges';
     public $incrementing = false;

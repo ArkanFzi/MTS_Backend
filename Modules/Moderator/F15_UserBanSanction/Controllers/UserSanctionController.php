@@ -4,6 +4,7 @@ namespace Modules\Moderator\F15_UserBanSanction\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Http\JsonResponse;
 use Modules\Moderator\F15_UserBanSanction\Services\UserSanctionService;
 use Modules\Moderator\F15_UserBanSanction\Requests\BanUserRequest;
 
@@ -22,17 +23,15 @@ class UserSanctionController extends Controller
         return view('admin::F15_UserBanSanction.index', compact('users'));
     }
 
-    public function ban(BanUserRequest $request, string $id)
+    public function ban(BanUserRequest $request, string $id): JsonResponse
     {
         $this->service->banUser($id, $request->validated());
-        return redirect()->route('admin.bans.index')
-                         ->with('success', 'User berhasil di-ban.');
+        return response()->json(['message' => 'User berhasil di-ban.']);
     }
 
-    public function unban(Request $request, string $id)
+    public function unban(Request $request, string $id): JsonResponse
     {
         $this->service->unbanUser($id, $request->reason);
-        return redirect()->route('admin.bans.index')
-                         ->with('success', 'User berhasil di-unban.');
+        return response()->json(['message' => 'User berhasil di-unban.']);
     }
 }

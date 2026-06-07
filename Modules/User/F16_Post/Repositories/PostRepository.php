@@ -90,6 +90,14 @@ class PostRepository
         return Post::create($data);
     }
 
+    public function getMyPostsPaginated(string $userId, int $perPage = 15)
+    {
+        return Post::where('user_id', $userId)
+            ->with(['category:id,name'])
+            ->latest()
+            ->paginate($perPage);
+    }
+
     public function update(string $id, array $data)
     {
         $post = Post::findOrFail($id);

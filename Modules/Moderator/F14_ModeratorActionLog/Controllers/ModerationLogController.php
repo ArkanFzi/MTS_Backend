@@ -4,6 +4,7 @@ namespace Modules\Moderator\F14_ModeratorActionLog\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Http\JsonResponse;
 use Modules\Moderator\F14_ModeratorActionLog\Services\ModerationLogService;
 
 class ModerationLogController extends Controller
@@ -15,7 +16,7 @@ class ModerationLogController extends Controller
         $this->service = $service;
     }
 
-    public function index(Request $request)
+    public function index(Request $request): JsonResponse
     {
         $logs = $this->service->getAllPaginated(
             20, 
@@ -23,6 +24,9 @@ class ModerationLogController extends Controller
             $request->search
         );
 
-        return view('admin::F14_ModeratorActionLog.index', compact('logs'));
+        return response()->json([
+            'success' => true,
+            'data'    => $logs
+        ]);
     }
 }

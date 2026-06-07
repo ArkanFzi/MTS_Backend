@@ -11,6 +11,7 @@ use Modules\Common\F5_FilterByTag\Controllers\FilterTagController;
 use Modules\Common\F6_FilterByCategory\Controllers\FilterCategoryController;
 use Modules\Common\F7_TrendingPopularPost\Controllers\TrendingController;
 
+use Modules\Admin\F9_UserManagement\Controllers\AdminDashboardController;
 use Modules\Admin\F8_RoleAndPermission\Controllers\RoleController;
 use Modules\Admin\F8_RoleAndPermission\Controllers\UserManagementController;
 use Modules\Admin\F9_UserManagement\Controllers\UserAdminController;

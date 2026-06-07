@@ -73,8 +73,8 @@ class AdminDashboardController extends Controller
             ]
         ]);
     }
-}
-Response
+
+    public function pointsSummary(): JsonResponse
     {
         $stats = PointsLog::select(
             DB::raw('SUM(CASE WHEN points > 0 THEN points ELSE 0 END) as total_earned'),

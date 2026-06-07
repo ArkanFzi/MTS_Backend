@@ -24,6 +24,17 @@ class PostController extends Controller
         ]);
     }
 
+    public function myPosts(Request $request): JsonResponse
+    {
+        $perPage = $request->query('per_page', 15);
+        $userId = $request->user()->id;
+        
+        return response()->json([
+            'success' => true, 
+            'data' => $this->service->getMyPosts($userId, (int)$perPage)
+        ]);
+    }
+
     public function show(Request $request, string $id): JsonResponse
     {
         return response()->json(['success' => true, 'data' => $this->service->getPostDetail($id)]);
