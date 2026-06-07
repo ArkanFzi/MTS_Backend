@@ -1,0 +1,270 @@
+openapi: 3.0.3
+info:
+  title: MTS API (Mata Kuliah / Forum System)
+  description: >
+    Dokumentasi resmi API untuk project MTS. Menggunakan arsitektur Feature-Sliced Design.
+    Memetakan 30 Fitur (F1-F30) antara Backend Laravel dan Frontend React.
+  version: 3.0.0
+servers:
+  - url: http://localhost:8000/api
+    description: Local Development Server
+
+tags:
+  - name: 🔐 Auth (F1-F3)
+    description: Endpoint autentikasi dan manajemen sesi
+  - name: 🌐 Explore (F4-F7)
+    description: Pencarian dan filter publik tanpa login
+  - name: 👤 User (F16-F30)
+    description: Fitur utama pengguna (Post, Comment, Vote, Profile)
+  - name: 🛡️ Moderator (F13-F15)
+    description: Endpoint untuk pengelolaan konten dan sanksi
+  - name: ⚙️ Admin (F8-F12)
+    description: Manajemen role, master data, dan overview sistem
+
+paths:
+  # ==========================================
+  # 🔐 AUTH DOMAIN
+  # ==========================================
+  /auth/register:
+    post:
+      tags: [ "🔐 Auth (F1-F3)" ]
+      summary: (F1) Registrasi Akun Baru
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, email, password, password_confirmation]
+              properties:
+                username: { type: string, example: "arkan_dev" }
+                email: { type: string, format: email, example: "arkan@example.com" }
+                password: { type: string, format: password, example: "secret123" }
+                password_confirmation: { type: string, format: password, example: "secret123" }
+      responses:
+        '201': { description: "User registered successfully" }
+
+  /auth/login:
+    post:
+      tags: [ "🔐 Auth (F1-F3)" ]
+      summary: (F2) Login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string, format: email, example: "arkan@example.com" }
+                password: { type: string, format: password, example: "secret123" }
+      responses:
+        '200': 
+          description: "Login Success"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token: { type: string }
+                  user: { $ref: '#/components/schemas/User' }
+
+  /auth/logout:
+    post:
+      tags: [ "🔐 Auth (F1-F3)" ]
+      summary: (F3) Logout
+      security: [ { bearerAuth: [] } ]
+      responses:
+        '200': { description: "Logged out successfully" }
+
+  # ==========================================
+  # 🌐 EXPLORE DOMAIN
+  # ==========================================
+  /explore/search:
+    get:
+      tags: [ "🌐 Explore (F4-F7)" ]
+      summary: (F4) Search Posts
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: "Search results" }
+
+  /explore/trending:
+    get:
+      tags: [ "🌐 Explore (F4-F7)" ]
+      summary: (F7) Trending Posts
+      responses:
+        '200': { description: "List of trending posts" }
+
+  # ==========================================
+  # 👤 USER DOMAIN
+  # ==========================================
+  /posts:
+    get:
+      tags: [ "👤 User (F16-F30)" ]
+      summary: (F16) Get Global Feed
+      responses:
+        '200': { description: "List of posts" }
+    post:
+      tags: [ "👤 User (F16-F30)" ]
+      summary: (F16) Create New Post
+      security: [ { bearerAuth: [] } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title: { type: string, example: "Cara install Laravel?" }
+                body: { type: string, example: "Saya mengalami error..." }
+                category_id: { type: integer, example: 1 }
+                tags: 
+                  type: array
+                  items: { type: string }
+      responses:
+        '201': { description: "Post created" }
+
+  /posts/{post}:
+    get:
+      tags: [ "👤 User (F16-F30)" ]
+      summary: (F16) Get Post Detail
+      parameters:
+        - name: post
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: "Post detail object" }
+
+  /posts/{post}/comments:
+    get:
+      tags: [ "👤 User (F16-F30)" ]
+      summary: (F17) Get Comments of a Post
+      parameters:
+        - name: post
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: "List of comments" }
+    post:
+      tags: [ "👤 User (F16-F30)" ]
+      summary: (F17) Add Comment to Post
+      security: [ { bearerAuth: [] } ]
+      parameters:
+        - name: post
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                body: { type: string, example: "Coba jalankan composer install" }
+      responses:
+        '201': { description: "Comment added" }
+
+  /votes:
+    post:
+      tags: [ "👤 User (F16-F30)" ]
+      summary: (F22) Upvote / Downvote (Post/Comment)
+      security: [ { bearerAuth: [] } ]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                votable_id: { type: integer, example: 10 }
+                votable_type: { type: string, example: "App\\Models\\Post" }
+                value: { type: integer, example: 1, description: "1 for upvote, -1 for downvote" }
+      responses:
+        '200': { description: "Vote recorded" }
+
+  /bookmarks/toggle:
+    post:
+      tags: [ "👤 User (F16-F30)" ]
+      summary: (F24) Toggle Bookmark
+      security: [ { bearerAuth: [] } ]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                post_id: { type: integer, example: 5 }
+      responses:
+        '200': { description: "Bookmark toggled" }
+
+  /settings/profile:
+    get:
+      tags: [ "👤 User (F16-F30)" ]
+      summary: (F28) Get My Profile
+      security: [ { bearerAuth: [] } ]
+      responses:
+        '200': { description: "User profile data" }
+    put:
+      tags: [ "👤 User (F16-F30)" ]
+      summary: (F28) Update Profile
+      security: [ { bearerAuth: [] } ]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username: { type: string }
+                bio: { type: string }
+                avatar_url: { type: string }
+      responses:
+        '200': { description: "Profile updated" }
+
+  # ==========================================
+  # ⚙️ ADMIN & MODERATOR DOMAIN
+  # ==========================================
+  /admin/stats/overview:
+    get:
+      tags: [ "⚙️ Admin (F8-F12)" ]
+      summary: Admin Dashboard Overview
+      security: [ { bearerAuth: [] } ]
+      responses:
+        '200': { description: "Statistics object" }
+
+  /admin/users:
+    get:
+      tags: [ "⚙️ Admin (F8-F12)" ]
+      summary: (F9) Get All Users Directory
+      security: [ { bearerAuth: [] } ]
+      responses:
+        '200': { description: "List of users" }
+
+  /moderator/reports:
+    get:
+      tags: [ "🛡️ Moderator (F13-F15)" ]
+      summary: (F13) View Report Queue
+      security: [ { bearerAuth: [] } ]
+      responses:
+        '200': { description: "List of reports" }
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    User:
+      type: object
+      properties:
+        id: { type: integer, example: 1 }
+        username: { type: string, example: "arkan_dev" }
+        email: { type: string, example: "arkan@example.com" }
+        role: { type: string, example: "admin" }
+        reputation_points: { type: integer, example: 1500 }
