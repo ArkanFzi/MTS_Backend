@@ -71,4 +71,27 @@ class UserSanctionService
 
         return true;
     }
+
+    public function warnUser(string $id, array $data)
+{
+    // Log aksi warning
+    $this->logService->logAction([
+        'moderator_id'   => Auth::id(),
+        'target_user_id' => $id,
+        'action_type'    => 'warn_user',
+        'reason'         => $data['reason'],
+        'notes'          => $data['notes'] ?? null,
+    ]);
+
+    // Kirim notifikasi warning ke user
+    $this->notificationService->createNotification(
+        $id,
+        Auth::id(),
+        'user_warned',
+        $id,
+        \App\Models\Auth\User::class
+    );
+
+    return true;
+}
 }

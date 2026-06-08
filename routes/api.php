@@ -137,6 +137,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
         Route::prefix('bans')->group(function () {
             Route::get('/', [UserSanctionController::class, 'index']);
+            Route::post('{id}/warn', [UserSanctionController::class, 'warn']);
             Route::post('{id}/ban', [UserSanctionController::class, 'ban']);
             Route::post('{id}/unban', [UserSanctionController::class, 'unban']);
         });
