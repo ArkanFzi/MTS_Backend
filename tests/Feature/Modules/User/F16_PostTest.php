@@ -16,7 +16,7 @@ class F16_PostTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->user = User::factory()->create();
+        $this->user = User::factory()->create(['reputation_points' => 15]);
     }
 
     /** @test */

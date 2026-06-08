@@ -3,22 +3,20 @@
 namespace Modules\Admin\F8_RoleAndPermission\Repositories;
 
 use App\Models\Auth\User;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Modules\User\F26_NotificationSystem\Services\NotificationService;
+use Illuminate\Support\Str;
 
 class UserRepository
 {
-    protected User $model;
-
-    public function __construct(User $model)
-    {
-        $this->model = $model;
-    }
+    public function __construct(
+        protected User $model,
+        protected NotificationService $notificationService
+    ) {}
 
     public function all(int $perPage = 15): LengthAwarePaginator
     {
-        return $this->model->with('roles')
-            ->paginate($perPage);
+        return $this->model->with('roles')->paginate($perPage);
     }
 
     public function find(string $id): ?User
@@ -46,14 +44,17 @@ class UserRepository
         $user = $this->find($userId);
         if (!$user) return false;
 
-        return $user->roles()->syncWithoutDetaching([$roleId]);
-    }
+        $user->roles()->sync([$roleId]);
 
-    public function removeRole(string $userId, string $roleId): bool
-    {
-        $user = $this->find($userId);
-        if (!$user) return false;
+        // Kirim notifikasi ke user yang di-assign role
+        $this->notificationService->createNotification(
+            userId  : $userId,
+            actorId : auth()->id(),
+            type    : 'role_assigned',
+            refId   : $roleId,
+            refType : 'role'
+        );
 
-        return $user->roles()->detach($roleId);
+        return true;
     }
 }

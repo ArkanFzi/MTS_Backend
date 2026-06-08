@@ -39,6 +39,7 @@ use Modules\User\F29_BadgeAchievement\Controllers\BadgeAchievementController;
 use Modules\User\F24_BookmarkPost\Controllers\BookmarkController;
 use Modules\User\F30_UserReport\Controllers\UserReportController;
 
+use Modules\Auth\F31_ForgotPassword\Controllers\ForgotPasswordController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -49,6 +50,8 @@ use Modules\User\F30_UserReport\Controllers\UserReportController;
 Route::prefix('auth')->group(function () {
     Route::post('/register', [RegisterController::class, 'register']);
     Route::post('/login', [LoginController::class, 'login']);
+    Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLink']);
+    Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword']);
 });
 
 Route::prefix('explore')->group(function () {
@@ -106,7 +109,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::patch('/{id}/read', [NotificationController::class, 'markAsRead']);
     });
 
-    // --- FITUR FOLLOW ---
+    // FITUR FOLLOW
     Route::prefix('users/{id}')->group(function () {
         Route::post('/follow', [FollowController::class, 'toggle']);
         Route::get('/followers', [FollowController::class, 'followers']);
@@ -119,16 +122,19 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/votes', [VoteController::class, 'vote']);
     Route::post('reports', [UserReportController::class, 'store']);
 
-    // --- FITUR MODERATOR (Bisa diakses Moderator ATAU Admin) ---
+    // FITUR MODERATOR (Bisa diakses Moderator ATAU Admin) 
     Route::middleware('role:moderator,admin')->prefix('moderator')->name('moderator.')->group(function () {
         Route::apiResource('categories', CategoryController::class);
         Route::apiResource('badges', BadgeController::class)->except(['show']);
         Route::apiResource('tags', TagController::class)->except(['show']);
+
+        Route::delete('posts/{post}/comments/{comment}', [CommentController::class, 'destroy']);
+
         
         Route::prefix('reports')->group(function () {
             Route::get('/', [ReportController::class, 'index']);
             Route::get('{id}', [ReportController::class, 'show']);
-            Route::put('{id}', [ReportController::class, 'update']);
+            Route::put('{id}', [ReportController::class, 'update']);    
         });
 
         Route::get('logs', [ModerationLogController::class, 'index']);
@@ -137,6 +143,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
         Route::prefix('bans')->group(function () {
             Route::get('/', [UserSanctionController::class, 'index']);
+            Route::post('{id}/warn', [UserSanctionController::class, 'warn']);
             Route::post('{id}/ban', [UserSanctionController::class, 'ban']);
             Route::post('{id}/unban', [UserSanctionController::class, 'unban']);
         });
@@ -146,10 +153,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
         Route::get('stats/overview', [AdminDashboardController::class, 'overview']);
         Route::get('stats/points-summary', [AdminDashboardController::class, 'pointsSummary']);
-        Route::apiResource('roles', RoleController::class);
-        Route::apiResource('categories', CategoryController::class);
-        Route::apiResource('badges', BadgeController::class)->except(['show']);
-        Route::apiResource('tags', TagController::class)->except(['show']);
+        Route::get('roles', [RoleController::class, 'index']);
 
         Route::prefix('users')->group(function () {
             Route::get('/', [UserManagementController::class, 'index']);
@@ -157,22 +161,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::put('{id}/role', [UserManagementController::class, 'update']);
             Route::put('{id}/profile', [UserAdminController::class, 'updateProfile']);
             Route::put('{id}/reset-password', [UserAdminController::class, 'resetPassword']);
-        });
-
-        Route::prefix('reports')->group(function () {
-            Route::get('/', [ReportController::class, 'index']);
-            Route::get('{id}', [ReportController::class, 'show']);
-            Route::put('{id}', [ReportController::class, 'update']);
-        });
-
-        Route::get('logs', [ModerationLogController::class, 'index']);
-        Route::get('posts/{post}/history', [PostHistoryController::class, 'index']);
-        Route::get('comments/{comment}/history', [CommentHistoryController::class, 'index']);
-
-        Route::prefix('bans')->group(function () {
-            Route::get('/', [UserSanctionController::class, 'index']);
-            Route::post('{id}/ban', [UserSanctionController::class, 'ban']);
-            Route::post('{id}/unban', [UserSanctionController::class, 'unban']);
         });
     });
 });

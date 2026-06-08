@@ -41,39 +41,26 @@ class UserManagementController extends Controller
     }
 
     public function update(UpdateUserRequest $request, string $id): JsonResponse
-    {
-        $success = $this->userService->updateUser($id, $request->validated());
+{
+    $user = $this->userService->findUser($id);
 
-        if (!$success) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to update user'
-            ], 400);
-        }
-
-        return response()->json([
-            'success' => true,
-            'message' => 'User updated successfully'
-        ]);
+    if (!$user) {
+        return response()->json(['success' => false, 'message' => 'User not found'], 404);
     }
 
-    public function resetPassword(string $id): JsonResponse
-    {
-        $request = request();
-        $newPassword = $request->input('password');
+    // Cari role berdasarkan nama
+    $role = \App\Models\Auth\Role::where('name', $request->role)->first();
 
-        if (empty($newPassword) || strlen($newPassword) < 8) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Password must be at least 8 characters'
-            ], 422);
-        }
-
-        $success = $this->userService->resetPassword($id, $newPassword);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Password has been reset successfully'
-        ]);
+    if (!$role) {
+        return response()->json(['success' => false, 'message' => 'Role not found'], 404);
     }
+
+    // Sync role (replace semua role lama dengan role baru)
+    $this->userService->assignRoleToUser($id, $role->id);
+
+    return response()->json([
+        'success' => true,
+        'message' => "User role updated to {$request->role}"
+    ]);
+}
 }

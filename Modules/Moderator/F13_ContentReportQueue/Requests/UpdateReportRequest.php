@@ -15,6 +15,7 @@ class UpdateReportRequest extends FormRequest
     {
         return [
             'status' => 'required|in:reviewed,rejected,resolved',
+            'action' => 'required_if:status,resolved|in:warn,ban,none',
             'reason' => 'nullable|string|max:255',
             'notes'  => 'nullable|string',
         ];

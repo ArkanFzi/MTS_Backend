@@ -20,7 +20,7 @@ class F30_UserReportTest extends TestCase
     }
 
     /** @test */
-    public function user_can_report_a_post()
+    public function user_can_report_a_post()    
     {
         $post = Post::factory()->create();
         

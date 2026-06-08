@@ -11,8 +11,8 @@ class StoreCategoryRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        // Pastikan user memiliki role admin
-        return $this->user() && $this->user()->hasRole('admin');
+        // Pastikan user memiliki role moderator atau admin
+        return $this->user() && $this->user()->hasAnyRole('moderator', 'admin');
     }
 
     /**

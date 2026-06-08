@@ -26,8 +26,8 @@ class CommentRepository
         return Comment::findOrFail($id);
     }
 
-    public function delete(string $id)
+    public function delete(string $id): bool
     {
-        return Comment::findOrFail($id)->delete();
+        return Comment::where('id', $id)->delete();
     }
 }

@@ -27,9 +27,9 @@ class ReportController extends Controller
         return response()->json($report); // Return JSON
     }
 
-    public function update(Request $request, string $id)
+    public function update(\Modules\Moderator\F13_ContentReportQueue\Requests\UpdateReportRequest $request, string $id)
     {
         $this->service->resolve($id, $request->validated());
-        return response()->json(['message' => 'Laporan berhasil diproses.']); // Return JSON
+        return response()->json(['message' => 'Laporan berhasil diproses.']);
     }
 }

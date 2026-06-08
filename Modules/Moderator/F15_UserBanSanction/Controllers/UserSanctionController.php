@@ -7,6 +7,7 @@ use Illuminate\Routing\Controller;
 use Illuminate\Http\JsonResponse;
 use Modules\Moderator\F15_UserBanSanction\Services\UserSanctionService;
 use Modules\Moderator\F15_UserBanSanction\Requests\BanUserRequest;
+use Modules\Moderator\F15_UserBanSanction\Requests\WarnUserRequest;
 
 class UserSanctionController extends Controller
 {
@@ -34,4 +35,11 @@ class UserSanctionController extends Controller
         $this->service->unbanUser($id, $request->reason);
         return response()->json(['message' => 'User berhasil di-unban.']);
     }
+
+    public function warn(WarnUserRequest $request, string $id): JsonResponse
+    {
+        $this->service->warnUser($id, $request->validated());
+        return response()->json(['message' => 'Warning berhasil dikirim ke user.']);
+    }
+
 }
