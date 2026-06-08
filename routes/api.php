@@ -39,6 +39,7 @@ use Modules\User\F29_BadgeAchievement\Controllers\BadgeAchievementController;
 use Modules\User\F24_BookmarkPost\Controllers\BookmarkController;
 use Modules\User\F30_UserReport\Controllers\UserReportController;
 
+use Modules\Auth\F31_ForgotPassword\Controllers\ForgotPasswordController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -49,6 +50,8 @@ use Modules\User\F30_UserReport\Controllers\UserReportController;
 Route::prefix('auth')->group(function () {
     Route::post('/register', [RegisterController::class, 'register']);
     Route::post('/login', [LoginController::class, 'login']);
+    Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLink']);
+    Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword']);
 });
 
 Route::prefix('explore')->group(function () {
