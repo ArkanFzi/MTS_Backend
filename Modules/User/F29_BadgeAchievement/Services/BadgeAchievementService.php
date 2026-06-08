@@ -37,7 +37,7 @@ class BadgeAchievementService
             $user->increment('reputation_points', $points);
 
             // 3. Cek kenaikan level
-            $newLevel = floor($user->reputation_points / 100) + 1;
+            $newLevel = floor($user->reputation_points / 50) + 1;
             if ($newLevel > $user->level) {
                 $user->update(['level' => $newLevel]);
             }

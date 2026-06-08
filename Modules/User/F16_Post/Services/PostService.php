@@ -30,21 +30,27 @@ class PostService
     }
 
     public function createPost(array $data)
-    {
-        $user = Auth::user();
-        $data['user_id'] = $user->id;
-        $data['status']  = 'open'; // Paksa status jadi 'open'
-        
-        $post = $this->repo->create($data);
-        
-        if (isset($data['tags'])) {
-            $post->tags()->sync($data['tags']);
-        }
+{
+    $user = Auth::user();
 
-        $this->gamification->addPoints($user, 10, 'create_post', $post->id, 'Membuat postingan baru');
-
-        return $post;
+    // Cek minimum poin
+    if ($user->reputation_points < 15) {
+        abort(403, 'Anda membutuhkan minimal 15 poin untuk membuat post.');
     }
+
+    $data['user_id'] = $user->id;
+    $data['status']  = 'open';
+    
+    $post = $this->repo->create($data);
+    
+    if (isset($data['tags'])) {
+        $post->tags()->sync($data['tags']);
+    }
+
+    $this->gamification->addPoints($user, 5, 'create_post', $post->id, 'Membuat postingan baru');
+
+    return $post;
+}
 
     public function updatePost(string $id, array $data)
     {

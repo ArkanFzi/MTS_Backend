@@ -4,15 +4,18 @@ namespace Modules\User\F23_LikeSystem\Services;
 
 use Modules\User\F23_LikeSystem\Repositories\LikeRepository;
 use Modules\User\F26_NotificationSystem\Services\NotificationService;
+use Modules\User\F29_BadgeAchievement\Services\BadgeAchievementService;
 use App\Models\Content\Post;
-use App\Models\Content\Comment; 
+use App\Models\Content\Comment;
+use App\Models\Auth\User;
 use Exception;
 
 class LikeService
 {
     public function __construct(
         protected LikeRepository $repository,
-        protected NotificationService $notificationService
+        protected NotificationService $notificationService,
+        protected BadgeAchievementService $gamification
     ) {}
 
     public function toggleLike(string $userId, string $targetId, string $targetType): array
@@ -21,13 +24,13 @@ class LikeService
 
         if ($isLiked) {
             $this->repository->removeLike($userId, $targetId, $targetType);
+            $this->handlePoints($targetId, $targetType, $userId, false);
             $status = 'unliked';
         } else {
             $this->repository->addLike($userId, $targetId, $targetType);
-            $status = 'liked';
-
-            // Kirim notifikasi jika aksi adalah 'liked'
+            $this->handlePoints($targetId, $targetType, $userId, true);
             $this->sendNotification($userId, $targetId, $targetType);
+            $status = 'liked';
         }
 
         return [
@@ -36,17 +39,31 @@ class LikeService
         ];
     }
 
+    protected function handlePoints(string $targetId, string $targetType, string $actorId, bool $isLike): void
+    {
+        $model = ($targetType === 'post') ? Post::find($targetId) : Comment::find($targetId);
+        if (!$model) return;
+
+        // Jangan kasih poin jika like konten sendiri
+        if ($model->user_id === $actorId) return;
+
+        $owner = User::find($model->user_id);
+        if (!$owner) return;
+
+        $points = $isLike ? 2 : -2;
+        $action = $isLike ? 'like_received' : 'unlike_received';
+
+        $this->gamification->addPoints($owner, $points, $action, $targetId);
+    }
+
     protected function sendNotification(string $actorId, string $targetId, string $targetType): void
     {
         $model = ($targetType === 'post') ? Post::find($targetId) : Comment::find($targetId);
         
-        if (!$model) {
-            return;
-        }
+        if (!$model) return;
 
         $ownerId = $model->user_id;
 
-        // Jangan kirim notif jika user me-like konten miliknya sendiri
         if ($ownerId !== $actorId) {
             $this->notificationService->createNotification(
                 userId: $ownerId,
