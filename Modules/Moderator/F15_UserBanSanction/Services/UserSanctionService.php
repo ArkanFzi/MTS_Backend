@@ -61,7 +61,7 @@ class UserSanctionService
         // Kurangi poin saat di-ban
         $user = User::find($id);
         if ($user) {
-            $this->gamification->addPoints($user, -50, 'banned', $id, 'Akun di-ban oleh moderator');
+            $this->gamification->addPoints($user, -20, 'banned', $id, 'Akun di-ban oleh moderator');
         }
 
         return true;
@@ -103,7 +103,7 @@ class UserSanctionService
         // Kurangi poin saat di-warn
         $user = User::find($id);
         if ($user) {
-            $this->gamification->addPoints($user, -15, 'warned', $id, 'Mendapat peringatan dari moderator');
+            $this->gamification->addPoints($user, -5, 'warned', $id, 'Mendapat peringatan dari moderator');
         }
 
         return true;

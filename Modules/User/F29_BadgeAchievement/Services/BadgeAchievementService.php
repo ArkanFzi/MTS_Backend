@@ -94,7 +94,7 @@ class BadgeAchievementService
                     $user->id,
                     'badge_awarded',
                     $badge->id,
-                    Badge::class
+                    'badge'
                 );
             }
         }

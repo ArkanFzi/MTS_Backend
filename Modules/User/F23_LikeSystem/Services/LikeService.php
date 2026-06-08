@@ -20,6 +20,11 @@ class LikeService
 
     public function toggleLike(string $userId, string $targetId, string $targetType): array
     {
+        $model = ($targetType === 'post') ? Post::find($targetId) : Comment::find($targetId);
+        if ($model && $model->user_id === $userId) {
+            abort(403, 'Anda tidak bisa menyukai konten Anda sendiri.');
+        }
+
         $isLiked = $this->repository->isLiked($userId, $targetId, $targetType);
 
         if ($isLiked) {

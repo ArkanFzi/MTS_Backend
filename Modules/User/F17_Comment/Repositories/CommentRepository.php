@@ -27,7 +27,7 @@ class CommentRepository
     }
 
     public function delete(string $id): bool
-{
-    return $this->model->where('id', $id)->delete();
-}
+    {
+        return Comment::where('id', $id)->delete();
+    }
 }

@@ -15,7 +15,7 @@ return new class extends Migration
             $table->foreignUuid('actor_id')->nullable()->constrained('users')->onDelete('set null');
             $table->string('type', 50);
             $table->uuid('reference_id')->nullable();
-            $table->string('reference_type', 20)->nullable();
+            $table->string('reference_type', 100)->nullable();
             $table->boolean('is_read')->default(false);
             $table->timestamp('created_at')->useCurrent();
         });

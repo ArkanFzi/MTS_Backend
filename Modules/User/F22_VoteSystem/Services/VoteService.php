@@ -19,6 +19,11 @@ class VoteService
 
     public function vote(string $userId, string $targetId, string $targetType, string $voteInput): array
     {
+        $model = ($targetType === 'post') ? Post::find($targetId) : Comment::find($targetId);
+        if ($model && $model->user_id === $userId) {
+            abort(403, 'Anda tidak bisa memberikan vote pada konten Anda sendiri.');
+        }
+
         $typeValue = ($voteInput === 'up') ? 1 : -1;
         $existingVote = $this->repository->getExistingVote($userId, $targetId, $targetType);
 

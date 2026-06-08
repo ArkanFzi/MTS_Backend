@@ -150,6 +150,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
         Route::get('stats/overview', [AdminDashboardController::class, 'overview']);
         Route::get('stats/points-summary', [AdminDashboardController::class, 'pointsSummary']);
+        Route::get('roles', [RoleController::class, 'index']);
 
         Route::prefix('users')->group(function () {
             Route::get('/', [UserManagementController::class, 'index']);

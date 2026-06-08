@@ -47,7 +47,7 @@ class PostService
         $post->tags()->sync($data['tags']);
     }
 
-    $this->gamification->addPoints($user, 5, 'create_post', $post->id, 'Membuat postingan baru');
+    $this->gamification->addPoints($user, 10, 'create_post', $post->id, 'Membuat postingan baru');
 
     return $post;
 }
