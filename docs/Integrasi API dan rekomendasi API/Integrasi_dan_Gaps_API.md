@@ -156,7 +156,8 @@ Berikut adalah instruksi bagaimana Frontend Engineer harus menyambungkan API ke 
   - **Integrasi UI**: Sediakan tombol *Resolve* dan *Reject*. Saat diklik, panggil PUT update dengan payload status. Gunakan toast notification ("Laporan berhasil diselesaikan") dan buang row tersebut dari UI list atau refresh list API.
 
 * **PAGE 21 (Ban Management)**
-  - **Endpoint**: `POST /api/moderator/bans/{id}/ban`
+  - **Endpoint**: `POST /api/moderator/bans/{id}/warn |
+| POST | /api/moderator/bans/{id}/ban`
   - **Integrasi UI**: Frontend **Wajib** memunculkan modal meminta "Alasan Penangguhan / Reason" karena data ini akan dilempar ke field `reason` yang disimpan backend di tabel `moderation_logs`.
 
 * **PAGE 22 & 25 (Tag/Category CRUD)**

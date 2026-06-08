@@ -183,7 +183,8 @@ MODERATOR (role: moderator OR admin):
   GET    /api/moderator/posts/{post}/history
   GET    /api/moderator/comments/{comment}/history
   GET    /api/moderator/bans
-  POST   /api/moderator/bans/{id}/ban
+  POST   /api/moderator/bans/{id}/warn |
+| POST | /api/moderator/bans/{id}/ban
   POST   /api/moderator/bans/{id}/unban
 
 ADMIN (role: admin only):
@@ -333,7 +334,8 @@ ENDPOINTS TO BE CREATED (not yet in backend):
 - UI: Chronological log table, filter by `action_type` (ban/unban/warning), moderator UUID linkable to user profile
 
 **PAGE 21 — Ban Management** | Route: `/moderator/bans`
-- Endpoints: `GET /api/moderator/bans`, `POST /api/moderator/bans/{id}/ban`, `POST /api/moderator/bans/{id}/unban`
+- Endpoints: `GET /api/moderator/bans`, `POST /api/moderator/bans/{id}/warn |
+| POST | /api/moderator/bans/{id}/ban`, `POST /api/moderator/bans/{id}/unban`
 - Tables: `users` (`is_banned`), `moderation_logs`
 - UI: Banned users list, unban button per row, ban form with `reason` text input (writes to `moderation_logs`)
 

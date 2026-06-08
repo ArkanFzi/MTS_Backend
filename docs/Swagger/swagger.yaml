@@ -3,19 +3,19 @@ info:
   title: MTS API (Mata Kuliah / Forum System)
   description: >
     Dokumentasi resmi API untuk project MTS. Menggunakan arsitektur Feature-Sliced Design.
-    Memetakan 30 Fitur (F1-F30) antara Backend Laravel dan Frontend React.
+    Memetakan 30+ Fitur antara Backend Laravel dan Frontend React.
   version: 3.0.0
 servers:
   - url: http://localhost:8000/api
     description: Local Development Server
 
 tags:
-  - name: 🔐 Auth (F1-F3)
+  - name: 🔐 Auth (F1-F3, F31)
     description: Endpoint autentikasi dan manajemen sesi
   - name: 🌐 Explore (F4-F7)
     description: Pencarian dan filter publik tanpa login
   - name: 👤 User (F16-F30)
-    description: Fitur utama pengguna (Post, Comment, Vote, Profile)
+    description: Fitur utama pengguna (Post, Comment, Vote, Profile, Notifications)
   - name: 🛡️ Moderator (F13-F15)
     description: Endpoint untuk pengelolaan konten dan sanksi
   - name: ⚙️ Admin (F8-F12)
@@ -27,7 +27,7 @@ paths:
   # ==========================================
   /auth/register:
     post:
-      tags: [ "🔐 Auth (F1-F3)" ]
+      tags: [ "🔐 Auth (F1-F3, F31)" ]
       summary: (F1) Registrasi Akun Baru
       requestBody:
         required: true
@@ -46,7 +46,7 @@ paths:
 
   /auth/login:
     post:
-      tags: [ "🔐 Auth (F1-F3)" ]
+      tags: [ "🔐 Auth (F1-F3, F31)" ]
       summary: (F2) Login
       requestBody:
         required: true
@@ -61,21 +61,49 @@ paths:
       responses:
         '200': 
           description: "Login Success"
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  token: { type: string }
-                  user: { $ref: '#/components/schemas/User' }
 
   /auth/logout:
     post:
-      tags: [ "🔐 Auth (F1-F3)" ]
+      tags: [ "🔐 Auth (F1-F3, F31)" ]
       summary: (F3) Logout
       security: [ { bearerAuth: [] } ]
       responses:
         '200': { description: "Logged out successfully" }
+
+  /auth/forgot-password:
+    post:
+      tags: [ "🔐 Auth (F1-F3, F31)" ]
+      summary: (F31) Lupa Password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email: { type: string, format: email }
+      responses:
+        '200': { description: "Link reset password dikirim" }
+
+  /auth/reset-password:
+    post:
+      tags: [ "🔐 Auth (F1-F3, F31)" ]
+      summary: (F31) Reset Password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, token, password, password_confirmation]
+              properties:
+                email: { type: string, format: email }
+                token: { type: string }
+                password: { type: string, format: password }
+                password_confirmation: { type: string, format: password }
+      responses:
+        '200': { description: "Password berhasil direset" }
 
   # ==========================================
   # 🌐 EXPLORE DOMAIN
@@ -92,12 +120,50 @@ paths:
       responses:
         '200': { description: "Search results" }
 
+  /explore/tags:
+    get:
+      tags: [ "🌐 Explore (F4-F7)" ]
+      summary: (F5) Get All Tags
+      responses:
+        '200': { description: "List of all tags" }
+
+  /explore/tag/{slug}:
+    get:
+      tags: [ "🌐 Explore (F4-F7)" ]
+      summary: (F5) Filter Posts by Tag
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: "List of posts by tag" }
+
+  /explore/category/{slug}:
+    get:
+      tags: [ "🌐 Explore (F4-F7)" ]
+      summary: (F6) Filter Posts by Category
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: "List of posts by category" }
+
   /explore/trending:
     get:
       tags: [ "🌐 Explore (F4-F7)" ]
       summary: (F7) Trending Posts
       responses:
         '200': { description: "List of trending posts" }
+
+  /explore/leaderboard:
+    get:
+      tags: [ "🌐 Explore (F4-F7)" ]
+      summary: (F27) Gamification Leaderboard
+      responses:
+        '200': { description: "User leaderboard by points" }
 
   # ==========================================
   # 👤 USER DOMAIN
@@ -118,13 +184,14 @@ paths:
           application/json:
             schema:
               type: object
+              required: [title, body, category_id]
               properties:
                 title: { type: string, example: "Cara install Laravel?" }
                 body: { type: string, example: "Saya mengalami error..." }
-                category_id: { type: integer, example: 1 }
+                category_id: { type: string, format: uuid }
                 tags: 
                   type: array
-                  items: { type: string }
+                  items: { type: string, format: uuid }
       responses:
         '201': { description: "Post created" }
 
@@ -136,9 +203,62 @@ paths:
         - name: post
           in: path
           required: true
-          schema: { type: integer }
+          schema: { type: string, format: uuid }
       responses:
         '200': { description: "Post detail object" }
+    put:
+      tags: [ "👤 User (F16-F30)" ]
+      summary: (F16) Update Post
+      security: [ { bearerAuth: [] } ]
+      parameters:
+        - name: post
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title: { type: string }
+                body: { type: string }
+                category_id: { type: string, format: uuid }
+                tags: { type: array, items: { type: string, format: uuid } }
+      responses:
+        '200': { description: "Post updated" }
+    delete:
+      tags: [ "👤 User (F16-F30)" ]
+      summary: (F16) Delete Post
+      security: [ { bearerAuth: [] } ]
+      parameters:
+        - name: post
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200': { description: "Post deleted" }
+
+  /posts/{post}/status:
+    patch:
+      tags: [ "👤 User (F16-F30)" ]
+      summary: (F16) Update Post Status (open/closed)
+      security: [ { bearerAuth: [] } ]
+      parameters:
+        - name: post
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status: { type: string, enum: [open, closed] }
+      responses:
+        '200': { description: "Post status updated" }
 
   /posts/{post}/comments:
     get:
@@ -148,7 +268,7 @@ paths:
         - name: post
           in: path
           required: true
-          schema: { type: integer }
+          schema: { type: string, format: uuid }
       responses:
         '200': { description: "List of comments" }
     post:
@@ -159,16 +279,100 @@ paths:
         - name: post
           in: path
           required: true
-          schema: { type: integer }
+          schema: { type: string, format: uuid }
       requestBody:
         content:
           application/json:
             schema:
               type: object
+              required: [body]
               properties:
                 body: { type: string, example: "Coba jalankan composer install" }
       responses:
         '201': { description: "Comment added" }
+
+  /posts/{post}/comments/{comment}:
+    put:
+      tags: [ "👤 User (F16-F30)" ]
+      summary: (F17) Update Comment
+      security: [ { bearerAuth: [] } ]
+      parameters:
+        - name: post
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - name: comment
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [body]
+              properties:
+                body: { type: string }
+      responses:
+        '200': { description: "Comment updated" }
+
+  /posts/{post}/comments/{comment}/replies:
+    post:
+      tags: [ "👤 User (F16-F30)" ]
+      summary: (F20) Reply to a Comment
+      security: [ { bearerAuth: [] } ]
+      parameters:
+        - name: post
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - name: comment
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [body]
+              properties:
+                body: { type: string }
+      responses:
+        '201': { description: "Reply added" }
+
+  /posts/{post}/comments/{comment}/accept:
+    post:
+      tags: [ "👤 User (F16-F30)" ]
+      summary: (F18) Mark Comment as Accepted Answer
+      security: [ { bearerAuth: [] } ]
+      parameters:
+        - name: post
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - name: comment
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200': { description: "Answer accepted" }
+
+  /me/posts:
+    get:
+      tags: [ "👤 User (F16-F30)" ]
+      summary: (F16) Get My Posts
+      security: [ { bearerAuth: [] } ]
+      responses:
+        '200': { description: "List of user's own posts" }
+
+  /me/badges:
+    get:
+      tags: [ "👤 User (F16-F30)" ]
+      summary: (F29) Get My Badges
+      security: [ { bearerAuth: [] } ]
+      responses:
+        '200': { description: "List of user's earned badges" }
 
   /votes:
     post:
@@ -180,12 +384,30 @@ paths:
           application/json:
             schema:
               type: object
+              required: [target_id, target_type, type]
               properties:
-                votable_id: { type: integer, example: 10 }
-                votable_type: { type: string, example: "App\\Models\\Post" }
-                value: { type: integer, example: 1, description: "1 for upvote, -1 for downvote" }
+                target_id: { type: string, format: uuid }
+                target_type: { type: string, enum: [post, comment] }
+                type: { type: string, enum: [up, down] }
       responses:
         '200': { description: "Vote recorded" }
+
+  /likes/toggle:
+    post:
+      tags: [ "👤 User (F16-F30)" ]
+      summary: (F23) Toggle Like
+      security: [ { bearerAuth: [] } ]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [target_id, target_type]
+              properties:
+                target_id: { type: string, format: uuid }
+                target_type: { type: string, enum: [post, comment] }
+      responses:
+        '200': { description: "Like toggled" }
 
   /bookmarks/toggle:
     post:
@@ -197,10 +419,48 @@ paths:
           application/json:
             schema:
               type: object
+              required: [post_id]
               properties:
-                post_id: { type: integer, example: 5 }
+                post_id: { type: string, format: uuid }
       responses:
         '200': { description: "Bookmark toggled" }
+
+  /bookmarks:
+    get:
+      tags: [ "👤 User (F16-F30)" ]
+      summary: (F24) Get Bookmarks
+      security: [ { bearerAuth: [] } ]
+      responses:
+        '200': { description: "List of bookmarked posts" }
+
+  /users/{id}/follow:
+    post:
+      tags: [ "👤 User (F16-F30)" ]
+      summary: (F25) Toggle Follow User
+      security: [ { bearerAuth: [] } ]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200': { description: "Follow status toggled" }
+
+  /notifications:
+    get:
+      tags: [ "👤 User (F16-F30)" ]
+      summary: (F26) Get Notifications
+      security: [ { bearerAuth: [] } ]
+      responses:
+        '200': { description: "List of notifications" }
+
+  /notifications/mark-all-read:
+    patch:
+      tags: [ "👤 User (F16-F30)" ]
+      summary: (F26) Mark All Notifications as Read
+      security: [ { bearerAuth: [] } ]
+      responses:
+        '200': { description: "All notifications marked as read" }
 
   /settings/profile:
     get:
@@ -220,10 +480,48 @@ paths:
               type: object
               properties:
                 username: { type: string }
+                email: { type: string, format: email }
                 bio: { type: string }
                 avatar_url: { type: string }
       responses:
         '200': { description: "Profile updated" }
+
+  /settings/password:
+    put:
+      tags: [ "👤 User (F16-F30)" ]
+      summary: (F28) Update Password
+      security: [ { bearerAuth: [] } ]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [old_password, new_password, new_password_confirmation]
+              properties:
+                old_password: { type: string, format: password }
+                new_password: { type: string, format: password }
+                new_password_confirmation: { type: string, format: password }
+      responses:
+        '200': { description: "Password updated" }
+
+  /reports:
+    post:
+      tags: [ "👤 User (F16-F30)" ]
+      summary: (F30) Report User/Post/Comment
+      security: [ { bearerAuth: [] } ]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [reportable_id, reportable_type, reason]
+              properties:
+                reportable_id: { type: string, format: uuid }
+                reportable_type: { type: string }
+                reason: { type: string }
+                description: { type: string }
+      responses:
+        '201': { description: "Report submitted" }
 
   # ==========================================
   # ⚙️ ADMIN & MODERATOR DOMAIN
@@ -244,6 +542,27 @@ paths:
       responses:
         '200': { description: "List of users" }
 
+  /admin/users/{id}/role:
+    put:
+      tags: [ "⚙️ Admin (F8-F12)" ]
+      summary: (F9) Update User Role
+      security: [ { bearerAuth: [] } ]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [role]
+              properties:
+                role: { type: string }
+      responses:
+        '200': { description: "User role updated" }
+
   /moderator/reports:
     get:
       tags: [ "🛡️ Moderator (F13-F15)" ]
@@ -251,6 +570,14 @@ paths:
       security: [ { bearerAuth: [] } ]
       responses:
         '200': { description: "List of reports" }
+
+  /moderator/bans:
+    get:
+      tags: [ "🛡️ Moderator (F13-F15)" ]
+      summary: (F15) View Banned Users
+      security: [ { bearerAuth: [] } ]
+      responses:
+        '200': { description: "List of bans" }
 
 components:
   securitySchemes:
@@ -263,7 +590,7 @@ components:
     User:
       type: object
       properties:
-        id: { type: integer, example: 1 }
+        id: { type: string, format: uuid }
         username: { type: string, example: "arkan_dev" }
         email: { type: string, example: "arkan@example.com" }
         role: { type: string, example: "admin" }

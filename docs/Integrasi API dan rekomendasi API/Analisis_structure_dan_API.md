@@ -51,7 +51,7 @@ features/
 │   ├── F10_TagMaster/          → PAGE 8
 │   └── F11_BadgeMaster/        → tidak di-prompt
 ├── Auth/
-│   ├── F1_Register, F2_Login, F3_Logout
+│   ├── F1_Register, F2_Login, F3_Logout, F31_ForgotPassword
 ├── Common/
 │   ├── F3_SearchPost, F4_FilterByTag
 │   ├── F5_FilterByCategory, F6_TrendingPopularPost
@@ -288,7 +288,8 @@ Clicking any user row expands it vertically to reveal an inline sub-form:
 - Ban Toggle Checkbox: 'Is Banned' boolean checkbox writing to `users.is_banned`. Uses endpoints:
   * To ban: POST /admin/bans/{id}/ban
   * To unban: POST /admin/bans/{id}/unban
-- Sanction Reason Textarea: A required multi-line text area labeled 'Sanction Reason / Moderator Note'. Value is submitted to POST /moderator/bans/{id}/ban (or unban) as the `reason` field. This is logged in the `moderation_logs` table with the following schema mapping:
+- Sanction Reason Textarea: A required multi-line text area labeled 'Sanction Reason / Moderator Note'. Value is submitted to POST /moderator/bans/{id}/warn |
+| POST | /api/moderator/bans/{id}/ban (or unban) as the `reason` field. This is logged in the `moderation_logs` table with the following schema mapping:
   * `moderation_logs.moderator_id` = currently authenticated admin UUID
   * `moderation_logs.target_user_id` = the selected user's UUID
   * `moderation_logs.action_type` = 'ban' | 'unban' | 'warning'
@@ -609,7 +610,8 @@ NOTE: Admin-specific route for comment history does NOT currently exist — only
 | Detail | Info |
 |--------|------|
 | **Route Frontend** | `/moderator/bans` |
-| **Backend Endpoints** | `GET /api/moderator/bans`, `POST /api/moderator/bans/{id}/ban`, `POST /api/moderator/bans/{id}/unban` |
+| **Backend Endpoints** | `GET /api/moderator/bans`, `POST /api/moderator/bans/{id}/warn |
+| POST | /api/moderator/bans/{id}/ban`, `POST /api/moderator/bans/{id}/unban` |
 | **Module Backend** | `Modules/Moderator/F15_UserBanSanction` |
 | **Tabel Terkait** | `users` (`is_banned`), `moderation_logs` |
 | **Komponen UI** | List banned users, tombol unban, form alasan ban |
@@ -755,7 +757,8 @@ src/
 │   │   │   │   └── LoginForm.tsx       // Formulir input email dan password login (Dumb UI View)
 │   │   │   └── types/
 │   │   │       └── index.ts            // Kontrak tipe data payload pengiriman login user
-│   │   └── F3_Logout/
+│   │   └── F3_Logout, F31_ForgotPassword/
+│   ├── F31_ForgotPassword/
 │   │       ├── api/
 │   │       │   └── index.ts            // Request penghancuran token sesi aktif di server backend Laravel
 │   │       ├── components/

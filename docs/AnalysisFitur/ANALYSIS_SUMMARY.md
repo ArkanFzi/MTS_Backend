@@ -232,7 +232,8 @@ Modules/
 ├── Auth/
 │   ├── F1_Register/      ✅ Complete
 │   ├── F2_Login/         ✅ Complete
-│   └── F3_Logout/        ⚠️ Minimal
+│   └── F3_Logout, F31_ForgotPassword/
+│   ├── F31_ForgotPassword/        ⚠️ Minimal
 ├── Common/
 │   ├── F4_SearchPost/    ✅ Complete
 │   ├── F5_FilterByTag/   ✅ Complete

@@ -35,7 +35,8 @@
 **Auth Module Findings:**
 - Register & Login: Fully implemented with validation and error handling
 - Logout: Only controller exists (likely minimal implementation)
-- Location: `Modules/Auth/F1_Register/`, `Modules/Auth/F2_Login/`, `Modules/Auth/F3_Logout/`
+- Location: `Modules/Auth/F1_Register/`, `Modules/Auth/F2_Login/`, `Modules/Auth/F3_Logout, F31_ForgotPassword/
+│   ├── F31_ForgotPassword/`
 
 **Issues:**
 - F3 (Logout) lacks Service and Repository - might be too simple to need them
@@ -95,7 +96,8 @@
 |:--:|---------|-------------------|-----------|---------|-----------|----------|--------|--------|
 | **F13** | Content Report Queue | `GET/PUT /api/moderator/reports` | ✅ ReportController | ✅ ReportService | ✅ ReportRepository | ✅ UpdateReportRequest | ✅ Defined | **✅ Implemented** |
 | **F14** | Moderation Action Log | `GET /api/moderator/logs` | ✅ ModerationLogController | ✅ ModerationLogService | ✅ ModerationLogRepository | ❌ Missing | ✅ Defined | **✅ Implemented** |
-| **F15** | User Ban/Unban + Sanctions | `PUT /api/moderator/bans/{id}/ban\|unban` | ✅ UserSanctionController | ✅ UserSanctionService | ✅ UserSanctionRepository | ✅ BanUserRequest | ✅ Defined | **✅ Implemented** |
+| **F15** | User Ban/Unban + Sanctions | `PUT /api/moderator/bans/{id}/warn |
+| POST | /api/moderator/bans/{id}/ban\|unban` | ✅ UserSanctionController | ✅ UserSanctionService | ✅ UserSanctionRepository | ✅ BanUserRequest | ✅ Defined | **✅ Implemented** |
 
 **Moderator Module Findings:**
 - All 3 features implemented with proper authorization
