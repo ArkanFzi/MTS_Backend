@@ -98,7 +98,13 @@ class PostService
     }
 
     public function deletePost(string $id)
-    {
-        return $this->repo->delete($id);
+{
+    $post = $this->repo->findById($id);
+
+    if ($post->user_id !== Auth::id() && !Auth::user()->hasRole('moderator') && !Auth::user()->hasRole('admin')) {
+        abort(403, 'Anda tidak memiliki izin untuk menghapus post ini.');
     }
+
+    return $this->repo->delete($id);
+}
 }

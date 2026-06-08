@@ -124,6 +124,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::apiResource('categories', CategoryController::class);
         Route::apiResource('badges', BadgeController::class)->except(['show']);
         Route::apiResource('tags', TagController::class)->except(['show']);
+
+        Route::delete('posts/{post}/comments/{comment}', [CommentController::class, 'destroy']);
+
         
         Route::prefix('reports')->group(function () {
             Route::get('/', [ReportController::class, 'index']);

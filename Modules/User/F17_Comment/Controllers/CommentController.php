@@ -48,6 +48,12 @@ public function update(UpdateCommentRequest $request, string $postId, string $co
     }
 }
 
+    public function destroy(string $postId, string $commentId): JsonResponse
+    {
+        $this->service->deleteComment($commentId, auth()->id());
+        return response()->json(['success' => true, 'message' => 'Komentar berhasil dihapus']);
+    }
+
     public function index(string $postId): JsonResponse
     {
         return response()->json($this->service->getComments($postId));

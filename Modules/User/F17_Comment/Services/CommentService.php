@@ -64,6 +64,22 @@ class CommentService
     {
         return $this->repository->getByPost($postId);
     }
+
+public function deleteComment(string $commentId, string $userId)
+{
+    $comment = $this->repository->findById($commentId);
+
+    if (!$comment) {
+        abort(404, 'Komentar tidak ditemukan.');
+    }
+
+    // Hanya moderator atau admin yang boleh hapus
+    if (!auth()->user()->hasRole('moderator') && !auth()->user()->hasRole('admin')) {
+        abort(403, 'Anda tidak memiliki izin untuk menghapus komentar.');
+    }
+
+    return $this->repository->delete($commentId);
+}
     
     // Di Modules\User\F17_Comment\Services\CommentService.php
 
