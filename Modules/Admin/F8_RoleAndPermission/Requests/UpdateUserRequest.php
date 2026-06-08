@@ -14,12 +14,7 @@ class UpdateUserRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'username' => 'sometimes|string|min:3|max:100|unique:users,username,' . $this->route('id'),
-            'email' => 'sometimes|email|unique:users,email,' . $this->route('id'),
-            'avatar_url' => 'nullable|string|url',
-            'bio' => 'nullable|string|max:500',
-            'is_banned' => 'nullable|boolean',
-            'reputation_points' => 'nullable|integer|min:0',
+            'role' => 'required|string|in:moderator,user,admin', 
         ];
     }
 }

@@ -41,7 +41,7 @@ class LikeService
         $model = ($targetType === 'post') ? Post::find($targetId) : Comment::find($targetId);
         
         if (!$model) {
-            return; // Atau lempar Exception: Content not found
+            return;
         }
 
         $ownerId = $model->user_id;
