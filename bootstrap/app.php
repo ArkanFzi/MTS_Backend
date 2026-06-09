@@ -14,6 +14,17 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
     $middleware->append(\Illuminate\Http\Middleware\HandleCors::class);
 
+    // Enable Sanctum stateful API middleware (session + cookies for SPA)
+    $middleware->statefulApi();
+
+    // Exclude public auth routes from CSRF validation (cross-origin SPA)
+    $middleware->validateCsrfTokens(except: [
+        'api/auth/login',
+        'api/auth/register',
+        'api/auth/forgot-password',
+        'api/auth/reset-password',
+    ]);
+
     $middleware->alias([
         // Arahkan ke file yang baru Anda buat:
         'role' => \App\Http\Middleware\RoleMiddleware::class,
