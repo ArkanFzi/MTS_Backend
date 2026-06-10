@@ -106,7 +106,7 @@ class PostSeeder extends Seeder
                     'user_id' => $user->id,
                     'category_id' => $category->id,
                     'body' => $data['body'],
-                    'status' => 'published',
+                    'status' => 'open',
                     'view_count' => $data['views'],
                     'vote_score' => $data['votes'],
                     'is_answered' => false,

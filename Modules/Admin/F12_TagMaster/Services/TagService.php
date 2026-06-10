@@ -3,6 +3,7 @@
 namespace Modules\Admin\F12_TagMaster\Services;
 
 use Modules\Admin\F12_TagMaster\Repositories\TagRepository;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 
 class TagService
@@ -26,11 +27,14 @@ class TagService
 
     public function create(array $data)
     {
-        $data['slug'] = Str::slug($data['name']);
+        $data['slug']       = Str::slug($data['name']);
         $data['usage_count'] = 0;
         $data['created_at'] = now();
 
-        return $this->repository->create($data);
+        $tag = $this->repository->create($data);
+        Cache::forget('all_tags');
+
+        return $tag;
     }
 
     public function update(string $id, array $data)
@@ -39,11 +43,17 @@ class TagService
             $data['slug'] = Str::slug($data['name']);
         }
 
-        return $this->repository->update($id, $data);
+        $result = $this->repository->update($id, $data);
+        Cache::forget('all_tags');
+
+        return $result;
     }
 
     public function delete(string $id): bool
     {
-        return $this->repository->delete($id);
+        $result = $this->repository->delete($id);
+        Cache::forget('all_tags');
+
+        return $result;
     }
 }

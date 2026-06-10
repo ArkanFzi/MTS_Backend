@@ -4,6 +4,7 @@ namespace Modules\Auth\F1_Register\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Auth;
 use Modules\Auth\F1_Register\Requests\RegisterRequest;
 use Modules\Auth\F1_Register\Services\RegisterService;
 
@@ -18,23 +19,28 @@ class RegisterController extends Controller
 
     public function register(RegisterRequest $request): JsonResponse
     {
-        $result = $this->registerService->execute($request->validated());
+        $user = $this->registerService->execute($request->validated());
+
+        Auth::login($user);
+
+        if ($request->hasSession()) {
+            $request->session()->regenerate();
+        }
 
         return response()->json([
             'status'  => 'success',
             'message' => 'Registrasi berhasil. Selamat datang!',
             'data'    => [
                 'user' => [
-                    'id'                => $result['user']->id,
-                    'username'          => $result['user']->username,
-                    'email'             => $result['user']->email,
-                    'avatar_url'        => $result['user']->avatar_url,
-                    'level'             => $result['user']->level,
-                    'reputation_points' => $result['user']->reputation_points,
-                    'roles'             => $result['user']->roles->pluck('name'), // contoh: ["user"]
+                    'id'                => $user->id,
+                    'username'          => $user->username,
+                    'email'             => $user->email,
+                    'avatar_url'        => $user->avatar_url,
+                    'level'             => $user->level,
+                    'reputation_points' => $user->reputation_points,
+                    'is_banned'         => $user->is_banned,
+                    'roles'             => $user->roles->pluck('name'),
                 ],
-                'access_token' => $result['access_token'],
-                'token_type'   => $result['token_type']
             ]
         ], 201);
     }

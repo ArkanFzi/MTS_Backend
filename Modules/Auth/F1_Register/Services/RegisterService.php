@@ -5,6 +5,7 @@ namespace Modules\Auth\F1_Register\Services;
 use Modules\Auth\F1_Register\Repositories\RegisterRepository;
 use Modules\User\F26_NotificationSystem\Services\NotificationService;
 use Illuminate\Validation\ValidationException;
+use App\Models\Auth\User;
 
 class RegisterService
 {
@@ -17,9 +18,8 @@ class RegisterService
         $this->notificationService = $notificationService;
     }
 
-    public function execute(array $data): array
+    public function execute(array $data): User
     {
-        // Cek apakah role "user" sudah ada
         if (!\App\Models\Auth\Role::where('name', 'user')->exists()) {
             throw ValidationException::withMessages([
                 'error' => ['Role "user" belum dibuat. Jalankan Role Seeder terlebih dahulu.']
@@ -27,8 +27,7 @@ class RegisterService
         }
 
         $user = $this->registerRepository->create($data);
-        
-        // Kirim Notifikasi Pengingat Lengkapi Profile
+
         $this->notificationService->createNotification(
             $user->id,
             $user->id,
@@ -37,12 +36,6 @@ class RegisterService
             \App\Models\Auth\User::class
         );
 
-        $token = $user->createToken('auth_token')->plainTextToken;
-
-        return [
-            'user'         => $user,
-            'access_token' => $token,
-            'token_type'   => 'Bearer'
-        ];
+        return $user; // return User object, bukan array
     }
 }
