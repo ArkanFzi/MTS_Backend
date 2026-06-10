@@ -21,7 +21,8 @@ class SearchPostController extends Controller
         // Ambil filter query parameter 'q' (keyword) dan 'per_page'
         $filters = [
             'q'        => $request->query('q'),
-            'per_page' => $request->query('per_page', 10)
+            'per_page' => $request->query('per_page', 10),
+            'sort'     => $request->query('sort', 'terbaru'),
         ];
 
         $posts = $this->searchService->execute($filters);

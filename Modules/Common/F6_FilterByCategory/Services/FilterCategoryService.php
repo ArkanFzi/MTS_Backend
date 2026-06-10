@@ -16,7 +16,7 @@ class FilterCategoryService
         return Cache::remember($cacheKey, 3600, function () use ($categorySlug, $perPage) {
             return Post::query()
                 ->with(['user:id,username,avatar_url', 'category:id,name,slug', 'tags:id,name,slug,color'])
-                ->where('status', 'published')
+                ->where('status', 'open')
                 ->whereHas('category', function ($query) use ($categorySlug) {
                     $query->where('slug', $categorySlug);
                 })

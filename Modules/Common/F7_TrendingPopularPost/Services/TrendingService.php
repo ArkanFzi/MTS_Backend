@@ -15,7 +15,7 @@ class TrendingService
         return Cache::remember($cacheKey, 300, function () use ($type, $limit) {
             $query = Post::query()
                 ->with(['user:id,username,avatar_url', 'category:id,name,slug', 'tags:id,name,slug,color'])
-                ->where('status', 'published');
+                ->where('status', 'open');
 
             if ($type === 'trending') {
                 $query->orderBy('vote_score', 'desc');

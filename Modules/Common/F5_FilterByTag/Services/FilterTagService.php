@@ -16,7 +16,7 @@ class FilterTagService
         return Cache::remember($cacheKey, 3600, function () use ($tagSlug, $perPage) {
             return Post::query()
                 ->with(['user:id,username,avatar_url', 'category:id,name,slug', 'tags:id,name,slug,color'])
-                ->where('status', 'published')
+                ->where('status', 'open')
                 ->whereHas('tags', function ($query) use ($tagSlug) {
                     $query->where('slug', $tagSlug);
                 })
