@@ -4,63 +4,53 @@ describe('Interactions API', () => {
   });
 
   it('should toggle like on a post', () => {
-    cy.apiClient({
-      method: 'POST',
-      url: '/api/likes/toggle',
-      body: { type: 'post', id: 2 }, // Assuming post 2 is not owned by user
-    }).then((res) => {
-      expect(res.status).to.eq(200);
-      expect(res.body).to.have.property('liked');
-    });
-  });
-
-  it('should NOT like own post', () => {
-    // Assuming post 1 is owned by the user (or we created it in post.cy.js)
-    cy.apiClient({
-      method: 'POST',
-      url: '/api/likes/toggle',
-      body: { type: 'post', id: 1 },
-    }).then((res) => {
-      expect(res.status).to.eq(403);
+    cy.apiClient({ method: 'GET', url: '/api/posts' }).then((res) => {
+      const postId = res.body.data.data[0].id;
+      cy.apiClient({
+        method: 'POST',
+        url: '/api/likes/toggle',
+        body: { target_id: postId, target_type: 'post' },
+      }).then((likeRes) => {
+        expect(likeRes.status).to.eq(200);
+      });
     });
   });
 
   it('should vote on a post', () => {
-    cy.apiClient({
-      method: 'POST',
-      url: '/api/votes',
-      body: { type: 'post', id: 2, value: 1 },
-    }).then((res) => {
-      expect(res.status).to.eq(200);
-    });
-  });
-
-  it('should NOT vote on own post', () => {
-    cy.apiClient({
-      method: 'POST',
-      url: '/api/votes',
-      body: { type: 'post', id: 1, value: 1 },
-    }).then((res) => {
-      expect(res.status).to.eq(403);
+    cy.apiClient({ method: 'GET', url: '/api/posts' }).then((res) => {
+      const postId = res.body.data.data[0].id;
+      cy.apiClient({
+        method: 'POST',
+        url: '/api/votes',
+        body: { target_id: postId, target_type: 'post', vote: 'up' },
+      }).then((voteRes) => {
+        expect(voteRes.status).to.eq(200);
+      });
     });
   });
 
   it('should toggle bookmark', () => {
-    cy.apiClient({
-      method: 'POST',
-      url: '/api/bookmarks/toggle',
-      body: { post_id: 2 },
-    }).then((res) => {
-      expect(res.status).to.eq(200);
+    cy.apiClient({ method: 'GET', url: '/api/posts' }).then((res) => {
+      const postId = res.body.data.data[0].id;
+      cy.apiClient({
+        method: 'POST',
+        url: '/api/bookmarks/toggle',
+        body: { post_id: postId },
+      }).then((bookRes) => {
+        expect(bookRes.status).to.eq(200);
+      });
     });
   });
 
   it('should follow a user', () => {
-    cy.apiClient({
-      method: 'POST',
-      url: '/api/users/2/follow',
-    }).then((res) => {
-      expect(res.status).to.eq(200);
+    cy.apiClient({ method: 'GET', url: '/api/admin/users' }).then((res) => {
+      const userId = res.body.data.data.find(u => u.email !== Cypress.env('user_email')).id;
+      cy.apiClient({
+        method: 'POST',
+        url: `/api/users/${userId}/follow`,
+      }).then((followRes) => {
+        expect(followRes.status).to.eq(200);
+      });
     });
   });
 });

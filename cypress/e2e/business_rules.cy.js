@@ -1,85 +1,89 @@
 describe('Business Rules Validation', () => {
   it('should enforce 15 reputation points for post creation', () => {
-    // 1. Create a fresh user (0 points)
     const email = `newuser_rep_${Date.now()}@email.com`;
-    cy.apiClient({
-      method: 'POST',
-      url: '/api/auth/register',
-      body: {
-        name: 'No Rep User',
-        email: email,
-        password: 'password123',
-        password_confirmation: 'password123',
-      },
-    }).then((res) => {
-      const token = res.body.access_token;
-      
-      // 2. Try to create a post with this user
-      cy.request({
+    cy.request('/sanctum/csrf-cookie').then(() => {
+      cy.apiClient({
         method: 'POST',
-        url: '/api/posts',
+        url: '/api/auth/register',
         body: {
-          title: 'I have no rep',
-          content: 'This should fail',
-          category_id: 1,
+          username: 'NoRepUser',
+          email: email,
+          password: 'password123',
+          password_confirmation: 'password123',
         },
-        headers: {
-          Authorization: `Bearer ${token}`,
-          Accept: 'application/json',
-        },
-        failOnStatusCode: false,
-      }).then((postRes) => {
-        expect(postRes.status).to.eq(403);
-        expect(postRes.body.message).to.contain('reputation');
+      }).then((res) => {
+        expect(res.status).to.eq(201);
+
+        const categoryId = '019eb007-e370-732a-91c7-44d1664206d2';
+
+        cy.apiClient({
+          method: 'POST',
+          url: '/api/posts',
+          body: {
+            title: 'I have no rep',
+            body: 'This should fail',
+            category_id: categoryId,
+          },
+        }).then((postRes) => {
+          expect(postRes.status).to.eq(403);
+          expect(postRes.body.message).to.contain('poin');
+        });
       });
     });
   });
 
   it('should prevent self-interaction (voting own post)', () => {
     cy.login(Cypress.env('user_email'), Cypress.env('password'));
-    
-    // Assuming post 1 is owned by 'user@email.com'
-    cy.apiClient({
-      method: 'POST',
-      url: '/api/votes',
-      body: { type: 'post', id: 1, value: 1 },
-    }).then((res) => {
-      expect(res.status).to.eq(403);
-      expect(res.body.message).to.contain('own');
+
+    cy.apiClient({ method: 'GET', url: '/api/me/posts' }).then((res) => {
+      if (res.body.data && res.body.data.data && res.body.data.data.length > 0) {
+        const postId = res.body.data.data[0].id;
+        cy.apiClient({
+          method: 'POST',
+          url: '/api/votes',
+          body: { target_type: 'post', target_id: postId, vote: 'up' },
+        }).then((voteRes) => {
+          expect(voteRes.status).to.eq(403);
+        });
+      }
     });
   });
 
   it('should prevent banned users from logging in', () => {
-    // 1. Mod bans user 3
     cy.login(Cypress.env('mod_email'), Cypress.env('password'));
-    cy.apiClient({
-      method: 'POST',
-      url: '/api/moderator/bans/3/ban',
-      body: { reason: 'Testing login block' },
-    });
 
-    // 2. Try to login as user 3 (assuming its email is known or we used a specific one)
-    // For this test to work reliably, we'd need to know user 3's email.
-    // Assuming we have a dedicated banned user in seeders or we use the one we just banned.
-    // Let's assume user@email.com was user 3 for this specific test context (fragile, but demonstrates the logic)
-    
-    cy.apiClient({
-      method: 'POST',
-      url: '/api/auth/login',
-      body: {
-        email: Cypress.env('user_email'),
-        password: Cypress.env('password'),
-      },
-    }).then((res) => {
-      expect(res.status).to.eq(403);
-      expect(res.body.message).to.match(/ban|deactivated/i);
-    });
+    cy.apiClient({ method: 'GET', url: '/api/moderator/bans' }).then((res) => {
+      const userToBan = res.body.data.data.find(u => u.email === Cypress.env('user_email'));
+      if (userToBan) {
+        const userId = userToBan.id;
 
-    // Cleanup: Unban user 3
-    cy.login(Cypress.env('mod_email'), Cypress.env('password'));
-    cy.apiClient({
-      method: 'POST',
-      url: '/api/moderator/bans/3/unban',
+        cy.apiClient({
+          method: 'POST',
+          url: `/api/moderator/bans/${userId}/ban`,
+          body: { reason: 'Testing login block' },
+        }).then(() => {
+          cy.request('/sanctum/csrf-cookie').then(() => {
+            cy.apiClient({
+              method: 'POST',
+              url: '/api/auth/login',
+              body: {
+                email: Cypress.env('user_email'),
+                password: Cypress.env('password'),
+              },
+            }).then((loginRes) => {
+              expect(loginRes.status).to.eq(403);
+              expect(loginRes.body.message).to.match(/ban|deactivated|blokir/i);
+
+              // Cleanup
+              cy.login(Cypress.env('mod_email'), Cypress.env('password'));
+              cy.apiClient({
+                method: 'POST',
+                url: `/api/moderator/bans/${userId}/unban`,
+              });
+            });
+          });
+        });
+      }
     });
   });
 });

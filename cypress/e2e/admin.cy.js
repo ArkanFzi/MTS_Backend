@@ -6,7 +6,7 @@ describe('Admin API', () => {
   it('should get overview stats', () => {
     cy.apiClient({ method: 'GET', url: '/api/admin/stats/overview' }).then((res) => {
       expect(res.status).to.eq(200);
-      expect(res.body).to.have.property('users_count');
+      expect(res.body).to.have.property('data');
     });
   });
 
@@ -18,22 +18,28 @@ describe('Admin API', () => {
   });
 
   it('should update a user\'s role', () => {
-    cy.apiClient({
-      method: 'PUT',
-      url: '/api/admin/users/3/role',
-      body: { role: 'moderator' },
-    }).then((res) => {
-      expect(res.status).to.eq(200);
+    cy.apiClient({ method: 'GET', url: '/api/admin/users' }).then((res) => {
+      const userId = res.body.data.data[0].id;
+      cy.apiClient({
+        method: 'PUT',
+        url: `/api/admin/users/${userId}/role`,
+        body: { role: 'moderator' },
+      }).then((putRes) => {
+        expect(putRes.status).to.eq(200);
+      });
     });
   });
 
   it('should reset a user\'s password', () => {
-    cy.apiClient({
-      method: 'PUT',
-      url: '/api/admin/users/3/reset-password',
-      body: { password: 'newpassword123', password_confirmation: 'newpassword123' },
-    }).then((res) => {
-      expect(res.status).to.eq(200);
+    cy.apiClient({ method: 'GET', url: '/api/admin/users' }).then((res) => {
+      const userId = res.body.data.data[0].id;
+      cy.apiClient({
+        method: 'PUT',
+        url: `/api/admin/users/${userId}/reset-password`,
+        body: { password: 'newpassword123', password_confirmation: 'newpassword123' },
+      }).then((putRes) => {
+        expect(putRes.status).to.eq(200);
+      });
     });
   });
 

@@ -15,12 +15,13 @@ class F2_LoginTest extends TestCase
     {
         $user = User::factory()->create(['password_hash' => bcrypt('password123')]);
 
-        $response = $this->postJson('/api/auth/login', [
-            'email' => $user->email,
-            'password' => 'password123',
-        ]);
+        $response = $this->withHeaders(['Origin' => 'http://localhost:5173'])
+            ->postJson('/api/auth/login', [
+                'email' => $user->email,
+                'password' => 'password123',
+            ]);
 
         $response->assertStatus(200)
-                 ->assertJsonStructure(['status', 'message', 'data' => ['access_token']]);
+            ->assertJsonStructure(['status', 'message', 'data' => ['user' => ['id', 'username', 'email']]]);
     }
 }

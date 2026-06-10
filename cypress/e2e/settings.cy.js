@@ -6,7 +6,7 @@ describe('Settings API', () => {
   it('should get profile settings', () => {
     cy.apiClient({ method: 'GET', url: '/api/settings/profile' }).then((res) => {
       expect(res.status).to.eq(200);
-      expect(res.body).to.have.property('email', Cypress.env('user_email'));
+      expect(res.body.data).to.have.property('email', Cypress.env('user_email'));
     });
   });
 
@@ -14,10 +14,10 @@ describe('Settings API', () => {
     cy.apiClient({
       method: 'PUT',
       url: '/api/settings/profile',
-      body: { name: 'Updated User Name' },
+      body: { username: 'updateduser' },
     }).then((res) => {
       expect(res.status).to.eq(200);
-      expect(res.body.name).to.eq('Updated User Name');
+      expect(res.body.data.username).to.eq('updateduser');
     });
   });
 
@@ -26,9 +26,9 @@ describe('Settings API', () => {
       method: 'PUT',
       url: '/api/settings/password',
       body: {
-        current_password: Cypress.env('password'),
-        password: 'newpassword123',
-        password_confirmation: 'newpassword123',
+        old_password: Cypress.env('password'),
+        new_password: 'newpassword123',
+        new_password_confirmation: 'newpassword123',
       },
     }).then((res) => {
       expect(res.status).to.eq(200);
@@ -38,11 +38,10 @@ describe('Settings API', () => {
     cy.apiClient({
       method: 'PUT',
       url: '/api/settings/password',
-      headers: { Authorization: `Bearer ${Cypress.env('token')}` },
       body: {
-        current_password: 'newpassword123',
-        password: Cypress.env('password'),
-        password_confirmation: Cypress.env('password'),
+        old_password: 'newpassword123',
+        new_password: Cypress.env('password'),
+        new_password_confirmation: Cypress.env('password'),
       },
     });
   });
