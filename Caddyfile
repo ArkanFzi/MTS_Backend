@@ -1,0 +1,16 @@
+api.alvian-aditya.my.id {
+    encode zstd gzip
+
+    root * /home/vian/project/src/MTS_Backend/public
+
+    @notFile {
+        not file
+    }
+    rewrite @notFile /index.php
+
+    php_fastcgi 127.0.0.1:8100 {
+        env SCRIPT_FILENAME /app/public{path}
+    }
+
+    file_server
+}

@@ -1,44 +1,41 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-
+use Modules\Admin\F10_CategoryMaster\Controllers\CategoryController;
+use Modules\Admin\F11_BadgeMaster\Controllers\BadgeController;
+use Modules\Admin\F12_TagMaster\Controllers\TagController;
+use Modules\Admin\F8_RoleAndPermission\Controllers\RoleController;
+use Modules\Admin\F8_RoleAndPermission\Controllers\UserManagementController;
+use Modules\Admin\F9_UserManagement\Controllers\AdminDashboardController;
+use Modules\Admin\F9_UserManagement\Controllers\UserAdminController;
 use Modules\Auth\F1_Register\Controllers\RegisterController;
 use Modules\Auth\F2_Login\Controllers\LoginController;
+use Modules\Auth\F31_ForgotPassword\Controllers\ForgotPasswordController;
 use Modules\Auth\F3_Logout\Controllers\LogoutController;
-
 use Modules\Common\F4_SearchPost\Controllers\SearchPostController;
 use Modules\Common\F5_FilterByTag\Controllers\FilterTagController;
 use Modules\Common\F6_FilterByCategory\Controllers\FilterCategoryController;
 use Modules\Common\F7_TrendingPopularPost\Controllers\TrendingController;
-
-use Modules\Admin\F9_UserManagement\Controllers\AdminDashboardController;
-use Modules\Admin\F8_RoleAndPermission\Controllers\RoleController;
-use Modules\Admin\F8_RoleAndPermission\Controllers\UserManagementController;
-use Modules\Admin\F9_UserManagement\Controllers\UserAdminController;
-use Modules\Admin\F10_CategoryMaster\Controllers\CategoryController;
-use Modules\Admin\F11_BadgeMaster\Controllers\BadgeController;
-use Modules\Admin\F12_TagMaster\Controllers\TagController;
-
 use Modules\Moderator\F13_ContentReportQueue\Controllers\ReportController;
 use Modules\Moderator\F14_ModeratorActionLog\Controllers\ModerationLogController;
 use Modules\Moderator\F15_UserBanSanction\Controllers\UserSanctionController;
-
 use Modules\User\F16_Post\Controllers\PostController;
 use Modules\User\F17_Comment\Controllers\CommentController;
-use Modules\User\F28_ProfileSettings\Controllers\ProfileController;
-use Modules\User\F27_GamificationLeaderboard\Controllers\LeaderboardController;
-use Modules\User\F26_NotificationSystem\Controllers\NotificationController;
-use Modules\User\F25_FollowUser\Controllers\FollowController;
-use Modules\User\F23_LikeSystem\Controllers\LikeController;
-use Modules\User\F22_VoteSystem\Controllers\VoteController;
-use Modules\User\F20_NestedCommentReply\Controllers\CommentReplyController;
-use Modules\User\F19_PostEditHistory\Controllers\PostHistoryController;
-use Modules\User\F21_CommentEditHistory\Controllers\CommentHistoryController;
 use Modules\User\F18_MarkAcceptedAnswer\Controllers\AcceptedAnswerController;
-use Modules\User\F29_BadgeAchievement\Controllers\BadgeAchievementController;
+use Modules\User\F19_PostEditHistory\Controllers\PostHistoryController;
+use Modules\User\F20_NestedCommentReply\Controllers\CommentReplyController;
+use Modules\User\F21_CommentEditHistory\Controllers\CommentHistoryController;
+use Modules\User\F22_VoteSystem\Controllers\VoteController;
+use Modules\User\F23_LikeSystem\Controllers\LikeController;
 use Modules\User\F24_BookmarkPost\Controllers\BookmarkController;
+use Modules\User\F25_FollowUser\Controllers\FollowController;
+use Modules\User\F26_NotificationSystem\Controllers\NotificationController;
+use Modules\User\F27_GamificationLeaderboard\Controllers\LeaderboardController;
+use Modules\User\F28_ProfileSettings\Controllers\ProfileController;
+use Modules\User\F29_BadgeAchievement\Controllers\BadgeAchievementController;
 use Modules\User\F30_UserReport\Controllers\UserReportController;
-use Modules\Auth\F31_ForgotPassword\Controllers\ForgotPasswordController;
+use Dedoc\Scramble\Http\Controllers\DocsController;
+use Dedoc\Scramble\Http\Controllers\OpenApiSpecController;
 
 /*
 |--------------------------------------------------------------------------
@@ -46,14 +43,18 @@ use Modules\Auth\F31_ForgotPassword\Controllers\ForgotPasswordController;
 |--------------------------------------------------------------------------
 */
 
+
+
+
+Route::get('docs/api', [DocsController::class, 'show'])->name('scramble.docs.index');
+Route::get('docs/api.json', [OpenApiSpecController::class, 'show'])->name('scramble.docs.json');
+
 // ====================== PUBLIC ROUTES ======================
 Route::prefix('auth')->group(function () {
-    Route::middleware('throttle:register')->post('/register', [RegisterController::class, 'register']);
-    Route::middleware('throttle:login')->post('/login', [LoginController::class, 'login']);
-    Route::middleware('throttle:forgot-password')->group(function () {
-        Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLink']);
-        Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword']);
-    });
+    Route::post('/register', [RegisterController::class, 'register']);
+    Route::post('/login', [LoginController::class, 'login']);
+    Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLink']);
+    Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword']);
 });
 
 Route::middleware('throttle:api-public')->group(function () {
@@ -71,8 +72,8 @@ Route::middleware('throttle:api-public')->group(function () {
 });
 
 // ====================== PROTECTED ROUTES ======================
+// 1. Semua route di bawah ini wajib sudah login (Sanctum)
 Route::middleware(['auth:sanctum', 'throttle:api-protected'])->group(function () {
-
     Route::post('/auth/logout', [LogoutController::class, 'logout']);
 
     // --- FITUR PROFILE SETTINGS ---
@@ -82,7 +83,7 @@ Route::middleware(['auth:sanctum', 'throttle:api-protected'])->group(function ()
         Route::put('password', [ProfileController::class, 'updatePassword']);
     });
 
-    // --- FITUR UMUM USER ---
+    // --- FITUR UMUM USER (Sudah Login) ---
     Route::prefix('me')->name('me.')->group(function () {
         Route::get('posts', [PostController::class, 'myPosts']);
         Route::get('badges', [BadgeAchievementController::class, 'index']);
@@ -90,7 +91,7 @@ Route::middleware(['auth:sanctum', 'throttle:api-protected'])->group(function ()
 
     Route::post('posts', [PostController::class, 'store']);
     Route::put('posts/{post}', [PostController::class, 'update']);
-    Route::patch('posts/{post}/status', [PostController::class, 'updateStatus']);
+    Route::patch('posts/{post}/status', [PostController::class, 'updateStatus']); // Endpoint baru
     Route::delete('posts/{post}', [PostController::class, 'destroy']);
 
     Route::prefix('posts/{post}')->group(function () {
@@ -102,7 +103,7 @@ Route::middleware(['auth:sanctum', 'throttle:api-protected'])->group(function ()
         Route::post('comments/{comment}/accept', [AcceptedAnswerController::class, 'store']);
     });
 
-    // --- FITUR TAGS ---
+    // --- FITUR TAGS (Bisa ditambah user) ---
     Route::post('tags', [TagController::class, 'store']);
 
     // --- FITUR NOTIFIKASI ---
@@ -112,7 +113,7 @@ Route::middleware(['auth:sanctum', 'throttle:api-protected'])->group(function ()
         Route::patch('/{id}/read', [NotificationController::class, 'markAsRead']);
     });
 
-    // --- FITUR FOLLOW ---
+    // FITUR FOLLOW
     Route::prefix('users/{id}')->group(function () {
         Route::post('/follow', [FollowController::class, 'toggle']);
         Route::get('/followers', [FollowController::class, 'followers']);
@@ -125,7 +126,7 @@ Route::middleware(['auth:sanctum', 'throttle:api-protected'])->group(function ()
     Route::post('/votes', [VoteController::class, 'vote']);
     Route::post('reports', [UserReportController::class, 'store']);
 
-    // --- FITUR MODERATOR ---
+    // FITUR MODERATOR (Bisa diakses Moderator ATAU Admin)
     Route::middleware('role:moderator,admin')->prefix('moderator')->name('moderator.')->group(function () {
         Route::apiResource('categories', CategoryController::class);
         Route::apiResource('badges', BadgeController::class)->except(['show']);

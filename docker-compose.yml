@@ -1,0 +1,21 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mts-backend-app
+    restart: unless-stopped
+    working_dir: /app
+    mem_limit: 512m
+    mem_reservation: 256m
+    cpus: 0.5
+    ports:
+      - "8100:9000"
+    volumes:
+      - ./public:/app/public
+    networks:
+      - multyapp-project_app-network
+
+networks:
+  multyapp-project_app-network:
+    external: true
