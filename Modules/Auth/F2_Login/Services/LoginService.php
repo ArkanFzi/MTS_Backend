@@ -15,7 +15,11 @@ class LoginService
         $this->repository = $repository;
     }
 
-    public function execute(array $data)
+    /**
+     * Validasi kredensial user untuk Sanctum SPA login.
+     * Tidak membuat token — sesi dikelola melalui HttpOnly cookie.
+     */
+    public function validateCredentials(array $data)
     {
         $user = $this->repository->findByEmail($data['email']);
 
@@ -27,16 +31,10 @@ class LoginService
 
         if ($user->is_banned) {
             throw ValidationException::withMessages([
-                'email' => ['Akun Anda telah diban. Silakan hubungi administrator.'],
+                'email' => ['Akun Anda telah diblokir oleh moderator/admin.'],
             ]);
         }
 
-        $token = $user->createToken('auth_token')->plainTextToken;
-
-        return [
-            'user'         => $user,
-            'access_token' => $token,
-            'token_type'   => 'Bearer'
-        ];
+        return $user;
     }
 }

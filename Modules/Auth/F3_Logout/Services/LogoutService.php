@@ -2,15 +2,21 @@
 
 namespace Modules\Auth\F3_Logout\Services;
 
-use App\Models\Auth\User;
+use Illuminate\Http\Request;
 
 class LogoutService
 {
     /**
-     * Logout dari sesi/perangkat saat ini.
+     * Invalidate sesi saat ini (Sanctum SPA cookie-based).
+     * Menghapus session dari database dan regenerate CSRF token.
      */
-    public function logoutCurrentToken(User $user): bool
+    public function invalidateSession(Request $request): void
     {
-        return $user->currentAccessToken()->delete();
+        if ($request->hasSession()) {
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+        }
+
+        auth()->guard('web')->logout();
     }
 }
