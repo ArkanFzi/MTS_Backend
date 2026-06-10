@@ -1,867 +1,302 @@
-# 02. Module Structure - Architecture & Organization
+# 02. Module Structure - Arsitektur & Organisasi Folder
 
-## 📁 Struktur Folder Backend
+**Versi:** 2.0 (Terverifikasi dari Codebase Aktual)
+**Tanggal Update:** 10 Juni 2026
 
-Dokumentasi lengkap tentang organisasi folder, naming conventions, dan arsitektur modular.
+Dokumentasi lengkap tentang organisasi folder, naming conventions, dan arsitektur modular backend MTS.
 
 ---
 
-## 🏗️ Core Architecture Pattern
+## 1. Core Architecture Pattern
 
 Proyek ini menggunakan kombinasi dari:
-1. **Domain-Driven Design (DDD)**
-2. **Feature-Based Modularity**
-3. **Clean Architecture**
-4. **SOLID Principles**
+1. **Domain-Driven Design (DDD)** — Modul dikelompokkan berdasarkan domain bisnis
+2. **Feature-Based Modularity** — Setiap fitur memiliki folder terisolasi sendiri
+3. **Clean Architecture** — Separation of concerns antar layer (Controller → Service → Repository)
+4. **SOLID Principles** — Single Responsibility, Dependency Injection
 
 ---
 
-## 📂 Full Folder Hierarchy
+## 2. Root Folder: `MTS_backend/`
 
 ```
-backend_roleuser/
+MTS_backend/
 │
-├── Modules/                                    # ⭐ Core business logic (Feature-Based DDD)
-│   │                                           # Naming: F{number}_{FeatureName}
-│   │
-│   ├── Auth/                                   # Authentication & Authorization (Fitur 1-2)
-│   │   ├── F1_Register/                        # Fitur 1: Register akun user baru
-│   │   │   ├── Controllers/
-│   │   │   │   └── RegisterController.php
-│   │   │   ├── Requests/
-│   │   │   │   └── RegisterRequest.php
-│   │   │   ├── Services/
-│   │   │   │   └── RegisterService.php
-│   │   │   └── Repositories/ (optional)
-│   │   │
-│   │   └── F2_Login/                           # Fitur 2: Login & penerbitan token API
-│   │       ├── Controllers/
-│   │       │   └── LoginController.php
-│   │       ├── Requests/
-│   │       │   └── LoginRequest.php
-│   │       ├── Services/
-│   │       │   └── LoginService.php
-│   │       └── Repositories/ (optional)
-│   │
-│   ├── Common/                                 # Public/Common features (Fitur 3-6)
-│   │   ├── F3_SearchPost/                      # Fitur 3: Search postingan
-│   │   │   ├── Controllers/
-│   │   │   │   └── SearchController.php
-│   │   │   ├── Services/
-│   │   │   │   └── SearchService.php
-│   │   │   └── Repositories/ (optional)
-│   │   │
-│   │   ├── F4_FilterByTag/                     # Fitur 4: Filter by Tag
-│   │   │   ├── Controllers/
-│   │   │   │   └── FilterTagController.php
-│   │   │   ├── Services/
-│   │   │   │   └── FilterTagService.php
-│   │   │   └── Repositories/ (optional)
-│   │   │
-│   │   ├── F5_FilterByCategory/                # Fitur 5: Filter by Kategori
-│   │   │   ├── Controllers/
-│   │   │   │   └── FilterCategoryController.php
-│   │   │   ├── Services/
-│   │   │   │   └── FilterCategoryService.php
-│   │   │   └── Repositories/ (optional)
-│   │   │
-│   │   └── F6_TrendingPopularPost/             # Fitur 6: Trending/Popular Posts
-│   │       ├── Controllers/
-│   │       │   └── TrendingController.php
-│   │       ├── Services/
-│   │       │   └── TrendingService.php
-│   │       └── Repositories/ (optional)
-│   │
-│   ├── Admin/                                  # Administrative features (Fitur 7-11)
-│   │   ├── F7_RoleAndPermission/               # Fitur 7-8: Multi-role & User Profile Mgmt
-│   │   │   ├── Controllers/
-│   │   │   │   ├── RoleController.php
-│   │   │   │   └── UserManagementController.php
-│   │   │   ├── Services/
-│   │   │   │   ├── RoleService.php
-│   │   │   │   └── UserManagementService.php
-│   │   │   ├── Repositories/
-│   │   │   │   ├── RoleRepository.php
-│   │   │   │   └── UserRepository.php
-│   │   │   └── Requests/
-│   │   │       ├── StoreRoleRequest.php
-│   │   │       └── UpdateUserRequest.php
-│   │   │
-│   │   ├── F9_UserManagement/                  # User profile, permissions mgmt (sub-feature dari F7)
-│   │   │   ├── Controllers/
-│   │   │   │   └── UserAdminController.php
-│   │   │   ├── Services/
-│   │   │   │   └── UserAdminService.php
-│   │   │   ├── Repositories/
-│   │   │   │   └── UserAdminRepository.php
-│   │   │   └── Requests/
-│   │   │       ├── UpdateProfileRequest.php
-│   │   │       └── ResetPasswordRequest.php
-│   │   │
-│   │   ├── F10_CategoryMaster/                  # Fitur 10: CRUD Kategori Forum
-│   │   │   ├── Controllers/
-│   │   │   │   └── CategoryController.php
-│   │   │   ├── Services/
-│   │   │   │   └── CategoryService.php
-│   │   │   ├── Repositories/
-│   │   │   │   └── CategoryRepository.php
-│   │   │   └── Requests/
-│   │   │       ├── StoreCategoryRequest.php
-│   │   │       └── UpdateCategoryRequest.php
-│   │   │
-│   │   ├── F11_TagMaster/                      # Fitur 10: CRUD Master Tag Forum
-│   │   │   ├── Controllers/
-│   │   │   │   └── TagController.php
-│   │   │   ├── Services/
-│   │   │   │   └── TagService.php
-│   │   │   ├── Repositories/
-│   │   │   │   └── TagRepository.php
-│   │   │   └── Requests/
-│   │   │       ├── StoreTagRequest.php
-│   │   │       └── UpdateTagRequest.php
-│   │   │
-│   │   └── F12_BadgeMaster/                    # Fitur 11: CRUD Badge/Achievement Master
-│   │       ├── Controllers/
-│   │       │   └── BadgeController.php
-│   │       ├── Services/
-│   │       │   └── BadgeService.php
-│   │       ├── Repositories/
-│   │       │   └── BadgeRepository.php
-│   │       └── Requests/
-│   │           ├── StoreBadgeRequest.php
-│   │           └── UpdateBadgeRequest.php
-│   │
-│   ├── Moderator/                              # Content moderation (Fitur 12-14)
-│   │   ├── F13_ContentReportQueue/             # Fitur 13: Manajemen Report Konten
-│   │   │   ├── Controllers/
-│   │   │   │   └── ReportController.php
-│   │   │   ├── Services/
-│   │   │   │   └── ReportService.php
-│   │   │   ├── Repositories/
-│   │   │   │   └── ReportRepository.php
-│   │   │   └── Requests/
-│   │   │       └── UpdateReportRequest.php
-│   │   │
-│   │   ├── F14_UserBanSanction/                # Fitur 14: Ban/Unban User
-│   │   │   ├── Controllers/
-│   │   │   │   └── UserSanctionController.php
-│   │   │   ├── Services/
-│   │   │   │   └── UserSanctionService.php
-│   │   │   ├── Repositories/
-│   │   │   │   └── UserSanctionRepository.php
-│   │   │   └── Requests/
-│   │   │       └── BanUserRequest.php
-│   │   │
-│   │   └── F15_ModeratorActionLog/             # Fitur 15: Moderator Action Log (auto-tracked)
-│   │       ├── Services/
-│   │       │   └── ModerationLogService.php
-│   │       ├── Repositories/
-│   │       │   └── ModerationLogRepository.php
-│   │       └── Events/
-│   │           └── ModerationActionLogged.php
-│   │
-│   └── User/                                   # Core forum features (Fitur 15-29) 
-│       ├── F15_CreatePost/                     # Fitur 15: Buat Postingan Baru
-│       │   ├── Controllers/
-│       │   │   └── PostController.php
-│       │   ├── Services/
-│       │   │   └── PostService.php
-│       │   ├── Repositories/
-│       │   │   └── PostRepository.php
-│       │   └── Requests/
-│       │       └── StorePostRequest.php
-│       │
-│       ├── F16_EditPost/                       # Fitur 16: Edit Postingan
-│       │   ├── Controllers/
-│       │   │   └── PostEditController.php
-│       │   ├── Services/
-│       │   │   └── PostEditService.php
-│       │   ├── Repositories/
-│       │   │   └── PostEditRepository.php
-│       │   └── Requests/
-│       │       └── UpdatePostRequest.php
-│       │
-│       ├── F17_DeletePost/                     # Fitur 17: Hapus Postingan (soft delete)
-│       │   ├── Controllers/
-│       │   │   └── PostDeleteController.php
-│       │   ├── Services/
-│       │   │   └── PostDeleteService.php
-│       │   └── Repositories/ (optional)
-│       │
-│       ├── F18_MarkAcceptedAnswer/             # Fitur 18: Mark as Accepted Answer
-│       │   ├── Controllers/
-│       │   │   └── AcceptedAnswerController.php
-│       │   ├── Services/
-│       │   │   └── AcceptedAnswerService.php
-│       │   └── Repositories/ (optional)
-│       │
-│       ├── F19_PostEditHistory/                # Fitur 19: Post Edit History (auto-tracked)
-│       │   ├── Services/
-│       │   │   └── PostHistoryService.php
-│       │   ├── Repositories/
-│       │   │   └── PostEditHistoryRepository.php
-│       │   └── Events/
-│       │       └── PostEdited.php
-│       │
-│       ├── F20_CreateComment/                  # Fitur 20: Buat Komentar/Jawaban
-│       │   ├── Controllers/
-│       │   │   └── CommentController.php
-│       │   ├── Services/
-│       │   │   └── CommentService.php
-│       │   ├── Repositories/
-│       │   │   └── CommentRepository.php
-│       │   └── Requests/
-│       │       └── StoreCommentRequest.php
-│       │
-│       ├── F21_NestedCommentReply/             # Fitur 21: Nested Reply (Balasan bertingkat)
-│       │   ├── Controllers/
-│       │   │   └── CommentReplyController.php
-│       │   ├── Services/
-│       │   │   └── CommentReplyService.php
-│       │   ├── Repositories/
-│       │   │   └── CommentReplyRepository.php
-│       │   └── Requests/
-│       │       └── StoreReplyRequest.php
-│       │
-│       ├── F22_EditDeleteComment/              # Fitur 22: Edit & Hapus Komentar
-│       │   ├── Controllers/
-│       │   │   └── CommentEditDeleteController.php
-│       │   ├── Services/
-│       │   │   └── CommentEditDeleteService.php
-│       │   ├── Repositories/
-│       │   │   └── CommentEditDeleteRepository.php
-│       │   └── Requests/
-│       │       └── UpdateCommentRequest.php
-│       │
-│       ├── F23_CommentEditHistory/             # Fitur 23: Comment Edit History (auto-tracked)
-│       │   ├── Services/
-│       │   │   └── CommentHistoryService.php
-│       │   ├── Repositories/
-│       │   │   └── CommentEditHistoryRepository.php
-│       │   └── Events/
-│       │       └── CommentEdited.php
-│       │
-│       ├── F24_VoteSystem/                     # Fitur 24: Upvote/Downvote Post & Comment
-│       │   ├── Controllers/
-│       │   │   └── VoteController.php
-│       │   ├── Services/
-│       │   │   └── VoteService.php
-│       │   ├── Repositories/
-│       │   │   └── VoteRepository.php
-│       │   └── Requests/
-│       │       └── VoteRequest.php
-│       │
-│       ├── F25_LikeSystem/                     # Fitur 25: Like Post & Comment
-│       │   ├── Controllers/
-│       │   │   └── LikeController.php
-│       │   ├── Services/
-│       │   │   └── LikeService.php
-│       │   ├── Repositories/
-│       │   │   └── LikeRepository.php
-│       │   └── Requests/ (optional)
-│       │
-│       ├── F26_BookmarkPost/                   # Fitur 26: Bookmark/Save Post
-│       │   ├── Controllers/
-│       │   │   └── BookmarkController.php
-│       │   ├── Services/
-│       │   │   └── BookmarkService.php
-│       │   ├── Repositories/
-│       │   │   └── BookmarkRepository.php
-│       │   └── Requests/ (optional)
-│       │
-│       ├── F27_FollowUser/                     # Fitur 27: Follow/Unfollow User
-│       │   ├── Controllers/
-│       │   │   └── FollowController.php
-│       │   ├── Services/
-│       │   │   └── FollowService.php
-│       │   ├── Repositories/
-│       │   │   └── FollowRepository.php
-│       │   └── Requests/ (optional)
-│       │
-│       ├── F28_NotificationSystem/             # Fitur 28: Sistem Notifikasi Real-time
-│       │   ├── Controllers/
-│       │   │   └── NotificationController.php
-│       │   ├── Services/
-│       │   │   └── NotificationService.php
-│       │   ├── Repositories/
-│       │   │   └── NotificationRepository.php
-│       │   ├── Events/
-│       │   │   └── NotificationCreated.php
-│       │   └── Listeners/
-│       │       └── SendNotification.php
-│       │
-│       └── F27_GamificationLeaderboard/        # Fitur 29: Reputation Level & Leaderboard
-│           ├── Controllers/
-│           │   └── GamificationController.php
-│           ├── Services/
-│           │   └── GamificationService.php
-│           ├── Repositories/
-│           │   └── GamificationRepository.php
-│           ├── Events/
-│           │   └── PointsEarned.php
-│           └── Listeners/
-│               └── UpdateReputation.php
+├── Modules/                          # ⭐ Core business logic (Feature-Based DDD)
+│   ├── Auth/                         # Domain: Autentikasi (4 fitur)
+│   ├── Common/                       # Domain: Fitur Publik (4 fitur)
+│   ├── Admin/                        # Domain: Administrasi (5 fitur)
+│   ├── Moderator/                    # Domain: Moderasi (3 fitur)
+│   └── User/                         # Domain: Fitur User (15 fitur)
 │
-├── app/                                    # Laravel core (Models, Providers)
+├── app/
 │   ├── Http/
-│   │   └── Controllers/                    # Base controllers (if any)
-│   ├── Models/                             # Eloquent models (optional, DDD uses repos)
-│   │   └── User.php
-│   └── Providers/
-│       └── AppServiceProvider.php
+│   │   ├── Controllers/              # Base controller
+│   │   └── Middleware/               # Custom middleware (RoleMiddleware)
+│   ├── Models/                       # Shared Eloquent models (6 grup)
+│   │   ├── Auth/                     # User, Role, UserRole
+│   │   ├── Content/                  # Post, Comment, Category, Tag, PostTag
+│   │   ├── Gamification/             # Badge, PointsLog, UserBadge
+│   │   ├── History/                  # PostEditHistory, CommentEditHistory
+│   │   ├── Interaction/              # Vote, Like, Bookmark, Follow
+│   │   └── Moderation/              # Notification, Report, ModerationLog
+│   └── Providers/                    # Service providers
 │
-├── bootstrap/                              # Laravel bootstrap
-│   ├── app.php
-│   ├── providers.php
-│   └── cache/
+├── bootstrap/
+│   └── app.php                       # Konfigurasi middleware, routing, exceptions
 │
-├── config/                                 # Configuration files
-│   ├── app.php
-│   ├── auth.php
-│   ├── cache.php
-│   ├── database.php
-│   ├── filesystems.php
-│   ├── logging.php
-│   ├── mail.php
-│   ├── queue.php
-│   ├── services.php
-│   └── session.php
+├── config/                           # Konfigurasi Laravel (app, auth, database, dll)
 │
-├── database/                               # Database related
-│   ├── factories/
-│   │   └── UserFactory.php
-│   ├── migrations/
-│   │   ├── 0001_01_01_000000_create_users_table.php
-│   │   ├── 0001_01_01_000001_create_cache_table.php
-│   │   └── 0001_01_01_000002_create_jobs_table.php
-│   └── seeders/
-│       └── DatabaseSeeder.php
+├── database/
+│   ├── migrations/                   # 27 migration files
+│   ├── seeders/                      # 10 seeder files + DatabaseSeeder
+│   └── factories/                    # Model factories
 │
-├── docs/                                   # Documentation
-│   ├── StructureBackend/                   # ⬅️ YOU ARE HERE
-│   │   ├── 00_README.md
-│   │   ├── 01_FEATURES_OVERVIEW.md
-│   │   ├── 02_MODULE_STRUCTURE.md (this file)
-│   │   ├── 03_DATABASE_SCHEMA.md
-│   │   ├── 04_FEATURE_MAPPING.md
-│   │   └── 05_ARCHITECTURE_PATTERNS.md
-│   └── [other docs]
+├── routes/
+│   ├── api.php                       # ⭐ Semua API routes (166 baris)
+│   ├── web.php                       # Web routes
+│   └── console.php                   # Console routes
 │
-├── public/                                 # Web root
-│   ├── index.php
-│   └── robots.txt
-│
-├── resources/                              # Frontend assets
-│   ├── css/
-│   ├── js/
-│   └── views/
-│
-├── routes/                                 # Route definitions
-│   ├── console.php
-│   └── web.php                             # API routes juga bisa di sini
-│
-├── storage/                                # Storage (logs, sessions, cache)
-│   ├── app/
-│   ├── framework/
-│   └── logs/
-│
-├── tests/                                  # Unit & Feature tests
-│   ├── Feature/
-│   └── Unit/
-│
-├── vendor/                                 # Composer dependencies
-│
-├── .editorconfig                           # Editor configuration
-├── .env                                    # Environment variables (local)
-├── .env.example                            # Environment template
-├── .gitignore                              # Git ignore rules
-├── artisan                                 # Laravel CLI
-├── composer.json                           # PHP dependencies
-├── composer.lock                           # Locked versions
-├── init_modules.php                        # Module initialization
-├── package.json                            # NPM dependencies (if any)
-├── phpunit.xml                             # Test configuration
-├── README.md                               # Project README
-└── vite.config.js                          # Vite configuration (frontend build)
+├── storage/                          # Logs, cache, file uploads
+├── tests/                            # Feature & Unit tests
+└── vendor/                           # Composer dependencies
 ```
 
 ---
 
-## 🔍 Struktur Per Domain Module
+## 3. Struktur Modul — 5 Domain, 31 Fitur
 
-### 1. Auth Domain (Fitur 1-2)
-**Path**: `Modules/Auth/`
+### 3.1 AUTH Module (`Modules/Auth/`) — 4 Fitur
 
-**Sub-Features**:
-- **F1_Register** - Register akun user baru
-- **F2_Login** - Login & penerbitan token API
+| Folder | Fitur | Layer |
+|--------|-------|-------|
+| `F1_Register/` | Register akun baru | Controllers, Services, Repositories, Requests |
+| `F2_Login/` | Login (Sanctum SPA session) | Controllers, Services, Repositories, Requests |
+| `F3_Logout/` | Logout & session invalidation | Controllers, Services |
+| `F31_ForgotPassword/` | Forgot & reset password via email | Controllers, Services, Repositories, Requests, **Jobs, Mail** |
 
-**Naming Pattern**:
-```
-Auth/
-├── F1_Register/
-│   ├── Controllers/RegisterController.php
-│   ├── Requests/RegisterRequest.php
-│   ├── Services/RegisterService.php
-│   └── Repositories/ (optional)
-│
-└── F2_Login/
-    ├── Controllers/LoginController.php
-    ├── Requests/LoginRequest.php
-    ├── Services/LoginService.php
-    └── Repositories/ (optional)
-```
+> **Catatan:** F31_ForgotPassword memiliki folder tambahan `Jobs/` (SendResetPasswordEmailJob) dan `Mail/` (ResetPasswordMail) untuk antrean pengiriman email reset password.
 
-**Note**: Tidak perlu authorization untuk endpoints ini (public access untuk register)
+### 3.2 COMMON Module (`Modules/Common/`) — 4 Fitur
 
----
+| Folder | Fitur | Layer |
+|--------|-------|-------|
+| `F4_SearchPost/` | Pencarian post (keyword) | Controllers, Services |
+| `F5_FilterByTag/` | Filter post berdasarkan tag | Controllers, Services |
+| `F6_FilterByCategory/` | Filter post berdasarkan kategori | Controllers, Services |
+| `F7_TrendingPopularPost/` | Post trending & populer | Controllers, Services |
 
-### 2. Common Domain (Fitur 3-6)
-**Path**: `Modules/Common/`
+### 3.3 ADMIN Module (`Modules/Admin/`) — 5 Fitur
 
-**Sub-Features**:
-- **F3_SearchPost** - Search functionality
-- **F4_FilterByTag** - Filter by tags
-- **F5_FilterByCategory** - Filter by category
-- **F6_TrendingPopularPost** - Trending/popular posts
+| Folder | Fitur | Layer |
+|--------|-------|-------|
+| `F8_RoleAndPermission/` | Manajemen role & assign role user | Controllers, Services, Repositories, Requests |
+| `F9_UserManagement/` | Dashboard admin, CRUD user, reset password | Controllers, Services, Repositories, Requests |
+| `F10_CategoryMaster/` | CRUD master kategori | Controllers, Services, Repositories, Requests |
+| `F11_BadgeMaster/` | CRUD master badge | Controllers, Services, Repositories, Requests |
+| `F12_TagMaster/` | CRUD master tag | Controllers, Services, Repositories, Requests |
 
-**Naming Pattern**:
-```
-Common/
-├── F3_SearchPost/
-│   ├── Controllers/SearchController.php
-│   ├── Services/SearchService.php
-│   └── Repositories/ (optional)
-│
-├── F4_FilterByTag/
-├── F5_FilterByCategory/
-└── F6_TrendingPopularPost/
-```
+### 3.4 MODERATOR Module (`Modules/Moderator/`) — 3 Fitur
 
-**Note**: Semua fitur di Common adalah public (tidak perlu authentication)
+| Folder | Fitur | Layer |
+|--------|-------|-------|
+| `F13_ContentReportQueue/` | Antrian laporan konten | Controllers, Services, Repositories, Requests |
+| `F14_ModeratorActionLog/` | Log aksi moderator | Controllers, Services, Repositories |
+| `F15_UserBanSanction/` | Sanksi user (warn/ban/unban) | Controllers, Services, Repositories, Requests |
 
----
+### 3.5 USER Module (`Modules/User/`) — 15 Fitur
 
-### 3. Admin Domain (Fitur 7-11)
-**Path**: `Modules/Admin/`
-
-**Sub-Features**:
-- **F7_RoleAndPermission** - Multi-role & permission management
-- **F8_UserManagement** - User profile & admin management
-- **F9_CategoryMaster** - Category CRUD
-- **F10_TagMaster** - Tag CRUD
-- **F11_BadgeMaster** - Badge CRUD
-
-**Naming Pattern**:
-```
-Admin/
-├── F7_RoleAndPermission/
-│   ├── Controllers/
-│   │   ├── RoleController.php
-│   │   └── UserManagementController.php
-│   ├── Services/
-│   ├── Repositories/
-│   └── Requests/
-│
-├── F8_UserManagement/
-├── F9_CategoryMaster/
-├── F10_TagMaster/
-└── F11_BadgeMaster/
-```
-
-**Authorization**: Admin role required for all endpoints
+| Folder | Fitur | Layer |
+|--------|-------|-------|
+| `F16_Post/` | CRUD postingan | Controllers, Services, Repositories, Requests |
+| `F17_Comment/` | CRUD komentar | Controllers, Services, Repositories, Requests |
+| `F18_MarkAcceptedAnswer/` | Tandai jawaban diterima | Controllers, Services, Repositories |
+| `F19_PostEditHistory/` | Riwayat edit post | Controllers, Services, Repositories |
+| `F20_NestedCommentReply/` | Balasan komentar bersarang | Controllers, Services |
+| `F21_CommentEditHistory/` | Riwayat edit komentar | Controllers, Services, Repositories |
+| `F22_VoteSystem/` | Sistem voting (up/down) | Controllers, Services, Repositories, Requests |
+| `F23_LikeSystem/` | Sistem like (toggle) | Controllers, Services, Repositories, Requests |
+| `F24_BookmarkPost/` | Bookmark postingan | Controllers, Services, Repositories |
+| `F25_FollowUser/` | Follow/unfollow user | Controllers, Services, Repositories |
+| `F26_NotificationSystem/` | Sistem notifikasi | Controllers, Services, Repositories |
+| `F27_GamificationLeaderboard/` | Papan peringkat gamifikasi | Controllers, Services |
+| `F28_ProfileSettings/` | Pengaturan profil user | Controllers, Services, Requests |
+| `F29_BadgeAchievement/` | Pencapaian badge & poin | Controllers, Services, Repositories |
+| `F30_UserReport/` | Laporan konten oleh user | Controllers, Services, Repositories, Requests |
 
 ---
 
-### 4. Moderator Domain (Fitur 12-14)
-**Path**: `Modules/Moderator/`
+## 4. Layer Penjelasan
 
-**Sub-Features**:
-- **F12_ContentReportQueue** - Report management & triage
-- **F13_UserBanSanction** - Ban/unban users
-- **F14_ModeratorActionLog** - Auto-tracked action logs
+Setiap fitur idealnya memiliki 4 layer berikut:
 
-**Naming Pattern**:
-```
-Moderator/
-├── F12_ContentReportQueue/
-│   ├── Controllers/ReportController.php
-│   ├── Services/ReportService.php
-│   ├── Repositories/ReportRepository.php
-│   └── Requests/UpdateReportRequest.php
-│
-├── F13_UserBanSanction/
-│   ├── Controllers/UserSanctionController.php
-│   ├── Services/UserSanctionService.php
-│   ├── Repositories/UserSanctionRepository.php
-│   └── Requests/BanUserRequest.php
-│
-└── F14_ModeratorActionLog/
-    ├── Services/ModerationLogService.php
-    ├── Repositories/ModerationLogRepository.php
-    └── Events/ModerationActionLogged.php
-```
+### Controllers/ — Pintu masuk HTTP
+- **Tanggung jawab:** Terima HTTP request, delegasi ke Service, kembalikan JSON response
+- **ATURAN:** Dilarang query DB langsung, dilarang ada logika bisnis
+- **Dependency:** Hanya memanggil Service
 
-**Authorization**: Moderator role required
-
----
-
-### 5. User Domain (Fitur 15-29)
-**Path**: `Modules/User/`
-
-**Sub-Features** (15 fitur):
-- **F15_CreatePost** - Create new post
-- **F16_EditPost** - Edit existing post
-- **F17_DeletePost** - Delete post (soft delete)
-- **F18_MarkAcceptedAnswer** - Mark comment as accepted answer
-- **F19_PostEditHistory** - Track post edits (auto-logged)
-- **F20_CreateComment** - Create comment/answer
-- **F21_NestedCommentReply** - Reply to comments (threaded)
-- **F22_EditDeleteComment** - Edit/delete comments
-- **F23_CommentEditHistory** - Track comment edits (auto-logged)
-- **F24_VoteSystem** - Upvote/downvote system
-- **F25_LikeSystem** - Like system
-- **F26_BookmarkPost** - Bookmark posts
-- **F27_FollowUser** - Follow users
-- **F28_NotificationSystem** - Real-time notifications
-- **F27_GamificationLeaderboard** - Reputation & leaderboard
-
-**Naming Pattern**:
-```
-User/
-├── F15_CreatePost/
-│   ├── Controllers/PostController.php
-│   ├── Services/PostService.php
-│   ├── Repositories/PostRepository.php
-│   └── Requests/StorePostRequest.php
-│
-├── F16_EditPost/
-├── F17_DeletePost/
-├── F18_MarkAcceptedAnswer/
-├── F19_PostEditHistory/
-├── F20_CreateComment/
-├── F21_NestedCommentReply/
-├── F22_EditDeleteComment/
-├── F23_CommentEditHistory/
-├── F24_VoteSystem/
-├── F25_LikeSystem/
-├── F26_BookmarkPost/
-├── F27_FollowUser/
-├── F28_NotificationSystem/
-└── F27_GamificationLeaderboard/
-```
-
-**Authorization**: User authentication required for most endpoints
-
----
-
-## 📋 Feature Numbering Reference
-
-| No | Feature Name | Path | Domain |
-|----|----|----|----|
-| 1 | Register Akun | `Auth/F1_Register/` | Auth |
-| 2 | Login API | `Auth/F2_Login/` | Auth |
-| 3 | Search Post | `Common/F3_SearchPost/` | Common |
-| 4 | Filter by Tag | `Common/F4_FilterByTag/` | Common |
-| 5 | Filter by Category | `Common/F5_FilterByCategory/` | Common |
-| 6 | Trending Posts | `Common/F6_TrendingPopularPost/` | Common |
-| 7 | Role & Permission | `Admin/F7_RoleAndPermission/` | Admin |
-| 8 | User Management | `Admin/F8_UserManagement/` | Admin |
-| 9 | Category Master | `Admin/F9_CategoryMaster/` | Admin |
-| 10 | Tag Master | `Admin/F10_TagMaster/` | Admin |
-| 11 | Badge Master | `Admin/F11_BadgeMaster/` | Admin |
-| 12 | Report Queue | `Moderator/F12_ContentReportQueue/` | Moderator |
-| 13 | User Ban | `Moderator/F13_UserBanSanction/` | Moderator |
-| 14 | Mod Log | `Moderator/F14_ModeratorActionLog/` | Moderator |
-| 15 | Create Post | `User/F15_CreatePost/` | User |
-| 16 | Edit Post | `User/F16_EditPost/` | User |
-| 17 | Delete Post | `User/F17_DeletePost/` | User |
-| 18 | Accept Answer | `User/F18_MarkAcceptedAnswer/` | User |
-| 19 | Post History | `User/F19_PostEditHistory/` | User |
-| 20 | Create Comment | `User/F20_CreateComment/` | User |
-| 21 | Nested Reply | `User/F21_NestedCommentReply/` | User |
-| 22 | Edit Comment | `User/F22_EditDeleteComment/` | User |
-| 23 | Comment History | `User/F23_CommentEditHistory/` | User |
-| 24 | Vote System | `User/F24_VoteSystem/` | User |
-| 25 | Like System | `User/F25_LikeSystem/` | User |
-| 26 | Bookmark | `User/F26_BookmarkPost/` | User |
-| 27 | Follow User | `User/F27_FollowUser/` | User |
-| 28 | Notification | `User/F28_NotificationSystem/` | User |
-| 29 | Gamification | `User/F27_GamificationLeaderboard/` | User |
-
----
-
-## 🔍 Struktur Per Feature
-
----
-
-## 📋 Naming Conventions
-
-### Controllers
 ```php
-// Pattern: {Resource}Controller
-class PostController extends Controller {
-    public function index() { }           // GET /posts
-    public function store() { }           // POST /posts
-    public function show($id) { }         // GET /posts/{id}
-    public function update($id) { }       // PUT /posts/{id}
-    public function destroy($id) { }      // DELETE /posts/{id}
-}
+// Contoh: PostController.php
+class PostController extends Controller
+{
+    public function __construct(protected PostService $service) {}
 
-// Custom actions
-public function acceptAnswer($postId, $commentId) { }  // POST /posts/{id}/accept-answer/{commentId}
-```
-
-### Services
-```php
-// Pattern: {Resource}Service
-class PostService {
-    public function create(array $data) { }
-    public function update($id, array $data) { }
-    public function delete($id) { }
-    public function getWithRelations($id) { }
-}
-```
-
-### Repositories
-```php
-// Pattern: {Resource}Repository
-class PostRepository {
-    public function find($id) { }
-    public function all() { }
-    public function create(array $data) { }
-    public function update($id, array $data) { }
-    public function delete($id) { }
-    public function whereTag($tagId) { }
-}
-```
-
-### Requests (Form Validation)
-```php
-// Pattern: {Action}{Resource}Request
-class StorePostRequest extends FormRequest {
-    public function rules() { }
-    public function messages() { }
-}
-
-class UpdatePostRequest extends FormRequest { }
-```
-
-### Models (if using)
-```php
-// Pattern: {Resource} (singular, PascalCase)
-class Post { }
-class Comment { }
-class User { }
-```
-
-### Database Tables
-```php
-// Pattern: {resource}_plural (snake_case, plural)
-Table: posts
-Table: comments
-Table: categories
-Table: tags
-Table: badges
-Table: votes
-Table: likes
-Table: bookmarks
-Table: follows
-Table: notifications
-Table: moderation_logs
-```
-
-### Routes
-```php
-// API routes (typically in routes/api.php or web.php)
-Route::post('auth/register', [AuthController::class, 'register']);
-Route::post('auth/login', [AuthController::class, 'login']);
-
-Route::get('explore/search', [ExploreController::class, 'search']);
-Route::get('explore/trending', [ExploreController::class, 'trending']);
-
-Route::group(['middleware' => ['auth:sanctum']], function () {
-    Route::post('posts', [PostController::class, 'store']);
-    Route::put('posts/{id}', [PostController::class, 'update']);
-});
-```
-
----
-
-## 🏛️ Layer Breakdown
-
-Setiap fitur mengikuti Clean Architecture layers:
-
-### 1. Controller Layer
-- **Tanggung Jawab**: HTTP request/response handling
-- **Input**: HTTP request parameters
-- **Output**: JSON response
-- **Validasi**: Delegasi ke Requests
-- **File**: `Controllers/{Resource}Controller.php`
-
-**Example**:
-```php
-class PostController {
-    public function store(StorePostRequest $request) {
-        // Request sudah validated
-        return $this->service->create($request->validated());
+    public function store(StorePostRequest $request): JsonResponse
+    {
+        $post = $this->service->createPost($request->validated());
+        return response()->json(['success' => true, 'data' => $post], 201);
     }
 }
 ```
 
-### 2. Service Layer
-- **Tanggung Jawab**: Business logic & orchestration
-- **Input**: Validated data
-- **Output**: Domain objects
-- **Validasi**: Business rule validation
-- **File**: `Services/{Resource}Service.php`
-
-**Example**:
-```php
-class PostService {
-    public function create(array $data) {
-        // Business logic: check user reputation, add tags, etc
-        return $this->repository->create($data);
-    }
-}
-```
-
-### 3. Repository Layer
-- **Tanggung Jawab**: Data access & persistence
-- **Input**: Domain objects or arrays
-- **Output**: Domain objects (Eloquent models)
-- **File**: `Repositories/{Resource}Repository.php`
-
-**Example**:
-```php
-class PostRepository {
-    public function create(array $data) {
-        return Post::create($data);
-    }
-    
-    public function whereTag($tagId) {
-        return Post::whereHas('tags', fn($q) => $q->where('id', $tagId))->get();
-    }
-}
-```
-
-### 4. Request Layer (Validation)
-- **Tanggung Jawab**: Input validation & authorization
-- **File**: `Requests/{Action}{Resource}Request.php`
-
-**Example**:
-```php
-class StorePostRequest extends FormRequest {
-    public function authorize() {
-        return $this->user()->can('create', Post::class);
-    }
-    
-    public function rules() {
-        return [
-            'title' => 'required|min:10|max:255',
-            'content' => 'required|min:30',
-            'category_id' => 'required|exists:categories,id',
-            'tags' => 'required|array|min:1',
-        ];
-    }
-}
-```
-
----
-
-## 🔄 Typical Request Flow
-
-```
-HTTP Request
-    ↓
-Router (routes/api.php)
-    ↓
-Controller (PostController@store)
-    ↓
-Form Validation (StorePostRequest@validate)
-    ├─ authorize() → Check permission
-    ├─ rules() → Validate input
-    ├─ validated() → Get clean data
-    ↓
-Service (PostService@create)
-    ├─ Business logic
-    ├─ Fire events
-    ├─ Call repositories
-    ↓
-Repository (PostRepository@create)
-    ├─ Eloquent operations
-    ├─ Database insert
-    ↓
-Response (JSON)
-    ↓
-HTTP Response (200, 201, etc)
-```
-
----
-
-## 📦 Dependency Injection
-
-Laravel Service Container mengelola dependencies:
+### Services/ — Otak bisnis
+- **Tanggung jawab:** Semua logika bisnis, kalkulasi poin, validasi otorisasi
+- **ATURAN:** Dilarang menyentuh Request/Response HTTP, boleh memanggil Repository dan Service lain
+- **Dependency:** Repository, Service lain (cross-feature), Auth facade
 
 ```php
-// In Service Provider (config/app.php)
-$this->app->bind(PostService::class, function() {
-    return new PostService(
-        new PostRepository(),
-        new PostHistoryService()
-    );
-});
-
-// In Controller
-class PostController {
+// Contoh: PostService memanggil PostRepository + BadgeAchievementService
+class PostService
+{
     public function __construct(
-        private PostService $postService,
-        private NotificationService $notificationService
+        protected PostRepository $repo,
+        protected BadgeAchievementService $gamification
     ) {}
-    
-    public function store(StorePostRequest $request) {
-        $post = $this->postService->create($request->validated());
-        // Auto-injected services ready to use
-    }
+}
+```
+
+### Repositories/ — Penjaga database
+- **Tanggung jawab:** Satu-satunya layer yang boleh query Eloquent
+- **ATURAN:** Dilarang ada logika bisnis, hanya CRUD + eager loading
+- **Dependency:** Eloquent Models
+
+```php
+// Contoh: PostRepository dengan eager loading
+public function getAllPaginated(int $perPage = 15, ?string $sort = null)
+{
+    return Post::with(['user:id,username', 'category:id,name'])
+        ->latest()->paginate($perPage);
+}
+```
+
+### Requests/ — Gerbang validasi
+- **Tanggung jawab:** Validasi input menggunakan Laravel FormRequest
+- **ATURAN:** Dieksekusi otomatis SEBELUM Controller via type-hint
+- **Method:** `authorize()` + `rules()` + `messages()` (opsional)
+
+```php
+// Contoh: StorePostRequest
+public function rules(): array
+{
+    return [
+        'category_id' => 'required|uuid|exists:categories,id',
+        'title'       => 'required|string|max:255',
+        'body'        => 'required|string',
+        'tags'        => 'nullable|array',
+        'tags.*'      => 'exists:tags,id',
+    ];
 }
 ```
 
 ---
 
-## 📝 File Location Quick Reference
+## 5. Shared Models (`app/Models/`)
 
-| Purpose | Location |
-|---------|----------|
-| HTTP Endpoints | `Modules/{Domain}/{Feature}/Controllers/{Feature}Controller.php` |
-| Business Logic | `Modules/{Domain}/{Feature}/Services/{Feature}Service.php` |
-| Data Access | `Modules/{Domain}/{Feature}/Repositories/{Feature}Repository.php` |
-| Input Validation | `Modules/{Domain}/{Feature}/Requests/{Action}{Feature}Request.php` |
-| Database Models | `app/Models/{Feature}.php` (optional, keep minimal) |
-| Routes | `routes/api.php` or `routes/web.php` |
-| Tests | `tests/Feature/{Feature}Test.php` |
-| Migrations | `database/migrations/{timestamp}_create_{table}_table.php` |
+Model Eloquent tidak berada di dalam folder modul, melainkan di folder shared yang dikelompokkan berdasarkan domain:
 
----
+| Grup | Model | Tabel |
+|------|-------|-------|
+| `Auth/` | User, Role, UserRole | `users`, `roles`, `user_roles` |
+| `Content/` | Post, Comment, Category, Tag, PostTag | `posts`, `comments`, `categories`, `tags`, `post_tags` |
+| `Gamification/` | Badge, PointsLog, UserBadge | `badges`, `points_log`, `user_badges` |
+| `History/` | PostEditHistory, CommentEditHistory | `post_edit_history`, `comment_edit_history` |
+| `Interaction/` | Vote, Like, Bookmark, Follow | `votes`, `likes`, `bookmarks`, `follows` |
+| `Moderation/` | Notification, Report, ModerationLog | `notifications`, `reports`, `moderation_logs` |
 
-## 🚀 Best Practices
-
-### ✅ DO
-- Keep controllers thin (max 50 lines)
-- Put business logic in services
-- Use repositories for data access
-- Validate input in Request classes
-- Inject dependencies via constructor
-- Use meaningful names (PostService, not PS)
-- One responsibility per class
-
-### ❌ DON'T
-- Put business logic in controllers
-- Query database directly in controllers
-- Duplicate validation logic
-- Create "god" services (too many methods)
-- Hardcode values (use config)
-- Skip error handling
+Semua model menggunakan:
+- **HasUuids** trait — Primary key UUID (bukan auto-increment)
+- **PostgreSQL** sebagai database
+- **SoftDeletes** pada Post dan Comment
 
 ---
 
-**Next: Baca [03_DATABASE_SCHEMA.md](03_DATABASE_SCHEMA.md) untuk skema database →**
+## 6. Middleware & Konfigurasi
+
+### File: `bootstrap/app.php`
+
+```php
+// Sanctum SPA cookie-based authentication
+$middleware->statefulApi();
+
+// CSRF exemption untuk route auth publik
+$middleware->validateCsrfTokens(except: [
+    'api/auth/login',
+    'api/auth/register',
+    'api/auth/forgot-password',
+    'api/auth/reset-password',
+]);
+
+// Custom role middleware alias
+$middleware->alias([
+    'role' => \App\Http\Middleware\RoleMiddleware::class,
+]);
+```
+
+### Role Middleware: `app/Http/Middleware/RoleMiddleware.php`
+
+```php
+// Penggunaan di routes:
+// 'role:admin'           → Hanya admin
+// 'role:moderator,admin' → Moderator ATAU admin
+
+public function handle(Request $request, Closure $next, ...$roles): Response
+{
+    $user = auth()->user();
+    $user->load('roles');
+    $userRoles = $user->roles->pluck('name')->toArray();
+    $hasAccess = !empty(array_intersect($userRoles, $roles));
+    // ...
+}
+```
+
+### Route Groups di `routes/api.php`:
+
+| Middleware | Prefix | Akses |
+|---|---|---|
+| *(none)* | `auth/`, `explore/`, `posts`, `comments` | Publik (tanpa login) |
+| `auth:sanctum` | `settings/`, `me/`, `posts`, `notifications/`, dll | User terautentikasi |
+| `auth:sanctum` + `role:moderator,admin` | `moderator/` | Moderator & Admin |
+| `auth:sanctum` + `role:admin` | `admin/` | Hanya Admin |
+
+---
+
+## 7. Perbedaan dengan Struktur Laravel Standar
+
+| Aspek | Laravel Standar | Proyek Ini |
+|-------|----------------|------------|
+| Controllers | `app/Http/Controllers/` | `Modules/{Domain}/{F##}/Controllers/` |
+| Services | Tidak ada | `Modules/{Domain}/{F##}/Services/` |
+| Repositories | Tidak ada | `Modules/{Domain}/{F##}/Repositories/` |
+| Requests | `app/Http/Requests/` | `Modules/{Domain}/{F##}/Requests/` |
+| Models | `app/Models/` (flat) | `app/Models/{Group}/` (6 sub-grup) |
+| Primary Key | Auto-increment INT | UUID (HasUuids trait) |
+| Auth | Sanctum API Token | Sanctum SPA Cookie Session |
+| Database | MySQL (default) | PostgreSQL |
+
+---
+
+## 8. Naming Conventions
+
+| Item | Konvensi | Contoh |
+|------|----------|--------|
+| Feature folder | `F{number}_{PascalCase}` | `F16_Post`, `F22_VoteSystem` |
+| Controller | `{Entity}Controller` | `PostController`, `VoteController` |
+| Service | `{Entity}Service` | `PostService`, `VoteService` |
+| Repository | `{Entity}Repository` | `PostRepository`, `VoteRepository` |
+| Request | `{Action}{Entity}Request` | `StorePostRequest`, `VoteRequest` |
+| Namespace | `Modules\{Domain}\{Feature}\{Layer}` | `Modules\User\F16_Post\Controllers` |
+| Route name | `{domain}.{resource}` | `moderator.reports`, `admin.users` |
+
+---
+
+**Selanjutnya: Baca [03_DATABASE_SCHEMA.md](03_DATABASE_SCHEMA.md) untuk detail struktur database →**

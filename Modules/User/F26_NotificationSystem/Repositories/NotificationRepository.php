@@ -11,6 +11,7 @@ class NotificationRepository
     public function getUserNotifications(string $userId, bool $unreadOnly = false): LengthAwarePaginator
     {
         $query = Notification::where('user_id', $userId)
+            ->with(['actor:id,username,avatar_url'])
             ->latest();
 
         if ($unreadOnly) {

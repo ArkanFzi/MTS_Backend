@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\Auth\User;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -11,11 +10,15 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             RoleSeeder::class,
-            UserTestSeeder::class,
             CategorySeeder::class,
             TagSeeder::class,
             BadgeSeeder::class,
+            UserTestSeeder::class,
             PostSeeder::class,
+            CommentSeeder::class,
+            InteractionSeeder::class,
+            ModerationSeeder::class,
+            GamificationSeeder::class,
         ]);
     }
 }

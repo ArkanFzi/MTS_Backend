@@ -44,7 +44,7 @@ class BookmarkRepository
     public function getBookmarkedPosts(string $userId): Collection
     {
         return Bookmark::where('user_id', $userId)
-            ->with('post') // Eager loading untuk efisiensi query
+            ->with(['post.user:id,username,avatar_url', 'post.category:id,name,slug', 'post.tags:id,name,slug,color'])
             ->latest()
             ->get();
     }

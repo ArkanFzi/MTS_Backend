@@ -1,928 +1,532 @@
-# 04. Feature Mapping - Implementation Roadmap
+# 04. Feature Mapping - Pemetaan Fitur ke Implementasi
 
-## 🗂️ Fitur-to-Code Mapping
+**Versi:** 2.0 (Terverifikasi dari Codebase Aktual)
+**Tanggal Update:** 10 Juni 2026
 
-Dokumentasi ini menunjukkan untuk setiap fitur, file/folder mana yang terlibat dalam implementasinya.
-
----
-
-## 📍 Navigasi Cepat
-
-Gunakan Ctrl+F untuk mencari fitur spesifik:
-- [Fitur 1-2: Auth](#auth-features)
-- [Fitur 3-6: Explore](#explore-features)
-- [Fitur 7-11: Admin](#admin-features)
-- [Fitur 12-14: Moderator](#moderator-features)
-- [Fitur 15-19: Post](#post-features)
-- [Fitur 20-23: Comment](#comment-features)
-- [Fitur 24-27: Interaction](#interaction-features)
-- [Fitur 28: Notification](#notification-features)
-- [Fitur 29: Gamification](#gamification-features)
+Dokumen ini memetakan setiap fitur ke file implementasi, route API, model, dan middleware yang terlibat.
 
 ---
 
-## 🔐 AUTH FEATURES
+## Navigasi Cepat
 
-### Fitur 1: Register Akun User Baru
-
-**Controllers**:
-- `Modules/Auth/Controllers/AuthController.php`
-  - Method: `register(RegisterRequest $request)`
-  - Action: Validate & create new user, return token
-
-**Requests (Validation)**:
-- `Modules/Auth/Requests/RegisterRequest.php`
-  - Rules: email unique, password min 8, name required
-
-**Services**:
-- `Modules/Auth/Services/AuthService.php`
-  - Method: `register(array $data)`
-  - Logic: Hash password, create user, generate Sanctum token
-
-**Database Tables**:
-- `users` - insert new user record
-- `personal_access_tokens` (Laravel Sanctum) - auto-created
-
-**Models** (if used):
-- `app/Models/User.php`
-
-**Routes**:
-- `POST /api/auth/register` → AuthController@register
-
-**API Response Example**:
-```json
-{
-  "user": {
-    "id": 1,
-    "email": "user@example.com",
-    "name": "John Doe"
-  },
-  "token": "1|abcdefgh..."
-}
-```
+- [AUTH Module (F1, F2, F3, F31)](#auth-module)
+- [COMMON Module (F4–F7)](#common-module)
+- [ADMIN Module (F8–F12)](#admin-module)
+- [MODERATOR Module (F13–F15)](#moderator-module)
+- [USER Module (F16–F30)](#user-module)
 
 ---
 
-### Fitur 2: Login & Penerbitan Token API
+## AUTH MODULE
 
-**Controllers**:
-- `Modules/Auth/Controllers/AuthController.php`
-  - Method: `login(LoginRequest $request)`
-  - Action: Validate credentials, generate token
+### F1: Register Akun User Baru
 
-**Requests**:
-- `Modules/Auth/Requests/LoginRequest.php`
-  - Rules: email exists, password correct, user not banned
-
-**Services**:
-- `Modules/Auth/Services/AuthService.php`
-  - Method: `login(array $credentials)`
-  - Logic: Verify credentials, create Sanctum token
-
-**Database Tables**:
-- `users` - fetch & verify
-- `personal_access_tokens` - create token
-
-**Routes**:
-- `POST /api/auth/login` → AuthController@login
-- `POST /api/auth/logout` → AuthController@logout
-
-**Middleware**:
-- Route middleware: `auth:sanctum` untuk protected endpoints
-
-**API Response Example**:
-```json
-{
-  "user": {
-    "id": 1,
-    "email": "user@example.com",
-    "name": "John Doe"
-  },
-  "token": "1|abcdefgh..."
-}
-```
+| Aspek | Detail |
+|-------|--------|
+| **Folder** | `Modules/Auth/F1_Register/` |
+| **Controller** | `Controllers/RegisterController.php` |
+| **Service** | `Services/RegisterService.php` |
+| **Repository** | `Repositories/RegisterRepository.php` |
+| **Request** | `Requests/RegisterRequest.php` |
+| **Model** | `app/Models/Auth/User.php` |
+| **Route** | `POST /api/auth/register` |
+| **Middleware** | Publik (CSRF exempt) |
+| **Tabel** | `users` |
 
 ---
 
-## 🔍 EXPLORE FEATURES
+### F2: Login (Sanctum SPA Session)
 
-### Fitur 3: Search Postingan
-
-**Controllers**:
-- `Modules/Common/Explore/Controllers/ExploreController.php`
-  - Method: `search(Request $request)`
-  - Params: `q` (query string)
-
-**Services**:
-- `Modules/Common/Explore/Services/SearchService.php`
-  - Method: `search(string $query, int $page, int $perPage)`
-  - Logic: Full-text search on title & content
-
-**Database Tables**:
-- `posts` - SELECT WHERE title LIKE OR content LIKE
-
-**Routes**:
-- `GET /api/explore/search?q=keyword` → ExploreController@search
-
-**API Response Example**:
-```json
-{
-  "data": [
-    {
-      "id": 1,
-      "title": "How to use Laravel?",
-      "content": "...",
-      "user": { "id": 1, "name": "John" },
-      "vote_score": 10,
-      "view_count": 100
-    }
-  ],
-  "pagination": { "total": 50, "page": 1 }
-}
-```
+| Aspek | Detail |
+|-------|--------|
+| **Folder** | `Modules/Auth/F2_Login/` |
+| **Controller** | `Controllers/LoginController.php` |
+| **Service** | `Services/LoginService.php` |
+| **Repository** | `Repositories/LoginRepository.php` |
+| **Request** | `Requests/LoginRequest.php` |
+| **Model** | `app/Models/Auth/User.php` |
+| **Route** | `POST /api/auth/login` |
+| **Middleware** | Publik (CSRF exempt) |
+| **Tabel** | `users`, `sessions` |
 
 ---
 
-### Fitur 4: Filter Postingan berdasarkan Tag
+### F3: Logout (Session Invalidation)
 
-**Controllers**:
-- `Modules/Common/Explore/Controllers/ExploreController.php`
-  - Method: `filterByTags(Request $request)`
-  - Params: `tag_ids=1,2,3` (array)
-
-**Services**:
-- `Modules/Common/Explore/Services/FilterService.php`
-  - Method: `filterByTags(array $tagIds, int $page)`
-  - Logic: Join post_tags table, WHERE tag_id IN (...)
-
-**Repositories** (optional):
-- `Modules/Common/Explore/Repositories/FilterRepository.php`
-  - Method: `findByTags(array $tagIds)`
-
-**Database Tables**:
-- `posts` - main table
-- `post_tags` - junction
-- `tags` - metadata
-
-**Query Example**:
-```sql
-SELECT DISTINCT p.* FROM posts p
-JOIN post_tags pt ON p.id = pt.post_id
-WHERE pt.tag_id IN (1, 2, 3)
-```
-
-**Routes**:
-- `GET /api/explore/filter/tags?tag_ids=1,2,3` → ExploreController@filterByTags
+| Aspek | Detail |
+|-------|--------|
+| **Folder** | `Modules/Auth/F3_Logout/` |
+| **Controller** | `Controllers/LogoutController.php` |
+| **Service** | `Services/LogoutService.php` |
+| **Model** | — (menggunakan session) |
+| **Route** | `POST /api/auth/logout` |
+| **Middleware** | `auth:sanctum` |
+| **Tabel** | `sessions` |
 
 ---
 
-### Fitur 5: Filter Postingan berdasarkan Kategori
+### F31: Forgot & Reset Password
 
-**Controllers**:
-- `Modules/Common/Explore/Controllers/ExploreController.php`
-  - Method: `filterByCategory(Request $request)`
-  - Params: `category_id=1`
-
-**Services**:
-- `Modules/Common/Explore/Services/FilterService.php`
-  - Method: `filterByCategory(int $categoryId, int $page)`
-  - Logic: Include subcategories (if parent-child exists)
-
-**Database Tables**:
-- `posts` - WHERE category_id = ?
-- `categories` - for hierarchy info
-
-**Routes**:
-- `GET /api/explore/filter/categories?category_id=1` → ExploreController@filterByCategory
+| Aspek | Detail |
+|-------|--------|
+| **Folder** | `Modules/Auth/F31_ForgotPassword/` |
+| **Controller** | `Controllers/ForgotPasswordController.php` |
+| **Service** | `Services/ForgotPasswordService.php` |
+| **Repository** | `Repositories/ForgotPasswordRepository.php` |
+| **Request** | `Requests/ForgotPasswordRequest.php`, `Requests/ResetPasswordRequest.php` |
+| **Jobs** | `Jobs/SendResetPasswordEmailJob.php` |
+| **Mail** | `Mail/ResetPasswordMail.php` |
+| **Model** | `app/Models/Auth/User.php` |
+| **Routes** | `POST /api/auth/forgot-password`, `POST /api/auth/reset-password` |
+| **Middleware** | Publik (CSRF exempt) |
+| **Tabel** | `users`, `password_reset_tokens` |
 
 ---
 
-### Fitur 6: Trending / Popular Posts
+## COMMON MODULE
 
-**Controllers**:
-- `Modules/Common/Explore/Controllers/ExploreController.php`
-  - Method: `trending(Request $request)`
-  - Params: `period=week|month|day|all`
+### F4: Search Post
 
-**Services**:
-- `Modules/Common/Explore/Services/TrendingService.php`
-  - Method: `getTrending(string $period, int $limit)`
-  - Logic: Calculate weighted score (views + votes + comments)
-
-**Database Tables**:
-- `posts` - SELECT with scoring
-
-**Scoring Algorithm** (example):
-```
-score = (view_count * 0.3) + (vote_score * 0.5) + (comment_count * 0.2)
-```
-
-**Routes**:
-- `GET /api/explore/trending?period=week` → ExploreController@trending
+| Aspek | Detail |
+|-------|--------|
+| **Folder** | `Modules/Common/F4_SearchPost/` |
+| **Controller** | `Controllers/SearchPostController.php` |
+| **Service** | `Services/SearchPostService.php` |
+| **Model** | `app/Models/Content/Post.php` |
+| **Route** | `GET /api/explore/search` |
+| **Middleware** | Publik |
+| **Tabel** | `posts` |
 
 ---
 
-## 👨‍💼 ADMIN FEATURES
+### F5: Filter By Tag
 
-### Fitur 7 & 8: Roles/Permissions & User Management
-
-**Controllers**:
-- `Modules/Admin/RoleManagement/Controllers/RoleController.php`
-  - Methods: `index()`, `store()`, `update()`, `destroy()`
-  
-- `Modules/Admin/RoleManagement/Controllers/UserManagementController.php`
-  - Methods: `index()`, `show()`, `update()`, `resetPassword()`
-
-**Services**:
-- `Modules/Admin/RoleManagement/Services/RoleService.php`
-  - Methods: `createRole()`, `assignPermissions()`, `assignRoleToUser()`
-
-- `Modules/Admin/RoleManagement/Services/UserManagementService.php`
-  - Methods: `updateProfile()`, `resetPassword()`, `updateAvatar()`
-
-**Requests**:
-- `Modules/Admin/RoleManagement/Requests/StoreRoleRequest.php`
-- `Modules/Admin/RoleManagement/Requests/UpdateUserRequest.php`
-
-**Database Tables**:
-- `roles` - master roles (admin, moderator, user)
-- `permissions` - master permissions
-- `user_roles` - user → role assignment
-- `role_permissions` - role → permission assignment
-- `users` - update avatar_url, bio
-
-**Routes**:
-- `GET /api/admin/roles` → RoleController@index
-- `POST /api/admin/roles` → RoleController@store
-- `GET /api/admin/users` → UserManagementController@index
-- `PUT /api/admin/users/{id}` → UserManagementController@update
-- `PUT /api/admin/users/{id}/reset-password` → UserManagementController@resetPassword
-
-**Authorization**:
-- Only users with "admin" role can access
+| Aspek | Detail |
+|-------|--------|
+| **Folder** | `Modules/Common/F5_FilterByTag/` |
+| **Controller** | `Controllers/FilterTagController.php` |
+| **Service** | `Services/FilterTagService.php` |
+| **Model** | `app/Models/Content/Post.php`, `app/Models/Content/Tag.php` |
+| **Route** | `GET /api/explore/tag/{slug}` |
+| **Middleware** | Publik |
+| **Tabel** | `posts`, `post_tags`, `tags` |
 
 ---
 
-### Fitur 9: CRUD Master Kategori Forum
+### F6: Filter By Category
 
-**Controllers**:
-- `Modules/Admin/Category/Controllers/CategoryController.php`
-  - Methods: `index()`, `store()`, `show()`, `update()`, `destroy()`
-
-**Services**:
-- `Modules/Admin/Category/Services/CategoryService.php`
-  - Methods: `create()`, `update()`, `delete()`, `getHierarchy()`
-
-**Repositories**:
-- `Modules/Admin/Category/Repositories/CategoryRepository.php`
-  - Methods: `find()`, `all()`, `create()`, `update()`, `delete()`
-
-**Requests**:
-- `Modules/Admin/Category/Requests/StoreCategoryRequest.php`
-  - Rules: name required|unique, parent_id exists
-- `Modules/Admin/Category/Requests/UpdateCategoryRequest.php`
-
-**Database Tables**:
-- `categories` - parent_id for hierarchy
-
-**Routes**:
-- `GET /api/admin/categories` → CategoryController@index
-- `POST /api/admin/categories` → CategoryController@store
-- `PUT /api/admin/categories/{id}` → CategoryController@update
-- `DELETE /api/admin/categories/{id}` → CategoryController@destroy
+| Aspek | Detail |
+|-------|--------|
+| **Folder** | `Modules/Common/F6_FilterByCategory/` |
+| **Controller** | `Controllers/FilterCategoryController.php` |
+| **Service** | `Services/FilterCategoryService.php` |
+| **Model** | `app/Models/Content/Post.php`, `app/Models/Content/Category.php` |
+| **Route** | `GET /api/explore/category/{slug}` |
+| **Middleware** | Publik |
+| **Tabel** | `posts`, `categories` |
 
 ---
 
-### Fitur 10: CRUD Master Tag Forum
+### F7: Trending & Popular Post
 
-**Controllers**:
-- `Modules/Admin/Tag/Controllers/TagController.php`
-  - Methods: `index()`, `store()`, `show()`, `update()`, `destroy()`
-
-**Services**:
-- `Modules/Admin/Tag/Services/TagService.php`
-  - Methods: `create()`, `update()`, `delete()`, `getPopular()`
-
-**Repositories**:
-- `Modules/Admin/Tag/Repositories/TagRepository.php`
-
-**Requests**:
-- `Modules/Admin/Tag/Requests/StoreTagRequest.php`
-  - Rules: name required|unique, color hex format
-- `Modules/Admin/Tag/Requests/UpdateTagRequest.php`
-
-**Database Tables**:
-- `tags` - name, slug, color, usage_count
-
-**Routes**:
-- `GET /api/admin/tags` → TagController@index
-- `POST /api/admin/tags` → TagController@store
-- `PUT /api/admin/tags/{id}` → TagController@update
-- `DELETE /api/admin/tags/{id}` → TagController@destroy
+| Aspek | Detail |
+|-------|--------|
+| **Folder** | `Modules/Common/F7_TrendingPopularPost/` |
+| **Controller** | `Controllers/TrendingController.php` |
+| **Service** | `Services/TrendingService.php` |
+| **Model** | `app/Models/Content/Post.php` |
+| **Route** | `GET /api/explore/trending` |
+| **Middleware** | Publik |
+| **Tabel** | `posts` |
 
 ---
 
-### Fitur 11: CRUD Badge/Achievement Master
+## ADMIN MODULE
 
-**Controllers**:
-- `Modules/Admin/Badge/Controllers/BadgeController.php`
-  - Methods: `index()`, `store()`, `update()`, `destroy()`
+### F8: Role & Permission Management
 
-**Services**:
-- `Modules/Admin/Badge/Services/BadgeService.php`
-  - Methods: `create()`, `update()`, `awardBadge()`
-
-**Requests**:
-- `Modules/Admin/Badge/Requests/StoreBadgeRequest.php`
-  - Rules: name required|unique, tier in:bronze,silver,gold
-- `Modules/Admin/Badge/Requests/UpdateBadgeRequest.php`
-
-**Database Tables**:
-- `badges` - name, tier, icon_url, points_reward
-- `user_badges` - track user ownership
-
-**Routes**:
-- `GET /api/admin/badges` → BadgeController@index
-- `POST /api/admin/badges` → BadgeController@store
-- `PUT /api/admin/badges/{id}` → BadgeController@update
-- `DELETE /api/admin/badges/{id}` → BadgeController@destroy
+| Aspek | Detail |
+|-------|--------|
+| **Folder** | `Modules/Admin/F8_RoleAndPermission/` |
+| **Controllers** | `Controllers/RoleController.php`, `Controllers/UserManagementController.php` |
+| **Service** | `Services/UserManagementService.php` |
+| **Repository** | `Repositories/UserRepository.php` |
+| **Request** | `Requests/UpdateUserRequest.php` |
+| **Model** | `app/Models/Auth/User.php`, `app/Models/Auth/Role.php`, `app/Models/Auth/UserRole.php` |
+| **Routes** | `GET /api/admin/roles`, `GET /api/admin/users`, `GET /api/admin/users/{id}`, `PUT /api/admin/users/{id}/role` |
+| **Middleware** | `auth:sanctum` + `role:admin` |
+| **Tabel** | `users`, `roles`, `user_roles` |
 
 ---
 
-## 🛡️ MODERATOR FEATURES
+### F9: User Management (Admin Dashboard)
 
-### Fitur 12: Manajemen Report Konten
-
-**Controllers**:
-- `Modules/Moderator/Report/Controllers/ReportController.php`
-  - Methods: `index()`, `show()`, `updateStatus()`, `addNote()`
-
-**Services**:
-- `Modules/Moderator/Report/Services/ReportService.php`
-  - Methods: `getReports()`, `updateStatus()`, `takeAction()`
-
-**Repositories**:
-- `Modules/Moderator/Report/Repositories/ReportRepository.php`
-
-**Requests**:
-- `Modules/Moderator/Report/Requests/UpdateReportRequest.php`
-  - Rules: status in:pending,in_review,resolved,dismissed
-
-**Database Tables**:
-- `reports` - status, assigned_to, resolution_note
-
-**Routes**:
-- `GET /api/moderator/reports?status=pending` → ReportController@index
-- `GET /api/moderator/reports/{id}` → ReportController@show
-- `PUT /api/moderator/reports/{id}/status` → ReportController@updateStatus
-- `POST /api/moderator/reports/{id}/note` → ReportController@addNote
-
-**Authorization**:
-- Only moderator role can access
+| Aspek | Detail |
+|-------|--------|
+| **Folder** | `Modules/Admin/F9_UserManagement/` |
+| **Controllers** | `Controllers/AdminDashboardController.php`, `Controllers/UserAdminController.php` |
+| **Service** | `Services/UserAdminService.php` |
+| **Repository** | `Repositories/UserAdminRepository.php` |
+| **Requests** | `Requests/ResetPasswordRequest.php`, `Requests/UpdateProfileRequest.php` |
+| **Model** | `app/Models/Auth/User.php` |
+| **Routes** | `GET /api/admin/stats/overview`, `GET /api/admin/stats/points-summary`, `PUT /api/admin/users/{id}/profile`, `PUT /api/admin/users/{id}/reset-password` |
+| **Middleware** | `auth:sanctum` + `role:admin` |
+| **Tabel** | `users`, `points_log` |
 
 ---
 
-### Fitur 13 & 14: User Ban/Unban + Moderation Log
+### F10: Category Master (CRUD)
 
-**Controllers**:
-- `Modules/Moderator/UserSanction/Controllers/UserSanctionController.php`
-  - Methods: `ban()`, `unban()`, `suspensionHistory()`
-
-**Services**:
-- `Modules/Moderator/UserSanction/Services/UserSanctionService.php`
-  - Methods: `banUser()`, `unbanUser()`
-  
-- `Modules/Moderator/UserSanction/Services/ModerationLogService.php`
-  - Methods: `logAction()` (auto-logged via events)
-
-**Repositories**:
-- `Modules/Moderator/UserSanction/Repositories/ModerationLogRepository.php`
-
-**Requests**:
-- `Modules/Moderator/UserSanction/Requests/BanUserRequest.php`
-  - Rules: reason required, duration_days integer|nullable
-
-**Database Tables**:
-- `users` - is_banned flag
-- `user_suspensions` - ban history
-- `moderation_logs` - audit trail
-
-**Events** (auto-logging):
-- `UserBanned` → logs to moderation_logs
-- `UserUnbanned` → logs to moderation_logs
-- `PostDeleted` → logs to moderation_logs
-
-**Routes**:
-- `PUT /api/moderator/users/{id}/ban` → UserSanctionController@ban
-- `PUT /api/moderator/users/{id}/unban` → UserSanctionController@unban
-- `GET /api/moderator/logs` → ModerationLogController@index
+| Aspek | Detail |
+|-------|--------|
+| **Folder** | `Modules/Admin/F10_CategoryMaster/` |
+| **Controller** | `Controllers/CategoryController.php` |
+| **Service** | `Services/CategoryService.php` |
+| **Repository** | `Repositories/CategoryRepository.php` |
+| **Requests** | `Requests/StoreCategoryRequest.php`, `Requests/UpdateCategoryRequest.php` |
+| **Model** | `app/Models/Content/Category.php` |
+| **Routes** | `apiResource /api/moderator/categories` (full CRUD) |
+| **Middleware** | `auth:sanctum` + `role:moderator,admin` |
+| **Tabel** | `categories` |
 
 ---
 
-## 📝 POST FEATURES
+### F11: Badge Master (CRUD)
 
-### Fitur 15: Buat Postingan Baru
-
-**Controllers**:
-- `Modules/User/Post/Controllers/PostController.php`
-  - Method: `store(StorePostRequest $request)`
-
-**Services**:
-- `Modules/User/Post/Services/PostService.php`
-  - Method: `create(array $data)`
-  - Logic: Validate, create post, attach tags, fire event
-
-**Repositories**:
-- `Modules/User/Post/Repositories/PostRepository.php`
-  - Method: `create(array $data)`
-
-**Requests**:
-- `Modules/User/Post/Requests/StorePostRequest.php`
-  - Rules: title min:10|max:255, content min:30, category_id exists, tags array|min:1
-
-**Database Tables**:
-- `posts` - insert
-- `post_tags` - attach tags
-- `post_categories` (optional)
-
-**Routes**:
-- `POST /api/posts` → PostController@store
-
-**Events Fired**:
-- `PostCreated` → update tag usage_count, notification
-
-**API Request Example**:
-```json
-{
-  "title": "How to use Laravel?",
-  "content": "I'm new to Laravel...",
-  "category_id": 1,
-  "tags": [1, 2, 3]
-}
-```
+| Aspek | Detail |
+|-------|--------|
+| **Folder** | `Modules/Admin/F11_BadgeMaster/` |
+| **Controller** | `Controllers/BadgeController.php` |
+| **Service** | `Services/BadgeService.php` |
+| **Repository** | `Repositories/BadgeRepository.php` |
+| **Requests** | `Requests/StoreBadgeRequest.php`, `Requests/UpdateBadgeRequest.php` |
+| **Model** | `app/Models/Gamification/Badge.php` |
+| **Routes** | `apiResource /api/moderator/badges` (except show) |
+| **Middleware** | `auth:sanctum` + `role:moderator,admin` |
+| **Tabel** | `badges` |
 
 ---
 
-### Fitur 16: Edit Postingan
+### F12: Tag Master (CRUD)
 
-**Controllers**:
-- `Modules/User/Post/Controllers/PostController.php`
-  - Method: `update(UpdatePostRequest $request, int $id)`
-
-**Services**:
-- `Modules/User/Post/Services/PostService.php`
-  - Method: `update(int $id, array $data)`
-  - Logic: Validate, store old version to history, update post
-
-**Requests**:
-- `Modules/User/Post/Requests/UpdatePostRequest.php`
-  - Authorization: Post owner only
-  - Rules: Same as store
-
-**Database Tables**:
-- `posts` - update
-- `post_edit_history` - create history entry
-- `post_tags` - sync tags
-
-**Routes**:
-- `PUT /api/posts/{id}` → PostController@update
-
-**Events Fired**:
-- `PostUpdated` → create edit history
+| Aspek | Detail |
+|-------|--------|
+| **Folder** | `Modules/Admin/F12_TagMaster/` |
+| **Controller** | `Controllers/TagController.php` |
+| **Service** | `Services/TagService.php` |
+| **Repository** | `Repositories/TagRepository.php` |
+| **Requests** | `Requests/StoreTagRequest.php`, `Requests/UpdateTagRequest.php` |
+| **Model** | `app/Models/Content/Tag.php` |
+| **Routes** | `apiResource /api/moderator/tags` (except show) + `GET /api/explore/tags` (publik) + `POST /api/tags` (auth) |
+| **Middleware** | Publik (index), `auth:sanctum` (store), `role:moderator,admin` (CRUD) |
+| **Tabel** | `tags` |
 
 ---
 
-### Fitur 17: Hapus Postingan (Soft Delete)
+## MODERATOR MODULE
 
-**Controllers**:
-- `Modules/User/Post/Controllers/PostController.php`
-  - Method: `destroy(int $id)`
+### F13: Content Report Queue
 
-**Services**:
-- `Modules/User/Post/Services/PostService.php`
-  - Method: `delete(int $id)`
-  - Logic: Soft delete (set deleted_at)
-
-**Database Tables**:
-- `posts` - UPDATE deleted_at = now()
-
-**Routes**:
-- `DELETE /api/posts/{id}` → PostController@destroy
-
-**Note**: Admin dapat restore via soft delete retrieval
+| Aspek | Detail |
+|-------|--------|
+| **Folder** | `Modules/Moderator/F13_ContentReportQueue/` |
+| **Controller** | `Controllers/ReportController.php` |
+| **Service** | `Services/ReportService.php` |
+| **Repository** | `Repositories/ReportRepository.php` |
+| **Request** | `Requests/UpdateReportRequest.php` |
+| **Model** | `app/Models/Moderation/Report.php` |
+| **Routes** | `GET /api/moderator/reports`, `GET /api/moderator/reports/{id}`, `PUT /api/moderator/reports/{id}` |
+| **Middleware** | `auth:sanctum` + `role:moderator,admin` |
+| **Tabel** | `reports` |
 
 ---
 
-### Fitur 18: Mark as Accepted Answer
+### F14: Moderator Action Log
 
-**Controllers**:
-- `Modules/User/Post/Controllers/PostController.php`
-  - Method: `acceptAnswer(int $postId, int $commentId)`
-
-**Services**:
-- `Modules/User/Post/Services/PostService.php`
-  - Method: `acceptAnswer(int $postId, int $commentId)`
-  - Logic: Update posts.accepted_answer_id, award reputation points
-
-**Database Tables**:
-- `posts` - UPDATE accepted_answer_id
-- `users` - UPDATE reputation_points (for answerer)
-- `points_log` - create log entry
-
-**Routes**:
-- `PUT /api/posts/{id}/accept-answer/{commentId}` → PostController@acceptAnswer
-
-**Business Logic**:
-- Only OP (post creator) can accept answer
-- Max 1 accepted answer per post
-- Answerer gains reputation
+| Aspek | Detail |
+|-------|--------|
+| **Folder** | `Modules/Moderator/F14_ModeratorActionLog/` |
+| **Controller** | `Controllers/ModerationLogController.php` |
+| **Service** | `Services/ModerationLogService.php` |
+| **Repository** | `Repositories/ModerationLogRepository.php` |
+| **Model** | `app/Models/Moderation/ModerationLog.php` |
+| **Route** | `GET /api/moderator/logs` |
+| **Middleware** | `auth:sanctum` + `role:moderator,admin` |
+| **Tabel** | `moderation_logs` |
 
 ---
 
-### Fitur 19: Post Edit History
+### F15: User Ban & Sanction
 
-**Services**:
-- `Modules/User/Post/Services/PostHistoryService.php`
-  - Method: `getHistory(int $postId)`
-  - Method: `getVersion(int $postId, int $version)`
-
-**Repositories**:
-- `Modules/User/Post/Repositories/PostEditHistoryRepository.php`
-
-**Database Tables**:
-- `post_edit_history` - auto-populated on update
-
-**Routes**:
-- `GET /api/posts/{id}/history` → PostController@getHistory
-- `GET /api/posts/{id}/history/{version}` → PostController@getVersion
-
-**API Response Example**:
-```json
-{
-  "data": [
-    {
-      "id": 1,
-      "title": "Original title",
-      "content": "Original content...",
-      "user": { "id": 1, "name": "John" },
-      "reason": "Fixed typo",
-      "created_at": "2026-06-03T10:00:00Z"
-    }
-  ]
-}
-```
+| Aspek | Detail |
+|-------|--------|
+| **Folder** | `Modules/Moderator/F15_UserBanSanction/` |
+| **Controller** | `Controllers/UserSanctionController.php` |
+| **Service** | `Services/UserSanctionService.php` |
+| **Repository** | `Repositories/UserSanctionRepository.php` |
+| **Requests** | `Requests/BanUserRequest.php`, `Requests/WarnUserRequest.php` |
+| **Model** | `app/Models/Auth/User.php`, `app/Models/Moderation/ModerationLog.php` |
+| **Routes** | `GET /api/moderator/bans`, `POST /api/moderator/bans/{id}/warn`, `POST /api/moderator/bans/{id}/ban`, `POST /api/moderator/bans/{id}/unban` |
+| **Middleware** | `auth:sanctum` + `role:moderator,admin` |
+| **Tabel** | `users`, `moderation_logs`, `notifications` |
 
 ---
 
-## 💬 COMMENT FEATURES
+## USER MODULE
 
-### Fitur 20: Buat Komentar / Jawaban Utama
+### F16: Post (CRUD)
 
-**Controllers**:
-- `Modules/User/Comment/Controllers/CommentController.php`
-  - Method: `store(StoreCommentRequest $request, int $postId)`
-
-**Services**:
-- `Modules/User/Comment/Services/CommentService.php`
-  - Method: `create(int $postId, array $data)`
-
-**Repositories**:
-- `Modules/User/Comment/Repositories/CommentRepository.php`
-
-**Requests**:
-- `Modules/User/Comment/Requests/StoreCommentRequest.php`
-  - Rules: content min:5, post_id exists
-
-**Database Tables**:
-- `comments` - insert (parent_id = NULL for top-level)
-
-**Routes**:
-- `POST /api/posts/{postId}/comments` → CommentController@store
-
-**Events Fired**:
-- `CommentCreated` → notify post author, update post comment_count
+| Aspek | Detail |
+|-------|--------|
+| **Folder** | `Modules/User/F16_Post/` |
+| **Controller** | `Controllers/PostController.php` |
+| **Service** | `Services/PostService.php` |
+| **Repository** | `Repositories/PostRepository.php` |
+| **Requests** | `Requests/StorePostRequest.php`, `Requests/UpdatePostRequest.php` |
+| **Model** | `app/Models/Content/Post.php` |
+| **Routes** | `GET /api/posts` (publik), `GET /api/posts/{id}` (publik), `POST /api/posts` (auth), `PUT /api/posts/{post}` (auth), `PATCH /api/posts/{post}/status` (auth), `DELETE /api/posts/{post}` (auth), `GET /api/me/posts` (auth) |
+| **Middleware** | Publik (index, show), `auth:sanctum` (store, update, delete, myPosts) |
+| **Tabel** | `posts`, `post_tags`, `post_edit_history`, `points_log` |
 
 ---
 
-### Fitur 21: Nested Reply (Balasan di dalam Komentar)
+### F17: Comment (CRUD)
 
-**Controllers**:
-- `Modules/User/Comment/Controllers/CommentController.php`
-  - Method: `reply(StoreCommentRequest $request, int $commentId)`
-
-**Services**:
-- `Modules/User/Comment/Services/CommentService.php`
-  - Method: `createReply(int $parentCommentId, array $data)`
-
-**Database Tables**:
-- `comments` - insert dengan parent_id = parentCommentId
-
-**Routes**:
-- `POST /api/comments/{commentId}/reply` → CommentController@reply
-
-**Database Query** (get threaded comments):
-```sql
-SELECT * FROM comments 
-WHERE post_id = ? 
-ORDER BY CASE 
-  WHEN parent_id IS NULL THEN id 
-  ELSE parent_id 
-END, created_at
-```
+| Aspek | Detail |
+|-------|--------|
+| **Folder** | `Modules/User/F17_Comment/` |
+| **Controller** | `Controllers/CommentController.php` |
+| **Service** | `Services/CommentService.php` |
+| **Repository** | `Repositories/CommentRepository.php` |
+| **Requests** | `Requests/StoreCommentRequest.php`, `Requests/UpdateCommentRequest.php` |
+| **Model** | `app/Models/Content/Comment.php` |
+| **Routes** | `GET /api/comments` (publik), `GET /api/posts/{post}/comments` (auth), `POST /api/posts/{post}/comments` (auth), `PUT /api/posts/{post}/comments/{comment}` (auth), `DELETE /api/moderator/posts/{post}/comments/{comment}` (mod) |
+| **Middleware** | Publik (index), `auth:sanctum` (CRUD), `role:moderator,admin` (delete) |
+| **Tabel** | `comments`, `comment_edit_history`, `points_log`, `notifications` |
 
 ---
 
-### Fitur 22: Edit & Hapus Komentar
+### F18: Mark Accepted Answer
 
-**Controllers**:
-- `Modules/User/Comment/Controllers/CommentController.php`
-  - Methods: `update()`, `destroy()`
-
-**Services**:
-- `Modules/User/Comment/Services/CommentService.php`
-  - Methods: `update()`, `delete()`
-
-**Database Tables**:
-- `comments` - UPDATE or soft delete (deleted_at)
-- `comment_edit_history` - create history on update
-
-**Routes**:
-- `PUT /api/comments/{id}` → CommentController@update
-- `DELETE /api/comments/{id}` → CommentController@destroy
+| Aspek | Detail |
+|-------|--------|
+| **Folder** | `Modules/User/F18_MarkAcceptedAnswer/` |
+| **Controller** | `Controllers/AcceptedAnswerController.php` |
+| **Service** | `Services/AcceptedAnswerService.php` |
+| **Repository** | `Repositories/AcceptedAnswerRepository.php` |
+| **Model** | `app/Models/Content/Post.php`, `app/Models/Content/Comment.php` |
+| **Route** | `POST /api/posts/{post}/comments/{comment}/accept` |
+| **Middleware** | `auth:sanctum` |
+| **Tabel** | `posts`, `comments` |
 
 ---
 
-### Fitur 23: Comment Edit History
+### F19: Post Edit History
 
-**Services**:
-- `Modules/User/Comment/Services/CommentHistoryService.php`
-
-**Repositories**:
-- `Modules/User/Comment/Repositories/CommentEditHistoryRepository.php`
-
-**Database Tables**:
-- `comment_edit_history`
-
-**Routes**:
-- `GET /api/comments/{id}/history` → CommentController@getHistory
-
----
-
-## ⭐ INTERACTION FEATURES
-
-### Fitur 24: Upvote / Downvote Post & Comment
-
-**Controllers**:
-- `Modules/User/Interaction/Controllers/VoteController.php`
-  - Method: `vote(Request $request, int $id)`
-  - Params: `voteable_type=post|comment`, `vote_type=upvote|downvote|remove`
-
-**Services**:
-- `Modules/User/Interaction/Services/VoteService.php`
-  - Method: `vote(int $userId, int $voteableId, string $voteableType, string $voteType)`
-
-**Repositories**:
-- `Modules/User/Interaction/Repositories/VoteRepository.php`
-
-**Database Tables**:
-- `votes` - create/update
-- `posts` or `comments` - UPDATE vote_score
-
-**Routes**:
-- `POST /api/posts/{id}/votes` → VoteController@vote
-- `POST /api/comments/{id}/votes` → VoteController@vote
-
-**Business Logic**:
-- 1 vote per user per content
-- vote_score = COUNT(upvote) - COUNT(downvote)
-- Upvote recipient gains +10 rep, downvote -2 rep
+| Aspek | Detail |
+|-------|--------|
+| **Folder** | `Modules/User/F19_PostEditHistory/` |
+| **Controller** | `Controllers/PostHistoryController.php` |
+| **Service** | `Services/PostHistoryService.php` |
+| **Repository** | `Repositories/PostEditHistoryRepository.php` |
+| **Model** | `app/Models/History/PostEditHistory.php` |
+| **Route** | `GET /api/moderator/posts/{post}/history` |
+| **Middleware** | `auth:sanctum` + `role:moderator,admin` |
+| **Tabel** | `post_edit_history` |
 
 ---
 
-### Fitur 25: Like Post & Comment
+### F20: Nested Comment Reply
 
-**Controllers**:
-- `Modules/User/Interaction/Controllers/LikeController.php`
-  - Method: `toggle(int $id)`
-
-**Services**:
-- `Modules/User/Interaction/Services/LikeService.php`
-  - Method: `toggle(int $userId, int $likeableId, string $likeableType)`
-
-**Repositories**:
-- `Modules/User/Interaction/Repositories/LikeRepository.php`
-
-**Database Tables**:
-- `likes` - create/delete (toggle behavior)
-
-**Routes**:
-- `POST /api/posts/{id}/likes` → LikeController@toggle
-- `POST /api/comments/{id}/likes` → LikeController@toggle
+| Aspek | Detail |
+|-------|--------|
+| **Folder** | `Modules/User/F20_NestedCommentReply/` |
+| **Controller** | `Controllers/CommentReplyController.php` |
+| **Service** | `Services/CommentReplyService.php` |
+| **Model** | `app/Models/Content/Comment.php` |
+| **Routes** | `POST /api/posts/{post}/comments/{comment}/replies`, `PUT /api/posts/{post}/comments/{comment}/replies/{reply}` |
+| **Middleware** | `auth:sanctum` |
+| **Tabel** | `comments` (parent_id) |
 
 ---
 
-### Fitur 26: Bookmark / Save Post
+### F21: Comment Edit History
 
-**Controllers**:
-- `Modules/User/Interaction/Controllers/BookmarkController.php`
-  - Methods: `store()`, `destroy()`, `index()`
-
-**Services**:
-- `Modules/User/Interaction/Services/BookmarkService.php`
-  - Methods: `bookmark()`, `unbookmark()`, `getBookmarks()`
-
-**Repositories**:
-- `Modules/User/Interaction/Repositories/BookmarkRepository.php`
-
-**Database Tables**:
-- `bookmarks` - post saved by user
-
-**Routes**:
-- `POST /api/posts/{id}/bookmark` → BookmarkController@store
-- `DELETE /api/bookmarks/{id}` → BookmarkController@destroy
-- `GET /api/bookmarks` → BookmarkController@index (list user bookmarks)
+| Aspek | Detail |
+|-------|--------|
+| **Folder** | `Modules/User/F21_CommentEditHistory/` |
+| **Controller** | `Controllers/CommentHistoryController.php` |
+| **Service** | `Services/CommentHistoryService.php` |
+| **Repository** | `Repositories/CommentEditHistoryRepository.php` |
+| **Model** | `app/Models/History/CommentEditHistory.php` |
+| **Route** | `GET /api/moderator/comments/{comment}/history` |
+| **Middleware** | `auth:sanctum` + `role:moderator,admin` |
+| **Tabel** | `comment_edit_history` |
 
 ---
 
-### Fitur 27: Follow / Unfollow User
+### F22: Vote System
 
-**Controllers**:
-- `Modules/User/Interaction/Controllers/FollowController.php`
-  - Methods: `follow()`, `unfollow()`
-
-**Services**:
-- `Modules/User/Interaction/Services/FollowService.php`
-  - Methods: `follow()`, `unfollow()`, `getFollowers()`, `getFollowing()`
-
-**Repositories**:
-- `Modules/User/Interaction/Repositories/FollowRepository.php`
-
-**Database Tables**:
-- `follows` - follower_id & following_id
-
-**Routes**:
-- `POST /api/users/{id}/follow` → FollowController@follow
-- `POST /api/users/{id}/unfollow` → FollowController@unfollow
-- `GET /api/users/{id}/followers` → FollowController@followers
-- `GET /api/users/{id}/following` → FollowController@following
+| Aspek | Detail |
+|-------|--------|
+| **Folder** | `Modules/User/F22_VoteSystem/` |
+| **Controller** | `Controllers/VoteController.php` |
+| **Service** | `Services/VoteService.php` |
+| **Repository** | `Repositories/VoteRepository.php` |
+| **Request** | `Requests/VoteRequest.php` |
+| **Model** | `app/Models/Interaction/Vote.php`, `app/Models/Content/Post.php`, `app/Models/Content/Comment.php` |
+| **Route** | `POST /api/votes` |
+| **Middleware** | `auth:sanctum` |
+| **Tabel** | `votes`, `posts` (vote_score), `comments` (vote_score), `points_log`, `notifications` |
 
 ---
 
-## 🔔 NOTIFICATION FEATURES
+### F23: Like System
 
-### Fitur 28: Sistem Notifikasi Real-time + Mark as Read
-
-**Controllers**:
-- `Modules/User/Notification/Controllers/NotificationController.php`
-  - Methods: `index()`, `markAsRead()`, `markAllAsRead()`, `delete()`
-
-**Services**:
-- `Modules/User/Notification/Services/NotificationService.php`
-  - Methods: `notify()`, `markAsRead()`, `getUnreadCount()`
-
-**Repositories**:
-- `Modules/User/Notification/Repositories/NotificationRepository.php`
-
-**Events** (auto-trigger notifications):
-- `CommentCreated` → notify post author
-- `VoteCreated` → notify votee
-- `UserBadgeEarned` → notify user
-- `UserMentioned` → notify mentioned user
-
-**Database Tables**:
-- `notifications` - store notification records
-
-**Routes**:
-- `GET /api/notifications` → NotificationController@index
-- `GET /api/notifications/unread-count` → NotificationController@unreadCount
-- `PUT /api/notifications/{id}/read` → NotificationController@markAsRead
-- `PUT /api/notifications/read-all` → NotificationController@markAllAsRead
-- `DELETE /api/notifications/{id}` → NotificationController@delete
-
-**Real-time Options**:
-1. **WebSocket** (Pusher/Ably): Broadcasting via Laravel Events
-2. **Polling**: `GET /api/notifications?since_id=X`
-3. **Server-Sent Events (SSE)**: `GET /api/notifications/stream`
-
-**Event Example**:
-```php
-// In CommentService
-event(new CommentCreated($comment));
-
-// In CommentCreated Event
-public function broadcastOn() {
-    return new PrivateChannel('user.'.$this->comment->post->user_id);
-}
-```
+| Aspek | Detail |
+|-------|--------|
+| **Folder** | `Modules/User/F23_LikeSystem/` |
+| **Controller** | `Controllers/LikeController.php` |
+| **Service** | `Services/LikeService.php` |
+| **Repository** | `Repositories/LikeRepository.php` |
+| **Request** | `Requests/ToggleLikeRequest.php` |
+| **Model** | `app/Models/Interaction/Like.php` |
+| **Route** | `POST /api/likes/toggle` |
+| **Middleware** | `auth:sanctum` |
+| **Tabel** | `likes` |
 
 ---
 
-## 🏆 GAMIFICATION FEATURES
+### F24: Bookmark Post
 
-### Fitur 29: Reputation Level & Leaderboard
-
-**Controllers**:
-- `Modules/User/Gamification/Controllers/GamificationController.php`
-  - Methods: `leaderboard()`, `userReputation()`, `pointsLog()`
-
-**Services**:
-- `Modules/User/Gamification/Services/ReputationService.php`
-  - Methods: `calculateReputation()`, `awardPoints()`, `getLevels()`
-
-**Repositories**:
-- `Modules/User/Gamification/Repositories/ReputationRepository.php`
-  - Methods: `getLeaderboard()`, `getPointsLog()`
-
-**Events** (auto-award points):
-- `PostAccepted` → +15 points
-- `VoteReceived` → +10 points (upvote), -2 points (downvote)
-- `CommentLiked` → +5 points
-- `BadgeEarned` → +variable points
-
-**Database Tables**:
-- `users` - reputation_points field
-- `points_log` - audit trail of point changes
-
-**Reputation Levels**:
-- 0-99: Newbie
-- 100-499: Member
-- 500-999: Senior
-- 1000-4999: Expert
-- 5000+: Legend
-
-**Routes**:
-- `GET /api/leaderboard?period=week` → GamificationController@leaderboard
-- `GET /api/leaderboard?period=month` → sorted by period
-- `GET /api/users/{id}/reputation` → GamificationController@userReputation
-- `GET /api/users/{id}/points-log` → GamificationController@pointsLog
-
-**API Response Example**:
-```json
-{
-  "data": [
-    {
-      "rank": 1,
-      "user": { "id": 1, "name": "Top User", "avatar": "..." },
-      "reputation_points": 5500,
-      "level": "Legend",
-      "badges_count": 15
-    }
-  ]
-}
-```
-
-**Leaderboard Query** (example):
-```sql
-SELECT u.id, u.name, u.avatar_url, u.reputation_points,
-  CASE 
-    WHEN u.reputation_points < 100 THEN 'Newbie'
-    WHEN u.reputation_points < 500 THEN 'Member'
-    -- ...
-  END as level,
-  COUNT(ub.id) as badges_count
-FROM users u
-LEFT JOIN user_badges ub ON u.id = ub.user_id
-WHERE u.created_at >= DATE_SUB(NOW(), INTERVAL 1 WEEK)
-GROUP BY u.id
-ORDER BY u.reputation_points DESC
-LIMIT 100
-```
+| Aspek | Detail |
+|-------|--------|
+| **Folder** | `Modules/User/F24_BookmarkPost/` |
+| **Controller** | `Controllers/BookmarkController.php` |
+| **Service** | `Services/BookmarkService.php` |
+| **Repository** | `Repositories/BookmarkRepository.php` |
+| **Model** | `app/Models/Interaction/Bookmark.php` |
+| **Routes** | `POST /api/bookmarks/toggle`, `GET /api/bookmarks` |
+| **Middleware** | `auth:sanctum` |
+| **Tabel** | `bookmarks` |
 
 ---
 
-## 📊 Feature Statistics Summary
+### F25: Follow User
 
-| Feature | Controllers | Services | Repositories | Requests | Tables | Routes |
-|---------|-------------|----------|--------------|----------|--------|--------|
-| Fitur 1-2 (Auth) | 1 | 1 | 0 | 2 | 2 | 3 |
-| Fitur 3-6 (Explore) | 1 | 3 | 0 | 0 | 3 | 4 |
-| Fitur 7-11 (Admin) | 3 | 5 | 3 | 5 | 8 | 10 |
-| Fitur 12-14 (Moderator) | 2 | 2 | 1 | 1 | 3 | 6 |
-| Fitur 15-19 (Post) | 1 | 2 | 2 | 2 | 3 | 5 |
-| Fitur 20-23 (Comment) | 1 | 2 | 2 | 2 | 2 | 5 |
-| Fitur 24-27 (Interaction) | 4 | 4 | 4 | 0 | 4 | 10 |
-| Fitur 28 (Notification) | 1 | 1 | 1 | 0 | 1 | 6 |
-| Fitur 29 (Gamification) | 1 | 1 | 1 | 0 | 2 | 3 |
-| **TOTAL** | **15** | **21** | **14** | **12** | **28** | **52** |
+| Aspek | Detail |
+|-------|--------|
+| **Folder** | `Modules/User/F25_FollowUser/` |
+| **Controller** | `Controllers/FollowController.php` |
+| **Service** | `Services/FollowService.php` |
+| **Repository** | `Repositories/FollowRepository.php` |
+| **Model** | `app/Models/Interaction/Follow.php` |
+| **Routes** | `POST /api/users/{id}/follow`, `GET /api/users/{id}/followers`, `GET /api/users/{id}/following` |
+| **Middleware** | `auth:sanctum` |
+| **Tabel** | `follows` |
 
 ---
 
-## 🎯 Development Checklist
+### F26: Notification System
 
-**Untuk implement setiap fitur, pastikan:**
-
-- [ ] Controller dibuat dengan proper HTTP methods
-- [ ] Service dibuat dengan business logic
-- [ ] Request class dibuat dengan validation rules
-- [ ] Repository dibuat (jika data-heavy)
-- [ ] Database migration dibuat
-- [ ] Routes didaftarkan di routes file
-- [ ] Tests written (unit & feature)
-- [ ] API documentation updated
-- [ ] Error handling implemented
-- [ ] Authorization checks implemented
-- [ ] Events/Listeners setup (jika diperlukan)
+| Aspek | Detail |
+|-------|--------|
+| **Folder** | `Modules/User/F26_NotificationSystem/` |
+| **Controller** | `Controllers/NotificationController.php` |
+| **Service** | `Services/NotificationService.php` |
+| **Repository** | `Repositories/NotificationRepository.php` |
+| **Model** | `app/Models/Moderation/Notification.php` |
+| **Routes** | `GET /api/notifications`, `PATCH /api/notifications/mark-all-read`, `PATCH /api/notifications/{id}/read` |
+| **Middleware** | `auth:sanctum` |
+| **Tabel** | `notifications` |
 
 ---
 
-**Next: Baca [05_ARCHITECTURE_PATTERNS.md](05_ARCHITECTURE_PATTERNS.md) untuk design patterns →**
+### F27: Gamification Leaderboard
+
+| Aspek | Detail |
+|-------|--------|
+| **Folder** | `Modules/User/F27_GamificationLeaderboard/` |
+| **Controller** | `Controllers/LeaderboardController.php` |
+| **Service** | `Services/GamificationService.php` |
+| **Model** | `app/Models/Auth/User.php` |
+| **Route** | `GET /api/explore/leaderboard` |
+| **Middleware** | Publik |
+| **Tabel** | `users` (reputation_points, level) |
+
+---
+
+### F28: Profile Settings
+
+| Aspek | Detail |
+|-------|--------|
+| **Folder** | `Modules/User/F28_ProfileSettings/` |
+| **Controller** | `Controllers/ProfileController.php` |
+| **Service** | `Services/ProfileService.php` |
+| **Request** | `Requests/UpdateProfileRequest.php` |
+| **Model** | `app/Models/Auth/User.php` |
+| **Routes** | `GET /api/settings/profile`, `PUT /api/settings/profile`, `PUT /api/settings/password` |
+| **Middleware** | `auth:sanctum` |
+| **Tabel** | `users` |
+
+---
+
+### F29: Badge Achievement
+
+| Aspek | Detail |
+|-------|--------|
+| **Folder** | `Modules/User/F29_BadgeAchievement/` |
+| **Controller** | `Controllers/BadgeAchievementController.php` |
+| **Service** | `Services/BadgeAchievementService.php` |
+| **Repository** | `Repositories/BadgeAchievementRepository.php` |
+| **Model** | `app/Models/Gamification/UserBadge.php`, `app/Models/Gamification/Badge.php`, `app/Models/Gamification/PointsLog.php` |
+| **Route** | `GET /api/me/badges` |
+| **Middleware** | `auth:sanctum` |
+| **Tabel** | `user_badges`, `badges`, `points_log` |
+
+> **Catatan:** `BadgeAchievementService` digunakan secara cross-feature oleh PostService, VoteService, CommentService untuk pemberian poin dan badge otomatis.
+
+---
+
+### F30: User Report
+
+| Aspek | Detail |
+|-------|--------|
+| **Folder** | `Modules/User/F30_UserReport/` |
+| **Controller** | `Controllers/UserReportController.php` |
+| **Service** | `Services/UserReportService.php` |
+| **Repository** | `Repositories/UserReportRepository.php` |
+| **Request** | `Requests/StoreReportRequest.php` |
+| **Model** | `app/Models/Moderation/Report.php` |
+| **Route** | `POST /api/reports` |
+| **Middleware** | `auth:sanctum` |
+| **Tabel** | `reports` |
+
+---
+
+## Ringkasan Middleware per Route Group
+
+| Route Group | Middleware | Jumlah Route |
+|-------------|-----------|-------------|
+| Publik Auth | *(none)* | 4 (register, login, forgot-password, reset-password) |
+| Publik Explore | *(none)* | 6 (search, tags, tag/{slug}, category/{slug}, trending, leaderboard) |
+| Publik Posts/Comments | *(none)* | 3 (posts index, posts show, comments index) |
+| User (auth:sanctum) | `auth:sanctum` | ~25 routes |
+| Moderator | `auth:sanctum` + `role:moderator,admin` | ~15 routes |
+| Admin | `auth:sanctum` + `role:admin` | ~7 routes |
+
+---
+
+## Cross-Feature Dependencies
+
+Beberapa Service digunakan oleh fitur lain:
+
+| Service | Dipanggil Oleh |
+|---------|---------------|
+| `BadgeAchievementService` (F29) | PostService (F16), VoteService (F22), CommentService (F17), UserSanctionService (F15) |
+| `NotificationService` (F26) | VoteService (F22), CommentService (F17), UserSanctionService (F15) |
+| `ModerationLogService` (F14) | UserSanctionService (F15), ReportService (F13) |
+
+---
+
+**Selanjutnya: Baca [05_ARCHITECTURE_PATTERNS.md](05_ARCHITECTURE_PATTERNS.md) untuk detail pola arsitektur →**
