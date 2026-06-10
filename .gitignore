@@ -21,5 +21,7 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
-_ide_helper*.php
-.phpstorm.meta.php
+"cypress/" 
+"tests/" 
+"cypress/" 
+"tests/" 
