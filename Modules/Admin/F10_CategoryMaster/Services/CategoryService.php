@@ -4,6 +4,7 @@ namespace Modules\Admin\F10_CategoryMaster\Services;
 
 use Modules\Admin\F10_CategoryMaster\Repositories\CategoryRepository;
 use App\Models\Content\Category;
+use Illuminate\Support\Facades\Cache;
 
 class CategoryService
 {
@@ -13,7 +14,9 @@ class CategoryService
 
     public function getHierarchy()
     {
-        return $this->repository->getHierarchy();
+        return Cache::remember('all_categories', 3600, function () {
+            return $this->repository->getHierarchy();
+        });
     }
 
     public function find(string $id): ?Category
@@ -23,18 +26,25 @@ class CategoryService
 
     public function create(array $data): Category
     {
-        // Kamu bisa tambahkan logika bisnis tambahan di sini jika perlu,
-        // misalnya trigger event atau logging.
-        return $this->repository->create($data);
+        $category = $this->repository->create($data);
+        Cache::forget('all_categories');
+
+        return $category;
     }
 
     public function update(string $id, array $data): bool
     {
-        return $this->repository->update($id, $data);
+        $result = $this->repository->update($id, $data);
+        Cache::forget('all_categories');
+
+        return $result;
     }
 
     public function delete(string $id): bool
     {
-        return $this->repository->delete($id);
+        $result = $this->repository->delete($id);
+        Cache::forget('all_categories');
+
+        return $result;
     }
 }
