@@ -39,16 +39,11 @@ use Modules\User\F29_BadgeAchievement\Controllers\BadgeAchievementController;
 use Modules\User\F24_BookmarkPost\Controllers\BookmarkController;
 use Modules\User\F30_UserReport\Controllers\UserReportController;
 use Modules\Auth\F31_ForgotPassword\Controllers\ForgotPasswordController;
-use Dedoc\Scramble\Http\Controllers\DocsController;
-use Dedoc\Scramble\Http\Controllers\OpenApiSpecController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
 |--------------------------------------------------------------------------
 */
-
-Route::get('docs/api', [DocsController::class, 'show'])->name('scramble.docs.index');
-Route::get('docs/api.json', [OpenApiSpecController::class, 'show'])->name('scramble.docs.json');
 
 // ====================== PUBLIC ROUTES ======================
 Route::prefix('auth')->group(function () {
