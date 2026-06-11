@@ -18,11 +18,12 @@ class SearchPostController extends Controller
 
     public function search(Request $request): JsonResponse
     {
-        // Ambil filter query parameter 'q' (keyword) dan 'per_page'
+        // Ambil filter query parameter 'q' (keyword), 'per_page', dan 'category'
         $filters = [
             'q'        => $request->query('q'),
             'per_page' => $request->query('per_page', 10),
             'sort'     => $request->query('sort', 'terbaru'),
+            'category' => $request->query('category'),
         ];
 
         $posts = $this->searchService->execute($filters);
