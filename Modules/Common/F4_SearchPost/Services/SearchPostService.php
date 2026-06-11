@@ -12,9 +12,10 @@ class SearchPostService
      */
     public function execute(array $filters): LengthAwarePaginator
     {
-        $keyword = $filters['q'] ?? '';
-        $perPage = $filters['per_page'] ?? 10;
-        $sort    = $filters['sort'] ?? 'terbaru';
+        $keyword  = $filters['q'] ?? '';
+        $perPage  = $filters['per_page'] ?? 10;
+        $sort     = $filters['sort'] ?? 'terbaru';
+        $category = $filters['category'] ?? null;
 
         $query = Post::query()
             ->with(['user:id,username,avatar_url', 'category:id,name,slug', 'tags:id,name,slug,color'])
@@ -25,6 +26,13 @@ class SearchPostService
             $query->where(function ($q) use ($keyword) {
                 $q->where('title', 'ILIKE', '%' . $keyword . '%')
                   ->orWhere('body', 'ILIKE', '%' . $keyword . '%');
+            });
+        }
+
+        // Filter berdasarkan kategori (slug)
+        if (!empty($category)) {
+            $query->whereHas('category', function ($q) use ($category) {
+                $q->where('slug', $category);
             });
         }
 

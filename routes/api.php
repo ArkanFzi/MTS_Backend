@@ -64,6 +64,8 @@ Route::middleware('throttle:api-public')->group(function () {
     Route::prefix('explore')->group(function () {
         Route::get('/search', [SearchPostController::class, 'search']);
         Route::get('/tags', [TagController::class, 'index']);
+        Route::get('/categories', [CategoryController::class, 'index']);
+        Route::get('/categories/with-tags', [FilterCategoryController::class, 'categoriesWithTags']);
         Route::get('/tag/{slug}', [FilterTagController::class, 'filter']);
         Route::get('/category/{slug}', [FilterCategoryController::class, 'filter']);
         Route::get('/trending', [TrendingController::class, 'getTrending']);

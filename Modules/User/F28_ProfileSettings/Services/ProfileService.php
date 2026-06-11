@@ -4,6 +4,7 @@ namespace Modules\User\F28_ProfileSettings\Services;
 
 use App\Models\Auth\User;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Modules\User\F26_NotificationSystem\Services\NotificationService;
 
 class ProfileService
@@ -18,11 +19,22 @@ class ProfileService
     public function updateProfile(User $user, array $data): User
     {
         $wasIncomplete = empty($user->bio) || empty($user->avatar_url);
-        
+
+        if (isset($data['avatar'])) {
+            // Hapus foto lama kalau ada
+            if ($user->avatar_url) {
+                $oldPath = str_replace('/storage/', '', $user->avatar_url);
+                Storage::disk('public')->delete($oldPath);
+            }
+
+            $path = $data['avatar']->store('avatars', 'public');
+            $data['avatar_url'] = Storage::url($path);
+            unset($data['avatar']);
+        }
+
         $user->update($data);
         $updatedUser = $user->fresh();
 
-        // Cek apakah baru saja melengkapi profile
         if ($wasIncomplete && (!empty($updatedUser->bio) && !empty($updatedUser->avatar_url))) {
             $this->notificationService->createNotification(
                 $user->id,
