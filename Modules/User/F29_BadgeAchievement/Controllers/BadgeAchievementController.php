@@ -3,27 +3,38 @@
 namespace Modules\User\F29_BadgeAchievement\Controllers;
 
 use App\Http\Controllers\Controller;
-use Modules\User\F29_BadgeAchievement\Services\BadgeAchievementService;
+use App\Models\Gamification\Badge;
 
 class BadgeAchievementController extends Controller
 {
-    protected BadgeAchievementService $service;
-
-    public function __construct(BadgeAchievementService $service)
-    {
-        $this->service = $service;
-    }
-    
+    /**
+     * Return ALL badges, with earned_at populated for badges the user has earned.
+     * Locked badges have earned_at = null.
+     */
     public function index()
     {
         $user = auth()->user();
-        
-        // Mengambil badge dengan data pivot earned_at
-        $badges = $user->badges()->withPivot('earned_at')->get();
-        
+
+        // Get IDs of badges the user has earned
+        $earnedBadgeIds = $user->badges()->pluck('badges.id')->toArray();
+
+        // Get ALL badges, attach earned_at only for earned ones
+        $allBadges = Badge::orderBy('tier')->orderBy('condition_value')->get()->map(function ($badge) use ($user, $earnedBadgeIds) {
+            $badgeData = $badge->toArray();
+
+            if (in_array($badge->id, $earnedBadgeIds)) {
+                $pivot = $user->badges()->where('badges.id', $badge->id)->first()?->pivot;
+                $badgeData['earned_at'] = $pivot?->earned_at;
+            } else {
+                $badgeData['earned_at'] = null;
+            }
+
+            return $badgeData;
+        });
+
         return response()->json([
             'success' => true,
-            'data' => $badges
+            'data'    => $allBadges,
         ]);
     }
 }

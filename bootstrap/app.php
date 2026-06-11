@@ -17,12 +17,12 @@ return Application::configure(basePath: dirname(__DIR__))
     // Enable Sanctum stateful API middleware (session + cookies for SPA)
     $middleware->statefulApi();
 
-    // Exclude public auth routes from CSRF validation (cross-origin SPA)
+    // Exclude ALL api/* routes from CSRF cookie validation.
+    // For SPA + Sanctum stateful auth, CSRF protection is handled via
+    // the X-XSRF-TOKEN header (read from XSRF-TOKEN cookie by Axios),
+    // NOT via the traditional Laravel CSRF cookie/form-field check.
     $middleware->validateCsrfTokens(except: [
-        'api/auth/login',
-        'api/auth/register',
-        'api/auth/forgot-password',
-        'api/auth/reset-password',
+        'api/*',
     ]);
 
     $middleware->alias([

@@ -21,6 +21,7 @@ class ProfileController extends Controller
     {
         return response()->json([
             'success' => true,
+            'message' => 'Profil berhasil dimuat',
             'data'    => auth()->user()
         ]);
     }
