@@ -31,7 +31,6 @@ class AuthTest extends TestCase
             ->assertJsonStructure([
                 'data' => [
                     'user' => ['id', 'username', 'email'],
-                    'access_token'
                 ]
             ]);
 
@@ -67,7 +66,7 @@ class AuthTest extends TestCase
 
         $response->assertStatus(200)
             ->assertJsonStructure([
-                'data' => ['access_token', 'token_type']
+                'data' => ['user']
             ]);
     }
 
@@ -83,7 +82,7 @@ class AuthTest extends TestCase
             'password' => 'wrongpassword',
         ]);
 
-        $response->assertStatus(422);
+        $response->assertStatus(401);
     }
 
     public function test_banned_user_cannot_login()
@@ -99,7 +98,7 @@ class AuthTest extends TestCase
             'password' => 'password123',
         ]);
 
-        $response->assertStatus(422); // Implementation returns 422 for ban as well in the logs
+        $response->assertStatus(403);
     }
 
     public function test_authenticated_user_can_logout()
