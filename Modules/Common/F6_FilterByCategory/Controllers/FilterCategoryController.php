@@ -23,9 +23,30 @@ class FilterCategoryController extends Controller
     {
         $perPage = $request->query('per_page', 10);
         $sort    = $request->query('sort', 'newest');
+        $tag     = $request->query('tag');
 
-        $posts    = $this->filterCategoryService->execute($slug, (int) $perPage, $sort);
+        $posts    = $this->filterCategoryService->execute($slug, (int) $perPage, $sort, $tag);
         $category = Category::where('slug', $slug)->first();
+
+        // Fetch all tags that have open posts in this category (for sidebar)
+        $tags = Tag::whereHas('posts', function ($q) use ($slug) {
+                $q->whereHas('category', fn($c) => $c->where('slug', $slug))
+                  ->where('status', 'open');
+            })
+            ->select('id', 'name', 'slug', 'color')
+            ->withCount(['posts as count' => function ($q) use ($slug) {
+                $q->whereHas('category', fn($c) => $c->where('slug', $slug))
+                  ->where('status', 'open');
+            }])
+            ->orderByDesc('count')
+            ->get()
+            ->map(fn(Tag $t) => [
+                'id'    => $t->id,
+                'name'  => $t->name,
+                'slug'  => $t->slug,
+                'color' => $t->color,
+                'count' => $t->count,
+            ]);
 
         return response()->json([
             'status'   => 'success',
@@ -38,6 +59,7 @@ class FilterCategoryController extends Controller
                 'description' => $category->description,
                 'created_at'  => $category->created_at,
             ] : null,
+            'tags'     => $tags,
             'meta'     => [
                 'current_page' => $posts->currentPage(),
                 'last_page'    => $posts->lastPage(),
