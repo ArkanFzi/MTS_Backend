@@ -5,6 +5,7 @@ namespace Modules\Moderator\F13_ContentReportQueue\Services;
 use Modules\Moderator\F13_ContentReportQueue\Repositories\ReportRepository;
 use Modules\Moderator\F15_UserBanSanction\Services\UserSanctionService;
 use Modules\User\F29_BadgeAchievement\Services\BadgeAchievementService;
+use Modules\User\F26_NotificationSystem\Services\NotificationService;
 use App\Models\Moderation\ModerationLog;
 use App\Models\Auth\User;
 use Illuminate\Support\Facades\Auth;
@@ -14,15 +15,18 @@ class ReportService
     protected ReportRepository $repository;
     protected BadgeAchievementService $gamification;
     protected UserSanctionService $sanctionService;
+    protected NotificationService $notificationService;
 
     public function __construct(
         ReportRepository $repository,
         BadgeAchievementService $gamification,
-        UserSanctionService $sanctionService
+        UserSanctionService $sanctionService,
+        NotificationService $notificationService
     ) {
         $this->repository = $repository;
         $this->gamification = $gamification;
         $this->sanctionService = $sanctionService;
+        $this->notificationService = $notificationService;
     }
 
     public function getAllPaginated(int $perPage = 20, $status = null, $search = null)
@@ -46,6 +50,15 @@ class ReportService
             'resolved_at' => now(),
         ]);
 
+        // Notifikasi otomatis ke pelapor
+        $this->notificationService->createNotification(
+            userId: $report->reporter_id,
+            actorId: Auth::id(),
+            type: 'report_updated',
+            refId: $report->id,
+            refType: 'report'
+        );
+
         $target = $report->target;
         $targetUserId = $target ? ($target->user_id ?? null) : null;
 
@@ -58,11 +71,9 @@ class ReportService
             'created_at'     => now(),
         ]);
 
-        // Hanya proses jika status resolved dan ada target user
         if ($data['status'] === 'resolved' && $targetUserId) {
             $user = User::find($targetUserId);
             if ($user) {
-                // Kurangi poin
                 $this->gamification->addPoints(
                     $user,
                     -10,
@@ -71,7 +82,6 @@ class ReportService
                     'Laporan terhadap konten diterima'
                 );
 
-                // Eksekusi action
                 $action = $data['action'] ?? 'none';
 
                 if ($action === 'warn') {
