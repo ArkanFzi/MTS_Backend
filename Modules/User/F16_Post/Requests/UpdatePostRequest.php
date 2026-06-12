@@ -3,14 +3,12 @@
 namespace Modules\User\F16_Post\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use App\Models\Content\Post; // Import modelnya agar lebih bersih
+use App\Models\Content\Post;
 
 class UpdatePostRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        // Gunakan route('post') atau $this->route('post')
-        // Pastikan nama parameter di route kamu memang 'post' (sesuai route:list)
         $postId = $this->route('post');
 
         if (!$postId) {
@@ -18,9 +16,16 @@ class UpdatePostRequest extends FormRequest
         }
 
         $post = Post::find($postId);
-        
-        // Pastikan post ada DAN user yang login adalah pemiliknya
-        return $post !== null && $post->user_id === $this->user()->id;
+
+        if (!$post) {
+            return false;
+        }
+
+        $user = $this->user();
+
+        return $post->user_id === $user->id
+            || $user->hasRole('moderator')
+            || $user->hasRole('admin');
     }
 
     public function rules(): array
@@ -29,8 +34,9 @@ class UpdatePostRequest extends FormRequest
             'category_id' => 'sometimes|uuid|exists:categories,id',
             'title'       => 'sometimes|string|max:255',
             'body'        => 'sometimes|string',
+            'edit_reason' => 'nullable|string|max:255',
             'tags'        => 'nullable|array',
-            'tags.*'      => 'exists:tags,id',
+            'tags.*'      => 'string',
         ];
     }
 }
