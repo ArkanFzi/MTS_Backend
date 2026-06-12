@@ -18,8 +18,15 @@ class NotificationController extends Controller
 
     public function index(Request $request): JsonResponse
     {
+        $userId = auth()->id();
+
+        // Safety check: ensure authenticated user ID is valid
+        if (!$userId) {
+            return response()->json(['message' => 'Unauthenticated.'], 401);
+        }
+
         $unreadOnly = $request->boolean('unread_only', false);
-        $notifications = $this->service->getNotifications(auth()->id(), $unreadOnly);
+        $notifications = $this->service->getNotifications($userId, $unreadOnly);
 
         return response()->json($notifications);
     }
