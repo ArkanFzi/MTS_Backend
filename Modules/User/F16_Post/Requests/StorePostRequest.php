@@ -8,7 +8,7 @@ class StorePostRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true; // Pastikan user sudah login melalui middleware di route
+        return true;
     }
 
     public function rules(): array
@@ -18,7 +18,7 @@ class StorePostRequest extends FormRequest
             'title'       => 'required|string|max:255',
             'body'        => 'required|string',
             'tags'        => 'nullable|array',
-            'tags.*'      => 'exists:tags,id', // Memastikan tag yang dikirim ada di database
+            'tags.*'      => 'string',
         ];
     }
 }
