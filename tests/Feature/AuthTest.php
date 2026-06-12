@@ -31,6 +31,10 @@ class AuthTest extends TestCase
             ->assertJsonStructure([
                 'data' => [
                     'user' => ['id', 'username', 'email'],
+<<<<<<< HEAD
+=======
+                    'access_token'
+>>>>>>> 3ebce9d (chore: sync tests & cypress from dev)
                 ]
             ]);
 
@@ -66,7 +70,11 @@ class AuthTest extends TestCase
 
         $response->assertStatus(200)
             ->assertJsonStructure([
+<<<<<<< HEAD
                 'data' => ['user']
+=======
+                'data' => ['access_token', 'token_type']
+>>>>>>> 3ebce9d (chore: sync tests & cypress from dev)
             ]);
     }
 
@@ -82,7 +90,11 @@ class AuthTest extends TestCase
             'password' => 'wrongpassword',
         ]);
 
+<<<<<<< HEAD
         $response->assertStatus(401);
+=======
+        $response->assertStatus(422);
+>>>>>>> 3ebce9d (chore: sync tests & cypress from dev)
     }
 
     public function test_banned_user_cannot_login()
@@ -98,7 +110,11 @@ class AuthTest extends TestCase
             'password' => 'password123',
         ]);
 
+<<<<<<< HEAD
         $response->assertStatus(403);
+=======
+        $response->assertStatus(422); // Implementation returns 422 for ban as well in the logs
+>>>>>>> 3ebce9d (chore: sync tests & cypress from dev)
     }
 
     public function test_authenticated_user_can_logout()
@@ -109,4 +125,8 @@ class AuthTest extends TestCase
 
         $response->assertStatus(200);
     }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 3ebce9d (chore: sync tests & cypress from dev)

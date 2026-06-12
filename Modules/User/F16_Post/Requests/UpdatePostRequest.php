@@ -7,30 +7,37 @@ use App\Models\Content\Post; // Import modelnya agar lebih bersih
 
 class UpdatePostRequest extends FormRequest
 {
-    public function authorize(): bool
-    {
-        // Gunakan route('post') atau $this->route('post')
-        // Pastikan nama parameter di route kamu memang 'post' (sesuai route:list)
-        $postId = $this->route('post');
+public function authorize(): bool
+{
+    $postId = $this->route('post');
 
-        if (!$postId) {
-            return false;
-        }
-
-        $post = Post::find($postId);
-        
-        // Pastikan post ada DAN user yang login adalah pemiliknya
-        return $post !== null && $post->user_id === $this->user()->id;
+    if (!$postId) {
+        return false;
     }
 
-    public function rules(): array
-    {
-        return [
-            'category_id' => 'sometimes|uuid|exists:categories,id',
-            'title'       => 'sometimes|string|max:255',
-            'body'        => 'sometimes|string',
-            'tags'        => 'nullable|array',
-            'tags.*'      => 'exists:tags,id',
-        ];
+    $post = Post::find($postId);
+
+    if (!$post) {
+        return false;
     }
+
+    $user = $this->user();
+
+    // Pemilik, moderator, atau admin boleh update
+    return $post->user_id === $user->id 
+        || $user->hasRole('moderator') 
+        || $user->hasRole('admin');
+}
+
+public function rules(): array
+{
+    return [
+        'category_id' => 'sometimes|uuid|exists:categories,id',
+        'title'       => 'sometimes|string|max:255',
+        'body'        => 'sometimes|string',
+        'edit_reason' => 'nullable|string|max:255',
+        'tags'        => 'nullable|array',
+        'tags.*'      => 'exists:tags,id',
+    ];
+}
 }

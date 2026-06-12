@@ -53,37 +53,52 @@ class PostService
 }
 
     public function updatePost(string $id, array $data)
-    {
-        $post = $this->repo->findById($id);
-        
-        // Cek izin: Hanya pemilik atau staf yang boleh update konten
-        if ($post->user_id !== Auth::id() && !Auth::user()->hasRole('moderator') && !Auth::user()->hasRole('admin')) {
-            abort(403, 'Anda tidak memiliki izin untuk mengedit post ini.');
-        }
+{
+    $post = $this->repo->findById($id);
+    $user = Auth::user();
 
-        $oldBody = $post->body;
-
-        // Update data utama
-        $post = $this->repo->update($id, $data);
-
-        // Catat ke history jika body berubah
-        if (isset($data['body']) && $data['body'] !== $oldBody) {
-            $post->editHistories()->create([
-                'edited_by'   => Auth::id(),
-                'body_before' => $oldBody,
-                'body_after'  => $data['body'],
-                'reason'      => $data['edit_reason'] ?? 'Update konten',
-                'edited_at'   => now(),
-            ]);
-        }
-
-        // Sync tags jika ada di request
-        if (isset($data['tags'])) {
-            $post->tags()->sync($data['tags']);
-        }
-
-        return $post->load('tags');
+    // Cek izin: pemilik, moderator, atau admin
+    if ($post->user_id !== $user->id && !$user->hasRole('moderator') && !$user->hasRole('admin')) {
+        abort(403, 'Anda tidak memiliki izin untuk mengedit post ini.');
     }
+
+    // Rate limit: hanya berlaku untuk pemilik (bukan mod/admin)
+    if ($post->user_id === $user->id && !$user->hasRole('moderator') && !$user->hasRole('admin')) {
+        $this->checkEditRateLimit($post);
+    }
+
+    $oldBody = $post->body;
+
+    $post = $this->repo->update($id, $data);
+
+    if (isset($data['body']) && $data['body'] !== $oldBody) {
+        $post->editHistories()->create([
+            'edited_by'   => $user->id,
+            'body_before' => $oldBody,
+            'body_after'  => $data['body'],
+            'reason'      => $data['edit_reason'] ?? 'Update konten',
+            'edited_at'   => now(),
+        ]);
+    }
+
+    if (isset($data['tags'])) {
+        $post->tags()->sync($data['tags']);
+    }
+
+    return $post->load('tags');
+}
+
+private function checkEditRateLimit($post): void
+{
+    $editCount = $post->editHistories()
+        ->where('edited_by', Auth::id())
+        ->where('edited_at', '>=', now()->subMinutes(30))
+        ->count();
+
+    if ($editCount >= 3) {
+        abort(429, 'Anda telah mencapai batas maksimal edit (3 kali dalam 30 menit). Silakan coba lagi nanti.');
+    }
+}
 
     public function updateStatus(string $id, string $status)
     {
