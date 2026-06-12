@@ -16,7 +16,6 @@ class UpdateProfileRequest extends FormRequest
         $user = auth()->user();
         return [
             'username' => 'sometimes|string|max:50|unique:users,username,' . $user->id,
-            'email'    => 'sometimes|email|max:255|unique:users,email,' . $user->id,
             'avatar'   => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
             'bio'      => 'nullable|string|max:500',
         ];
