@@ -141,4 +141,38 @@ class InteractionTest extends TestCase
             'following_id' => $other->id,
         ]);
     }
+
+    public function test_user_can_get_followers()
+    {
+        $user = $this->actingAsUser();
+        $other = User::factory()->create();
+        
+        // Simulasikan $other mem-follow $user
+        \App\Models\Interaction\Follow::create([
+            'follower_id' => $other->id,
+            'following_id' => $user->id,
+        ]);
+
+        $response = $this->getJson("/api/users/{$user->id}/followers");
+
+        $response->assertStatus(200)
+            ->assertJsonCount(1);
+    }
+
+    public function test_user_can_get_following()
+    {
+        $user = $this->actingAsUser();
+        $other = User::factory()->create();
+        
+        // Simulasikan $user mem-follow $other
+        \App\Models\Interaction\Follow::create([
+            'follower_id' => $user->id,
+            'following_id' => $other->id,
+        ]);
+
+        $response = $this->getJson("/api/users/{$user->id}/following");
+
+        $response->assertStatus(200)
+            ->assertJsonCount(1);
+    }
 }

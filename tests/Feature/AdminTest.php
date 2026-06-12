@@ -66,4 +66,76 @@ class AdminTest extends TestCase
 
         $response->assertStatus(403);
     }
+
+    public function test_admin_can_view_points_summary()
+    {
+        $this->actingAsUser(null, 'admin');
+
+        $response = $this->getJson('/api/admin/stats/points-summary');
+
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'success',
+                'data',
+            ]);
+    }
+
+    public function test_admin_can_view_roles()
+    {
+        $this->actingAsUser(null, 'admin');
+
+        $response = $this->getJson('/api/admin/roles');
+
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'success',
+                'data',
+            ]);
+    }
+
+    public function test_admin_can_list_users()
+    {
+        $this->actingAsUser(null, 'admin');
+        User::factory()->count(2)->create();
+
+        $response = $this->getJson('/api/admin/users');
+
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'success',
+                'data' => [
+                    'current_page',
+                    'data',
+                ]
+            ]);
+    }
+
+    public function test_admin_can_view_user_details()
+    {
+        $this->actingAsUser(null, 'admin');
+        $targetUser = User::factory()->create(['username' => 'targetusername']);
+
+        $response = $this->getJson("/api/admin/users/{$targetUser->id}");
+
+        $response->assertStatus(200)
+            ->assertJsonPath('data.username', 'targetusername');
+    }
+
+    public function test_admin_can_update_user_profile()
+    {
+        $this->actingAsUser(null, 'admin');
+        $targetUser = User::factory()->create(['username' => 'oldusername']);
+
+        $response = $this->putJson("/api/admin/users/{$targetUser->id}/profile", [
+            'username' => 'newusername',
+            'bio' => 'updated bio',
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJsonPath('status', 'success');
+
+        $targetUser->refresh();
+        $this->assertEquals('newusername', $targetUser->username);
+        $this->assertEquals('updated bio', $targetUser->bio);
+    }
 }

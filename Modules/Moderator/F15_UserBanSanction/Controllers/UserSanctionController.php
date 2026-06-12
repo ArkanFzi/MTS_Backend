@@ -18,10 +18,11 @@ class UserSanctionController extends Controller
         $this->service = $service;
     }
 
-    public function index(Request $request)
+    public function index(Request $request): JsonResponse
     {
+        // Ambil semua user dengan paginasi dan filter pencarian
         $users = $this->service->getAllPaginated(15, $request->search);
-        return view('admin::F15_UserBanSanction.index', compact('users'));
+        return response()->json(['data' => $users]);
     }
 
     public function ban(BanUserRequest $request, string $id): JsonResponse

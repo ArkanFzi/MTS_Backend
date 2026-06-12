@@ -109,4 +109,48 @@ class AuthTest extends TestCase
 
         $response->assertStatus(200);
     }
+
+    public function test_user_can_request_forgot_password()
+    {
+        $user = User::factory()->create(['email' => 'user@example.com']);
+
+        $response = $this->postJson('/api/auth/forgot-password', [
+            'email' => 'user@example.com',
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJsonPath('success', true);
+
+        $this->assertDatabaseHas('password_reset_tokens', [
+            'email' => 'user@example.com',
+        ]);
+    }
+
+    public function test_user_can_reset_password_with_valid_token()
+    {
+        $user = User::factory()->create(['email' => 'user@example.com']);
+        $token = 'random-reset-token-123';
+        
+        \Illuminate\Support\Facades\DB::table('password_reset_tokens')->insert([
+            'email' => 'user@example.com',
+            'token' => $token,
+            'created_at' => now(),
+        ]);
+
+        $response = $this->postJson('/api/auth/reset-password', [
+            'email' => 'user@example.com',
+            'token' => $token,
+            'password' => 'newpassword123',
+            'password_confirmation' => 'newpassword123',
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJsonPath('success', true);
+
+        $this->assertDatabaseMissing('password_reset_tokens', [
+            'email' => 'user@example.com',
+        ]);
+
+        $this->assertTrue(Hash::check('newpassword123', $user->fresh()->password_hash));
+    }
 }

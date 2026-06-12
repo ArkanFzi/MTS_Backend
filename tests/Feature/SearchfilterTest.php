@@ -94,4 +94,43 @@ class SearchFilterTest extends TestCase
                 'data',
             ]);
     }
+
+    public function test_can_get_explore_tags()
+    {
+        Tag::create(['name' => 'PHP', 'slug' => 'php', 'color' => '#8892bf']);
+
+        $response = $this->getJson('/api/explore/tags');
+
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'success',
+                'data',
+            ]);
+    }
+
+    public function test_can_get_explore_categories()
+    {
+        Category::factory()->create();
+
+        $response = $this->getJson('/api/explore/categories');
+
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'success',
+                'data',
+            ]);
+    }
+
+    public function test_can_get_trending_posts()
+    {
+        Post::factory()->count(2)->create(['status' => 'open']);
+
+        $response = $this->getJson('/api/explore/trending');
+
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'status',
+                'data',
+            ]);
+    }
 }

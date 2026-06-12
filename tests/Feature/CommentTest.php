@@ -79,4 +79,71 @@ class CommentTest extends TestCase
         $commentOwner = $comment->user;
         $this->assertEquals(15, $commentOwner->reputation_points);
     }
+
+    public function test_can_get_post_comments()
+    {
+        $user = $this->actingAsUser();
+        $post = Post::factory()->create();
+        Comment::factory()->count(2)->create(['post_id' => $post->id]);
+
+        $response = $this->getJson("/api/posts/{$post->id}/comments");
+
+        $response->assertStatus(200)
+            ->assertJsonCount(2);
+    }
+
+    public function test_owner_can_update_comment()
+    {
+        $user = $this->actingAsUser();
+        $post = Post::factory()->create();
+        $comment = Comment::factory()->create(['user_id' => $user->id, 'post_id' => $post->id, 'body' => 'Old comment body']);
+
+        $response = $this->putJson("/api/posts/{$post->id}/comments/{$comment->id}", [
+            'body' => 'Updated comment body',
+        ]);
+
+        $response->assertStatus(200);
+        $this->assertEquals('Updated comment body', $comment->fresh()->body);
+    }
+
+    public function test_user_can_reply_to_comment()
+    {
+        $user = $this->actingAsUser();
+        $post = Post::factory()->create();
+        $comment = Comment::factory()->create(['post_id' => $post->id]);
+
+        $response = $this->postJson("/api/posts/{$post->id}/comments/{$comment->id}/replies", [
+            'body' => 'This is a reply body',
+        ]);
+
+        $response->assertStatus(201)
+            ->assertJsonPath('message', 'Balasan berhasil ditambahkan');
+
+        $this->assertDatabaseHas('comments', [
+            'parent_id' => $comment->id,
+            'body' => 'This is a reply body',
+        ]);
+    }
+
+    public function test_owner_can_update_reply()
+    {
+        $user = $this->actingAsUser();
+        $post = Post::factory()->create();
+        $comment = Comment::factory()->create(['post_id' => $post->id]);
+        $reply = Comment::factory()->create([
+            'user_id' => $user->id,
+            'post_id' => $post->id,
+            'parent_id' => $comment->id,
+            'body' => 'Old reply body',
+        ]);
+
+        $response = $this->putJson("/api/posts/{$post->id}/comments/{$comment->id}/replies/{$reply->id}", [
+            'body' => 'Updated reply body',
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJsonPath('message', 'Balasan berhasil diedit');
+
+        $this->assertEquals('Updated reply body', $reply->fresh()->body);
+    }
 }

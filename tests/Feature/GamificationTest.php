@@ -69,4 +69,28 @@ class GamificationTest extends TestCase
 
         $this->assertTrue($user->fresh()->badges()->where('badge_id', $badge->id)->exists());
     }
+
+    public function test_can_access_leaderboard_endpoint()
+    {
+        $response = $this->getJson('/api/explore/leaderboard');
+
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'success',
+                'data',
+            ]);
+    }
+
+    public function test_user_can_view_earned_badges_endpoint()
+    {
+        $user = $this->actingAsUser();
+
+        $response = $this->getJson('/api/me/badges');
+
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'success',
+                'data',
+            ]);
+    }
 }

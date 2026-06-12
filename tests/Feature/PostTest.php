@@ -100,4 +100,45 @@ class PostTest extends TestCase
         $response->assertStatus(200);
         $this->assertSoftDeleted('posts', ['id' => $post->id]);
     }
+
+    public function test_user_can_view_single_post()
+    {
+        $post = Post::factory()->create(['title' => 'Test Single Post', 'view_count' => 5]);
+
+        $response = $this->getJson("/api/posts/{$post->id}");
+
+        $response->assertStatus(200)
+            ->assertJsonPath('data.title', 'Test Single Post');
+        
+        $this->assertEquals(6, $post->fresh()->view_count);
+    }
+
+    public function test_owner_can_update_post_status()
+    {
+        $user = $this->actingAsUser();
+        $post = Post::factory()->create(['user_id' => $user->id, 'status' => 'open']);
+
+        $response = $this->patchJson("/api/posts/{$post->id}/status", [
+            'status' => 'closed',
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJsonPath('success', true);
+
+        $this->assertEquals('closed', $post->fresh()->status);
+    }
+
+    public function test_user_can_get_own_posts()
+    {
+        $user = $this->actingAsUser();
+        Post::factory()->create(['user_id' => $user->id, 'title' => 'My Post 1']);
+        Post::factory()->create(['user_id' => $user->id, 'title' => 'My Post 2']);
+        Post::factory()->create(['title' => 'Other Post']); // Different user
+
+        $response = $this->getJson('/api/me/posts');
+
+        $response->assertStatus(200)
+            ->assertJsonPath('success', true)
+            ->assertJsonCount(2, 'data.data');
+    }
 }
