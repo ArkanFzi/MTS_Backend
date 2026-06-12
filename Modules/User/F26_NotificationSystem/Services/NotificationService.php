@@ -22,13 +22,19 @@ class NotificationService
         string $refId, 
         string $refType
     ): void {
-        // Prevent self-notifications (user interacting with own content)
-        if ($userId === $actorId) {
+        // Cegah self-notification (user berinteraksi dengan konten sendiri), kecuali untuk notifikasi sistem/pribadi
+        $allowedSelfNotifications = [
+            'complete_profile_reminder',
+            'profile_completed',
+            'badge_awarded'
+        ];
+
+        if ($userId === $actorId && !in_array($type, $allowedSelfNotifications)) {
             return;
         }
 
-        // Deduplication: check if a notification already exists for this
-        // user + actor + type + reference combination to prevent duplicate rows
+        // Deduplikasi: periksa apakah notifikasi sudah ada untuk kombinasi ini
+        // user + actor + tipe + referensi untuk mencegah baris data duplikat
         $exists = Notification::where('user_id', $userId)
             ->where('actor_id', $actorId)
             ->where('type', $type)
