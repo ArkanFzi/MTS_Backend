@@ -27,27 +27,34 @@ class AppServiceProvider extends ServiceProvider
 
     protected function configureRateLimiting(): void
     {
-        RateLimiter::for('login', function (Request $request) {
+        $isTesting = app()->environment('local', 'testing');
+
+        RateLimiter::for('login', function (Request $request) use ($isTesting) {
+            if ($isTesting) return Limit::none();
             return [
                 Limit::perMinute(5)->by($request->ip()),
                 Limit::perMinute(3)->by($request->input('email')),
             ];
         });
 
-        RateLimiter::for('register', function (Request $request) {
+        RateLimiter::for('register', function (Request $request) use ($isTesting) {
+            if ($isTesting) return Limit::none();
             return Limit::perMinute(3)->by($request->ip());
         });
 
-        RateLimiter::for('forgot-password', function (Request $request) {
+        RateLimiter::for('forgot-password', function (Request $request) use ($isTesting) {
+            if ($isTesting) return Limit::none();
             return Limit::perMinute(3)->by($request->ip());
         });
-        
-        RateLimiter::for('api-public', function (Request $request) {
-            return Limit::perMinute(60)->by($request->ip());
+
+        RateLimiter::for('api-public', function (Request $request) use ($isTesting) {
+            if ($isTesting) return Limit::none();
+            return Limit::perMinute(100)->by($request->ip());
         });
 
-        RateLimiter::for('api-protected', function (Request $request) {
-            return Limit::perMinute(120)->by($request->user()?->id ?: $request->ip());
+        RateLimiter::for('api-protected', function (Request $request) use ($isTesting) {
+            if ($isTesting) return Limit::none();
+            return Limit::perMinute(150)->by($request->user()?->id ?: $request->ip());
         });
     }
 }
