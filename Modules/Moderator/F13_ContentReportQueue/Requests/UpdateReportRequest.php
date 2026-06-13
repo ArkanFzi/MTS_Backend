@@ -14,8 +14,8 @@ class UpdateReportRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'status' => 'required|in:reviewed,rejected,resolved',
-            'action' => 'required_if:status,resolved|in:warn,ban,none',
+            'status' => 'required|in:reviewed,resolved,dismissed',
+            'action' => 'required_if:status,resolved|nullable|in:warn,ban,none',
             'reason' => 'nullable|string|max:255',
             'notes'  => 'nullable|string',
         ];
