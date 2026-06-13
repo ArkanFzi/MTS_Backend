@@ -21,18 +21,25 @@ class ProfileService
         $wasIncomplete = empty($user->bio) || empty($user->avatar_url);
 
         if (isset($data['avatar'])) {
-            // Hapus foto lama kalau ada
+            // 1. Ambil path relatif file lama secara aman menggunakan parse_url
             if ($user->avatar_url) {
-                $oldPath = str_replace('/storage/', '', $user->avatar_url);
+                $cleanPath = parse_url($user->avatar_url, PHP_URL_PATH); // Menghasilkan '/storage/avatars/xxx.png'
+                $oldPath = str_replace('/storage/', '', $cleanPath);     // Menghasilkan 'avatars/xxx.png'
                 Storage::disk('public')->delete($oldPath);
             }
 
+            // 2. Simpan file baru ke storage
             $path = $data['avatar']->store('avatars', 'public');
-            $data['avatar_url'] = Storage::url($path);
+            
+            // 3. Pakai asset() untuk memastikan mengembalikan FULL URL (termasuk http://localhost:8000)
+            $user->avatar_url = asset('storage/' . $path);
             unset($data['avatar']);
         }
 
-        $user->update($data);
+        // 4. Gunakan fill + save secara manual untuk menghindari jebakan $fillable pada Model User
+        $user->fill($data);
+        $user->save();
+        
         $updatedUser = $user->fresh();
 
         if ($wasIncomplete && (!empty($updatedUser->bio) && !empty($updatedUser->avatar_url))) {
@@ -41,7 +48,7 @@ class ProfileService
                 $user->id,
                 'profile_completed',
                 $user->id,
-                User::class
+                'user'
             );
         }
 

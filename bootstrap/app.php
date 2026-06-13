@@ -28,6 +28,7 @@ return Application::configure(basePath: dirname(__DIR__))
     $middleware->alias([
         // Arahkan ke file yang baru Anda buat:
         'role' => \App\Http\Middleware\RoleMiddleware::class,
+        'check.banned' => \App\Http\Middleware\CheckBanned::class,
     ]);
 })
     ->withExceptions(function (Exceptions $exceptions) {

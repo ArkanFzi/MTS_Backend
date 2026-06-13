@@ -74,7 +74,7 @@ Route::middleware('throttle:api-public')->group(function () {
 });
 
 // ====================== PROTECTED ROUTES ======================
-Route::middleware(['auth:sanctum', 'throttle:api-protected'])->group(function () {
+Route::middleware(['auth:sanctum', 'check.banned', 'throttle:api-protected'])->group(function () {
 
     Route::post('/auth/logout', [LogoutController::class, 'logout']);
 

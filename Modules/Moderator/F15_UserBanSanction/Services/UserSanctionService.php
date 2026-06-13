@@ -40,9 +40,21 @@ class UserSanctionService
 
     public function banUser(string $id, array $data)
     {
+        $targetUser = User::findOrFail($id);
+        $currentUser = Auth::user();
+
+        // --- Proteksi Role ---
+        if ($targetUser->isAdmin()) {
+            abort(403, 'Anda tidak dapat memblokir seorang Administrator.');
+        }
+
+        if ($currentUser->isModerator() && $targetUser->isModerator()) {
+            abort(403, 'Seorang Moderator tidak dapat memblokir sesama Moderator.');
+        }
+
         $this->repository->updateBanStatus($id, true);
 
-        $this->logService->logAction([
+        $log = $this->logService->logAction([
             'moderator_id'   => Auth::id(),
             'target_user_id' => $id,
             'action_type'    => 'ban_user',
@@ -54,21 +66,26 @@ class UserSanctionService
             $id,
             Auth::id(),
             'user_banned',
-            $id,
-            User::class
+            $log->id,
+            'moderation_log'
         );
 
         // Kurangi poin saat di-ban
-        $user = User::find($id);
-        if ($user) {
-            $this->gamification->addPoints($user, -20, 'banned', $id, 'Akun di-ban oleh moderator');
-        }
+        $this->gamification->addPoints($targetUser, -20, 'banned', $id, 'Akun di-ban oleh moderator');
 
         return true;
     }
 
     public function unbanUser(string $id, string $reason = null)
     {
+        $targetUser = User::findOrFail($id);
+        $currentUser = Auth::user();
+
+        // --- Proteksi Role ---
+        if ($targetUser->isAdmin()) {
+            abort(403, 'Status Administrator tidak dapat diubah melalui menu ini.');
+        }
+
         $this->repository->updateBanStatus($id, false);
 
         $this->logService->logAction([
@@ -84,7 +101,19 @@ class UserSanctionService
 
     public function warnUser(string $id, array $data)
     {
-        $this->logService->logAction([
+        $targetUser = User::findOrFail($id);
+        $currentUser = Auth::user();
+
+        // --- Proteksi Role ---
+        if ($targetUser->isAdmin()) {
+            abort(403, 'Anda tidak dapat memberikan peringatan kepada seorang Administrator.');
+        }
+
+        if ($currentUser->isModerator() && $targetUser->isModerator()) {
+            abort(403, 'Seorang Moderator tidak dapat memberikan peringatan kepada sesama Moderator.');
+        }
+
+        $log = $this->logService->logAction([
             'moderator_id'   => Auth::id(),
             'target_user_id' => $id,
             'action_type'    => 'warn_user',
@@ -96,15 +125,12 @@ class UserSanctionService
             $id,
             Auth::id(),
             'user_warned',
-            $id,
-            User::class
+            $log->id,
+            'moderation_log'
         );
 
         // Kurangi poin saat di-warn
-        $user = User::find($id);
-        if ($user) {
-            $this->gamification->addPoints($user, -5, 'warned', $id, 'Mendapat peringatan dari moderator');
-        }
+        $this->gamification->addPoints($targetUser, -5, 'warned', $id, 'Mendapat peringatan dari moderator');
 
         return true;
     }

@@ -11,7 +11,16 @@ class NotificationRepository
     public function getUserNotifications(string $userId, bool $unreadOnly = false): LengthAwarePaginator
     {
         $query = Notification::where('user_id', $userId)
-            ->with(['actor:id,username,avatar_url', 'reference'])
+            ->with(['actor:id,username,avatar_url'])
+            ->with(['reference' => function ($morphTo) {
+                $morphTo->morphWith([
+                    'comment' => ['post:id,title'],
+                    'report' => ['reporter:id,username'],
+                    'moderation_log' => ['moderator:id,username'],
+                    'badge' => [],
+                    'user' => [],
+                ]);
+            }])
             ->latest();
 
         if ($unreadOnly) {

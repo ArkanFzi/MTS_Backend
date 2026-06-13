@@ -19,10 +19,25 @@ class ProfileController extends Controller
 
     public function show(): JsonResponse
     {
+        $user = auth()->user();
+        
+        // Cek apakah ada notifikasi peringatan (warn) yang belum dibaca untuk memicu pop-up di frontend
+        $latestWarning = \App\Models\Moderation\Notification::where('user_id', $user->id)
+            ->where('type', 'user_warned')
+            ->where('is_read', false)
+            ->with(['reference' => function ($morphTo) {
+                $morphTo->morphWith([
+                    'moderation_log' => ['moderator:id,username'],
+                ]);
+            }])
+            ->latest()
+            ->first();
+
         return response()->json([
             'success' => true,
             'message' => 'Profil berhasil dimuat',
-            'data'    => auth()->user()
+            'data'    => $user,
+            'latest_warning' => $latestWarning
         ]);
     }
 

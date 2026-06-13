@@ -20,6 +20,11 @@ class AppServiceProvider extends ServiceProvider
         Relation::morphMap([
             'post'    => 'App\Models\Content\Post',
             'comment' => 'App\Models\Content\Comment',
+            'badge'   => 'App\Models\Gamification\Badge',
+            'user'    => 'App\Models\Auth\User',
+            'report'  => 'App\Models\Moderation\Report',
+            'role'    => 'App\Models\Auth\Role',
+            'moderation_log' => 'App\Models\Moderation\ModerationLog',
         ]);
 
         $this->configureRateLimiting();

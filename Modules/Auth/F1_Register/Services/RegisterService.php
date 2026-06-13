@@ -33,7 +33,7 @@ class RegisterService
             $user->id,
             'complete_profile_reminder',
             $user->id,
-            \App\Models\Auth\User::class
+            'user'
         );
 
         return $user; // return User object, bukan array
