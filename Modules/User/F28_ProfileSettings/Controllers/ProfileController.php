@@ -26,6 +26,28 @@ class ProfileController extends Controller
         ]);
     }
 
+    public function showPublic(string $id): JsonResponse
+    {
+        $user = \App\Models\Auth\User::with('roles')
+            ->withCount(['posts', 'followers', 'following'])
+            ->findOrFail($id);
+            
+        // Map roles to array of strings
+        $rolesList = $user->roles->pluck('name');
+        $user->unsetRelation('roles');
+        $user->roles = $rolesList;
+        
+        if (auth('sanctum')->check()) {
+            $user->is_following = auth('sanctum')->user()->following()->where('following_id', $id)->exists();
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Profil publik berhasil dimuat',
+            'data'    => $user
+        ]);
+    }
+
     public function update(UpdateProfileRequest $request): JsonResponse
     {
         $user = $this->service->updateProfile(auth()->user(), $request->validated());

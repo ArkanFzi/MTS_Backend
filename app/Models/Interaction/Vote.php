@@ -19,7 +19,8 @@ class Vote extends Model
     protected $fillable = ['user_id', 'target_id', 'target_type', 'vote_type', 'created_at'];
 
     protected $casts = [
-        'created_at' => 'datetime'
+        'created_at' => 'datetime',
+        'vote_type' => 'integer',
     ];
 
     public function user(): BelongsTo

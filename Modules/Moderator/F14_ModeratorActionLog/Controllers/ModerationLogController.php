@@ -25,8 +25,15 @@ class ModerationLogController extends Controller
         );
 
         return response()->json([
-            'success' => true,
-            'data'    => $logs
+            'status'  => 'success',
+            'message' => 'Moderation logs retrieved successfully.',
+            'data'    => $logs->items(),
+            'meta'    => [
+                'current_page' => $logs->currentPage(),
+                'last_page'    => $logs->lastPage(),
+                'per_page'     => $logs->perPage(),
+                'total'        => $logs->total(),
+            ],
         ]);
     }
 }

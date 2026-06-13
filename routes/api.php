@@ -67,6 +67,8 @@ Route::middleware('throttle:api-public')->group(function () {
         Route::get('/leaderboard', [LeaderboardController::class, 'index']);
     });
 
+    Route::get('users/{id}/profile', [\Modules\User\F28_ProfileSettings\Controllers\ProfileController::class, 'showPublic']);
+
     Route::apiResource('posts', PostController::class)->only(['index', 'show']);
     Route::get('comments', [CommentController::class, 'index']);
 });
@@ -126,6 +128,8 @@ Route::middleware(['auth:sanctum', 'throttle:api-protected'])->group(function ()
     Route::post('/votes', [VoteController::class, 'vote']);
     Route::post('reports', [UserReportController::class, 'store']);
 
+    // --- FITUR EDIT HISTORY DIPINDAHKAN KE MODERATOR/ADMIN ---
+
     // --- FITUR MODERATOR ---
     Route::middleware('role:moderator,admin')->prefix('moderator')->name('moderator.')->group(function () {
         Route::apiResource('categories', CategoryController::class);
@@ -134,6 +138,10 @@ Route::middleware(['auth:sanctum', 'throttle:api-protected'])->group(function ()
 
         Route::delete('posts/{post}/comments/{comment}', [CommentController::class, 'destroy']);
 
+        // --- FITUR EDIT HISTORY (hanya untuk moderator/admin) ---
+        Route::get('posts/{post}/history', [PostHistoryController::class, 'index']);
+        Route::get('comments/{comment}/history', [CommentHistoryController::class, 'index']);
+
         Route::prefix('reports')->group(function () {
             Route::get('/', [ReportController::class, 'index']);
             Route::get('{id}', [ReportController::class, 'show']);
@@ -141,8 +149,6 @@ Route::middleware(['auth:sanctum', 'throttle:api-protected'])->group(function ()
         });
 
         Route::get('logs', [ModerationLogController::class, 'index']);
-        Route::get('posts/{post}/history', [PostHistoryController::class, 'index']);
-        Route::get('comments/{comment}/history', [CommentHistoryController::class, 'index']);
 
         Route::prefix('bans')->group(function () {
             Route::get('/', [UserSanctionController::class, 'index']);
@@ -156,7 +162,12 @@ Route::middleware(['auth:sanctum', 'throttle:api-protected'])->group(function ()
     Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
         Route::get('stats/overview', [AdminDashboardController::class, 'overview']);
         Route::get('stats/points-summary', [AdminDashboardController::class, 'pointsSummary']);
+        Route::get('stats/activity-chart', [AdminDashboardController::class, 'activityChart']);
+        Route::get('audit-logs', [AdminDashboardController::class, 'auditTimeline']);
         Route::get('roles', [RoleController::class, 'index']);
+        Route::post('roles', [RoleController::class, 'store']);
+        Route::put('roles/{id}', [RoleController::class, 'update']);
+        Route::delete('roles/{id}', [RoleController::class, 'destroy']);
 
         Route::prefix('users')->group(function () {
             Route::get('/', [UserManagementController::class, 'index']);

@@ -30,9 +30,9 @@ class FollowService
         $this->notificationService->createNotification(
             userId: $followingId,
             actorId: $followerId,
-            type: 'new_follower',
+            type: 'followed',
             refId: $followerId,
-            refType: 'App\Models\User'
+            refType: 'user'
         );
 
         return 'followed';

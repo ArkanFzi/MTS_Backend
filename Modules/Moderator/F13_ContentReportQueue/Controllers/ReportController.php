@@ -18,13 +18,19 @@ class ReportController extends Controller
     public function index(Request $request)
     {
         $reports = $this->service->getAllPaginated(20, $request->status, $request->search);
-        return response()->json($reports); // Return JSON untuk API
+        return response()->json([
+            'success' => true,
+            'data'    => $reports,
+        ]);
     }
 
     public function show(string $id)
     {
         $report = $this->service->findById($id);
-        return response()->json($report); // Return JSON
+        return response()->json([
+            'success' => true,
+            'data'    => $report,
+        ]);
     }
 
     public function update(\Modules\Moderator\F13_ContentReportQueue\Requests\UpdateReportRequest $request, string $id)

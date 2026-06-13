@@ -34,6 +34,8 @@ class Post extends Model
         'accepted_answer_id'
     ];
 
+    protected $appends = ['user_vote', 'is_liked', 'likes_count', 'is_bookmarked'];
+
     protected $casts = [
         'view_count' => 'integer',
         'vote_score' => 'integer',
@@ -42,6 +44,22 @@ class Post extends Model
         'updated_at' => 'datetime',
         'deleted_at' => 'datetime'
     ];
+
+    public function getUserVoteAttribute(): ?string
+    {
+        $user = auth('sanctum')->user();
+        if (!$user) return null;
+
+        // Fetch vote if it was loaded or query it
+        if ($this->relationLoaded('votes')) {
+            $vote = $this->votes->firstWhere('user_id', $user->id);
+        } else {
+            $vote = $this->votes()->where('user_id', $user->id)->first();
+        }
+
+        if (!$vote) return null;
+        return (int)$vote->vote_type === 1 ? 'up' : 'down';
+    }
 
     public function user(): BelongsTo
     {
@@ -78,8 +96,45 @@ class Post extends Model
         return $this->hasMany(Bookmark::class, 'post_id');
     }
 
+    public function getIsLikedAttribute(): bool
+    {
+        $user = auth('sanctum')->user();
+        if (!$user) return false;
+
+        if ($this->relationLoaded('likes')) {
+            return $this->likes->contains('user_id', $user->id);
+        }
+
+        return $this->likes()->where('user_id', $user->id)->exists();
+    }
+
+    public function getLikesCountAttribute(): int
+    {
+        if ($this->relationLoaded('likes')) {
+            return $this->likes->count();
+        }
+        return $this->likes()->count();
+    }
+
+    public function getIsBookmarkedAttribute(): bool
+    {
+        $user = auth('sanctum')->user();
+        if (!$user) return false;
+
+        if ($this->relationLoaded('bookmarks')) {
+            return $this->bookmarks->contains('user_id', $user->id);
+        }
+
+        return $this->bookmarks()->where('user_id', $user->id)->exists();
+    }
+
     public function votes()
     {   
         return $this->hasMany(Vote::class, 'target_id')->where('target_type', 'post');
+    }
+
+    public function likes()
+    {
+        return $this->hasMany(\App\Models\Interaction\Like::class, 'target_id')->where('target_type', 'post');
     }
 }

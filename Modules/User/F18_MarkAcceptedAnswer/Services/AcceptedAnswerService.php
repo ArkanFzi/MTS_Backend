@@ -38,7 +38,7 @@ class AcceptedAnswerService
         $this->notificationService->createNotification(
             userId: $comment->user_id,
             actorId: $userId,
-            type: 'accepted_answer',
+            type: 'answer_accepted',
             refId: $commentId,
             refType: 'comment'
         );

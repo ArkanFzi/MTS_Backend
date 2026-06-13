@@ -33,7 +33,7 @@ class VoteService
             $this->handlePoints($targetId, $targetType, $typeValue, $userId);
             if ($typeValue === 1) $this->sendNotification($userId, $targetId, $targetType);
 
-        } elseif ($existingVote->vote_type === $typeValue) {
+        } elseif ((int) $existingVote->vote_type === $typeValue) {
             // Cancel vote → kembalikan poin
             $this->repository->deleteVote($existingVote);
             $action = 'canceled';
@@ -44,7 +44,7 @@ class VoteService
             $this->repository->updateVote($existingVote, $typeValue);
             $action = 'updated';
             // Kurangi poin lama, tambah poin baru
-            $this->handlePoints($targetId, $targetType, -$existingVote->vote_type, $userId);
+            $this->handlePoints($targetId, $targetType, -(int)$existingVote->vote_type, $userId);
             $this->handlePoints($targetId, $targetType, $typeValue, $userId);
             if ($typeValue === 1) $this->sendNotification($userId, $targetId, $targetType);
         }
