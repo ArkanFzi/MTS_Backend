@@ -32,21 +32,29 @@ class LoginController extends Controller
             $request->session()->regenerate();
         }
 
+        $data = [
+            'user' => [
+                'id'                => $user->id,
+                'username'          => $user->username,
+                'email'             => $user->email,
+                'avatar_url'        => $user->avatar_url,
+                'level'             => $user->level,
+                'reputation_points' => $user->reputation_points,
+                'is_banned'         => $user->is_banned,
+                'roles'             => $user->roles->pluck('name'),
+            ],
+        ];
+
+        // Token hanya untuk environment local/testing (Cypress)
+        // Cookie session SPA tetap berjalan normal
+        if (app()->environment('local', 'testing')) {
+            $data['token'] = $user->createToken('cypress')->plainTextToken;
+        }
+
         return response()->json([
             'status'  => 'success',
             'message' => 'Login berhasil!',
-            'data'    => [
-                'user' => [
-                    'id'                => $user->id,
-                    'username'          => $user->username,
-                    'email'             => $user->email,
-                    'avatar_url'        => $user->avatar_url,
-                    'level'             => $user->level,
-                    'reputation_points' => $user->reputation_points,
-                    'is_banned'         => $user->is_banned,
-                    'roles'             => $user->roles->pluck('name'),
-                ],
-            ]
+            'data'    => $data
         ], 200);
     }
 }
