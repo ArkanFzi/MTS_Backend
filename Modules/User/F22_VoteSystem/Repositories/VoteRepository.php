@@ -40,6 +40,6 @@ class VoteRepository
     {
         return (int) Vote::where('target_id', $targetId)
             ->where('target_type', $targetType)
-            ->sum(\Illuminate\Support\Facades\DB::raw('CAST(vote_type AS INTEGER)'));
+            ->sum('vote_type');
     }
 }

@@ -39,7 +39,7 @@ class InteractionSeeder extends Seeder
             foreach ($voters as $voter) {
                 Vote::firstOrCreate(
                     ['user_id' => $voter->id, 'target_id' => $post->id, 'target_type' => 'post'],
-                    ['vote_type' => rand(0, 10) > 2 ? 'upvote' : 'downvote']
+                    ['vote_type' => rand(0, 10) > 2 ? 1 : -1]
                 );
                 $voteCount++;
             }
@@ -54,7 +54,7 @@ class InteractionSeeder extends Seeder
             foreach ($voters as $voter) {
                 Vote::firstOrCreate(
                     ['user_id' => $voter->id, 'target_id' => $comment->id, 'target_type' => 'comment'],
-                    ['vote_type' => rand(0, 10) > 3 ? 'upvote' : 'downvote']
+                    ['vote_type' => rand(0, 10) > 3 ? 1 : -1]
                 );
                 $voteCount++;
             }

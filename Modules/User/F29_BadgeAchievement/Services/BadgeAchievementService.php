@@ -35,6 +35,14 @@ class BadgeAchievementService
             $newLevel = floor($user->reputation_points / 50) + 1;
             if ($newLevel > $user->level) {
                 $user->update(['level' => $newLevel]);
+
+                $this->notificationService->createNotification(
+                    $user->id,
+                    $user->id,
+                    'level_up',
+                    (string)$newLevel,
+                    'user'
+                );
             }
 
             $this->checkAndAwardBadges($user);

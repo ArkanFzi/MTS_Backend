@@ -14,7 +14,7 @@ return new class extends Migration
             $table->foreignUuid('user_id')->constrained('users')->onDelete('cascade');
             $table->uuid('target_id'); 
             $table->string('target_type', 20); 
-            $table->string('vote_type', 10);   
+            $table->integer('vote_type');   
             $table->timestamp('created_at')->useCurrent();
 
             $table->index(['target_id', 'target_type']);

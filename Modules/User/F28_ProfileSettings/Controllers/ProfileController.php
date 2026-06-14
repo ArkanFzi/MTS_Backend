@@ -20,6 +20,7 @@ class ProfileController extends Controller
     public function show(): JsonResponse
     {
         $user = auth()->user();
+        $user->setAttribute('roles', $user->roles()->pluck('name')->toArray());
         
         // Cek apakah ada notifikasi peringatan (warn) yang belum dibaca untuk memicu pop-up di frontend
         $latestWarning = \App\Models\Moderation\Notification::where('user_id', $user->id)
@@ -66,6 +67,9 @@ class ProfileController extends Controller
     public function update(UpdateProfileRequest $request): JsonResponse
     {
         $user = $this->service->updateProfile(auth()->user(), $request->validated());
+        
+        // Load roles and map to array of names to match frontend expectation
+        $user->setAttribute('roles', $user->roles()->pluck('name')->toArray());
 
         return response()->json([
             'success' => true,

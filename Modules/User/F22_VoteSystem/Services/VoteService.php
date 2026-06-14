@@ -27,32 +27,62 @@ class VoteService
         $typeValue = ($voteInput === 'up') ? 1 : -1;
         $existingVote = $this->repository->getExistingVote($userId, $targetId, $targetType);
 
+        $delta = 0;
+
         if (!$existingVote) {
+            // Vote baru: +1 untuk upvote, -1 untuk downvote
             $this->repository->createVote($userId, $targetId, $targetType, $typeValue);
             $action = 'voted';
+            $delta = $typeValue;
             $this->handlePoints($targetId, $targetType, $typeValue, $userId);
             if ($typeValue === 1) $this->sendNotification($userId, $targetId, $targetType);
 
         } elseif ((int) $existingVote->vote_type === $typeValue) {
-            // Cancel vote → kembalikan poin
+            // Batalkan vote yang sama: balik arah
             $this->repository->deleteVote($existingVote);
             $action = 'canceled';
-            $this->handlePoints($targetId, $targetType, -$typeValue, $userId); // balik poin
+            $delta = -$typeValue;
+            $this->handlePoints($targetId, $targetType, -$typeValue, $userId);
 
         } else {
-            // Ganti vote (up→down atau down→up)
+            // Ganti vote (up→down atau down→up): perubahan ±2
             $this->repository->updateVote($existingVote, $typeValue);
             $action = 'updated';
-            // Kurangi poin lama, tambah poin baru
+            $delta = $typeValue * 2;
             $this->handlePoints($targetId, $targetType, -(int)$existingVote->vote_type, $userId);
             $this->handlePoints($targetId, $targetType, $typeValue, $userId);
             if ($typeValue === 1) $this->sendNotification($userId, $targetId, $targetType);
         }
 
-        $actionScore = $this->repository->getScore($targetId, $targetType);
-        $this->syncVoteScore($targetId, $targetType, $actionScore);
+        // Terapkan delta pada kolom vote_score (bukan recount penuh dari tabel votes).
+        // Ini menjaga konsistensi meski vote_score di-seed langsung tanpa entri di tabel votes.
+        $newScore = $this->applyScoreDelta($targetId, $targetType, $delta);
 
-        return ['action' => $action, 'score' => $actionScore];
+        return ['action' => $action, 'score' => $newScore];
+    }
+
+    /**
+     * Terapkan delta ke kolom vote_score menggunakan increment/decrement atomik.
+     * Cara ini aman terhadap race condition dan tidak bergantung pada jumlah
+     * baris di tabel votes (menghindari desync antara kolom dan tabel votes).
+     */
+    protected function applyScoreDelta(string $targetId, string $targetType, int $delta): int
+    {
+        if ($targetType === 'post') {
+            if ($delta > 0) {
+                Post::where('id', $targetId)->increment('vote_score', $delta);
+            } elseif ($delta < 0) {
+                Post::where('id', $targetId)->decrement('vote_score', abs($delta));
+            }
+            return (int) Post::where('id', $targetId)->value('vote_score');
+        } else {
+            if ($delta > 0) {
+                Comment::where('id', $targetId)->increment('vote_score', $delta);
+            } elseif ($delta < 0) {
+                Comment::where('id', $targetId)->decrement('vote_score', abs($delta));
+            }
+            return (int) Comment::where('id', $targetId)->value('vote_score');
+        }
     }
 
     protected function handlePoints(string $targetId, string $targetType, int $typeValue, string $actorId): void
@@ -75,15 +105,6 @@ class VoteService
         }
 
         $this->gamification->addPoints($owner, $points, $action, $targetId);
-    }
-
-    protected function syncVoteScore(string $targetId, string $targetType, int $score): void
-    {
-        if ($targetType === 'post') {
-            Post::where('id', $targetId)->update(['vote_score' => $score]);
-        } elseif ($targetType === 'comment') {
-            Comment::where('id', $targetId)->update(['vote_score' => $score]);
-        }
     }
 
     protected function sendNotification(string $actorId, string $targetId, string $targetType): void

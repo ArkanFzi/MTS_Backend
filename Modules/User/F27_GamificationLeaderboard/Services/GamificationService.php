@@ -9,7 +9,8 @@ class GamificationService
 {
     public function getLeaderboard(int $limit = 10)
     {
-        $cacheKey = "leaderboard_{$limit}";
+        $page = request()->get('page', 1);
+        $cacheKey = "leaderboard_{$limit}_page_{$page}";
 
         return Cache::remember($cacheKey, 300, function () use ($limit) {
             return User::select('id', 'username', 'avatar_url', 'reputation_points', 'level')
