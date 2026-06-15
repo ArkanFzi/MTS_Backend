@@ -45,10 +45,14 @@ class LoginController extends Controller
             ],
         ];
 
-        // Token hanya untuk environment local/testing (Cypress)
-        // Cookie session SPA tetap berjalan normal
+        // Token untuk Tauri desktop app (Bearer auth) dan local/testing (Cypress)
+        // Web browser tetap menggunakan cookie session SPA secara normal
         if (app()->environment('local', 'testing')) {
             $data['token'] = $user->createToken('cypress')->plainTextToken;
+        } else {
+            // Tauri desktop app membutuhkan Bearer token karena native HTTP
+            // tidak bisa menggunakan cookie cross-origin dari tauri://localhost
+            $data['token'] = $user->createToken('tauri-desktop')->plainTextToken;
         }
 
         return response()->json([
